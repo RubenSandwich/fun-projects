@@ -1,0 +1,15 @@
+{
+  "name": "solar-system-clock",
+  "version": "1.0.0",
+  "description": "A simulation of the big bounce",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "browser-sync start --server -f -w"
+  },
+  "author": "Ruben Nic",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.26.12"
+  }
+}
