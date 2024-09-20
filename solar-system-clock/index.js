@@ -24,7 +24,7 @@ document.ontouchmove = function (event) {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  frameRate(20);
+  frameRate(20); // maybe set to 10 when prod?
   colorMode(HSB, 360, 100, 100, 1);
 
   sun = Sun.Create();
@@ -140,6 +140,13 @@ function draw() {
       continue; // Skip to the next iteration
     }
   }
+
+  if (frameCount % 100 === 0) {
+    if (stars.length > 0) {
+      var randomIndex = floor(random(stars.length));
+      stars.splice(randomIndex, 1);
+    }
+  }
 }
 
 // class definitions
@@ -173,12 +180,12 @@ function Sun() {
     ];
 
   this.stage = "blackhole"; // "sun", "supernova", or "blackhole"
-  this.explosionParticles = [];
-  this.numExplosionParticles = 200;
+  this.particles = [];
+  this.numParticles = 200;
 
   this.draw = function () {
     if (this.stage === "supernova") {
-      this.updateAndDrawSunParticles();
+      this.drawSupernova();
       return;
     } else if (this.stage === "blackhole") {
       this.drawBlackHole();
@@ -217,8 +224,8 @@ function Sun() {
 
   this.explodeSun = function () {
     this.stage = "supernova";
-    for (var i = 0; i < this.numExplosionParticles; i++) {
-      this.explosionParticles.push({
+    for (var i = 0; i < this.numParticles; i++) {
+      this.particles.push({
         pos: createVector(0, 0),
         vel: p5.Vector.random2D().mult(random(1, 5)),
         size: random(2, 6),
@@ -236,27 +243,75 @@ function Sun() {
     ellipse(0, 0, this.d, this.d);
 
     // Draw the pulsing white ring
-    var pulseSpeed = 0.05;
-    var pulseAmplitude = 5; // Reduced amplitude to prevent overlap with the black circle
-    var ringThickness = Math.abs(
-      3 + sin(frameCount * pulseSpeed) * pulseAmplitude
-    );
-
-    // https://old.reddit.com/r/generative/comments/192yvdo/anomaly_black_hole_p5_js/
-
-    // console.log(ringThickness);
+    var pulseSpeed = 0.025;
+    var pulseAmplitude = 5;
+    var ringThickness = Math.abs(sin(frameCount * pulseSpeed)) * pulseAmplitude;
 
     noFill();
     stroke(255);
     strokeWeight(ringThickness);
-    ellipse(0, 0, this.d + ringThickness, this.d + ringThickness); // Draw the ring right up against the black circle
+    ellipse(0, 0, this.d + ringThickness, this.d + ringThickness);
+
+    // Draw the pulsing disk across the middle
+    var diskPulseAmplitude = 1.5;
+    var diskWidth = this.d * 2.25;
+    var diskThickness =
+      Math.abs(sin(frameCount * pulseSpeed)) * diskPulseAmplitude;
+
+    noStroke();
+    fill(255);
+    rectMode(CENTER);
+    ellipse(0, 0, diskWidth, diskThickness);
+
+    // Introduce new particles over time
+    if (frameCount % 10 === 0) {
+      // Adjust the modulus value to control the rate of particle introduction
+      for (var i = 0; i < 5; i++) {
+        // Adjust the number of particles introduced each time
+        this.particles.push({
+          pos: createVector(
+            random(-width / 2, width / 2),
+            random(-height / 2, height / 2)
+          ),
+          vel: createVector(0, 0),
+          size: random(1, 3), // Smaller particle size
+          color: color(random(360), random(80, 100), random(80, 100)),
+        });
+      }
+    }
+
+    // Draw particles being sucked into the black hole in a spiral pattern
+    for (var i = this.particles.length - 1; i >= 0; i--) {
+      var particle = this.particles[i];
+      var dx = this.pos.x - particle.pos.x;
+      var dy = this.pos.y - particle.pos.y;
+      var distance = sqrt(dx * dx + dy * dy);
+      var angle = atan2(dy, dx);
+      var force = this.d / 2 / distance;
+      var spiralForce = createVector(
+        cos(angle + force),
+        sin(angle + force)
+      ).mult(force * 0.1); // Move slowly
+      particle.vel.add(spiralForce);
+      particle.pos.add(particle.vel);
+
+      // Remove particle if it hits the center of the black hole
+      if (distance < this.d / 2) {
+        this.particles.splice(i, 1);
+        continue;
+      }
+
+      fill(particle.color);
+      noStroke();
+      ellipse(particle.pos.x, particle.pos.y, particle.size);
+    }
 
     pop();
   };
 
-  this.updateAndDrawSunParticles = function () {
-    for (var i = this.explosionParticles.length - 1; i >= 0; i--) {
-      var particle = this.explosionParticles[i];
+  this.drawSupernova = function () {
+    for (var i = this.particles.length - 1; i >= 0; i--) {
+      var particle = this.particles[i];
       particle.pos.add(particle.vel);
       particle.size *= 0.99; // Slowly shrink particles
 
@@ -272,17 +327,20 @@ function Sun() {
         particle.pos.y < -height / 2 ||
         particle.pos.y > height / 2
       ) {
-        this.explosionParticles.splice(i, 1);
+        this.particles.splice(i, 1);
       }
     }
 
-    if (this.explosionParticles.length === 0) {
+    if (this.particles.length === 0) {
       this.stage = "blackhole";
     }
   };
 }
 Sun.Create = function Create() {
-  return new Sun();
+  var sun = new Sun();
+  // Initialize an empty array for particles
+  sun.particles = [];
+  return sun;
 };
 
 function Planet(_mass, _pos, _vel, _color, _orbitingBody, _planetTrail) {
