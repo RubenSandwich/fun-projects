@@ -6,7 +6,6 @@ body {
     max-height: 768px; /* ipad mini 1 screen res */
 }
 
-
 #errors {
     display: none;
     padding: 28px;
@@ -14,4 +13,19 @@ body {
     overflow-y: auto;
     height: 768px;
     color: white;
+}
+
+@media screen and (orientation: landscape) {
+    body {
+        width: 100vh;
+        height: 100vw;
+        transform-origin: 0 0;
+    }
+}
+
+body.rotation-90 {
+    transform: rotate(90deg) translateY(-100%);
+}
+body.rotation90 {
+    transform: rotate(-90deg) translateX(-100%);
 }

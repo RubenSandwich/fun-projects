@@ -11,8 +11,33 @@ function displayError(div, message) {
   }
 }
 
+// Unsure... Maybe I should rotate p5?
+// function deviceOrientation() {
+//   var body = document.body;
+//   body.classList = "";
+//   switch (window.orientation) {
+//     case 0:
+//       body.classList.add("rotation90");
+//       break;
+//     case 180:
+//       body.classList.add("rotation-90");
+//       break;
+//     default:
+//       body.classList.add("landscape");
+//       break;
+//   }
+// }
+// window.addEventListener("orientationchange", deviceOrientation);
+
+// TODO:
+// 1. rename supernove to blackhole
+// 2. test on the ipad mini, lots of changes have happened inbetween the last test
+// 3. figure out how to interpolate growing of the sun's mass
+// 4. how do I prevent planets from collading into the sun till much much latter?
+
 document.addEventListener("DOMContentLoaded", function () {
   errorDiv = document.getElementById("errors");
+  // deviceOrientation();
 });
 // This catches script loading errors, such as Reference Errors
 window.addEventListener("error", function (event) {
@@ -20,7 +45,20 @@ window.addEventListener("error", function (event) {
   displayError(errorDiv, event.message);
 });
 
+// Prevent mobile touch scrolling
+document.ontouchmove = function (event) {
+  event.preventDefault();
+};
+
 try {
+  var tickNum = 0;
+  var tickIntervalRef;
+  // 5 mins, which is 288 updates a day ((60 * 24) / 5)
+  // 288 * 7 = 2016
+  var tickIntervalMs = 300_000;
+  var yearInterval = 48_611_111.111;
+  var endOfTheUniverseYear = 98_000_000_000; // 2016 ticks
+
   var G = 100; // Gravitational constant
   var Destabilise = 0.15;
 
@@ -32,7 +70,7 @@ try {
   var sun;
 
   var planets = [];
-  var numPlanets = 2;
+  var numPlanets = 1;
   var planetTrails = [];
   var stars = []; // Array to store star objs
   var numStars = 200; // Number of stars to draw
@@ -40,10 +78,18 @@ try {
   var nebulas = []; // Array to store nebulas objs
   var numNebulas = 3; // Number of nebulas to draw
 
-  // Prevent mobile touch scrolling
-  document.ontouchmove = function (event) {
-    event.preventDefault();
-  };
+  function prettyNum(num) {
+    var len = Math.ceil(Math.log10(num + 1));
+
+    var divideNum = 1_000_000;
+    var unit = "M";
+    if (len > 9) {
+      divideNum = 1_000_000_000;
+      unit = "B";
+    }
+
+    return (num / divideNum).toFixed(2) + unit + " years old";
+  }
 
   function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -98,9 +144,15 @@ try {
       var nebula = Nebula.Create();
       nebulas.push(nebula);
     }
+
+    tickIntervalRef = setInterval(function () {
+      tickNum++;
+    }, tickIntervalMs);
   }
 
   function draw() {
+    var year = tickNum * yearInterval;
+
     background(10); // Very dark background
 
     translate(width / 2, height / 2);
@@ -170,6 +222,14 @@ try {
         stars.splice(randomIndex, 1);
       }
     }
+
+    textSize(20);
+    fill(255);
+
+    var universeAge = prettyNum(year);
+    var universeAgeWidth = textWidth(universeAge);
+
+    text(universeAge, width / 2 - universeAgeWidth - 20, height / 2 - 20);
   }
 
   // class definitions
@@ -202,9 +262,9 @@ try {
         Math.min(Math.max(Math.floor(this.mass / 10) * 10, this.lowestMass), 80)
       ];
 
-    this.stage = "blackhole"; // "sun", "supernova", or "blackhole"
+    this.stage = "sun"; // "sun", "supernova", or "blackhole"
     this.particles = [];
-    this.numParticles = 200;
+    this.numParticles = 400;
 
     this.draw = function () {
       if (this.stage === "supernova") {
@@ -252,6 +312,7 @@ try {
           pos: createVector(0, 0),
           vel: p5.Vector.random2D().mult(random(1, 5)),
           size: random(2, 6),
+          color: color(random(360), random(80, 100), random(80, 100)),
         });
       }
     };
@@ -311,7 +372,7 @@ try {
         var dy = this.pos.y - particle.pos.y;
         var distance = sqrt(dx * dx + dy * dy);
         var angle = atan2(dy, dx);
-        var force = this.d / 2 / distance;
+        var force = this.d / 8 / distance;
         var spiralForce = createVector(
           cos(angle + force),
           sin(angle + force)
@@ -337,15 +398,15 @@ try {
       for (var i = this.particles.length - 1; i >= 0; i--) {
         var particle = this.particles[i];
         particle.pos.add(particle.vel);
-        particle.size *= 0.99; // Slowly shrink particles
+        particle.size *= 0.9999999999; // Slowly shrink particles
 
-        fill(this.currentColor);
+        fill(particle.color);
         noStroke();
         ellipse(particle.pos.x, particle.pos.y, particle.size);
 
         // Remove particles that are too small or off-screen
         if (
-          particle.size < 0.5 ||
+          particle.size < 0.4 ||
           particle.pos.x < -width / 2 ||
           particle.pos.x > width / 2 ||
           particle.pos.y < -height / 2 ||
