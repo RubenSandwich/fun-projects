@@ -30,10 +30,18 @@ function displayError(div, message) {
 // window.addEventListener("orientationchange", deviceOrientation);
 
 // TODO:
-// 1. rename supernove to blackhole
 // 2. test on the ipad mini, lots of changes have happened inbetween the last test
 // 3. figure out how to interpolate growing of the sun's mass
 // 4. how do I prevent planets from collading into the sun till much much latter?
+//    a. recalculate their mass and velocity when the sun grows?
+// 5. log the time (maybe firebase?) that is takes to hit certain ticks?
+// 6. Maybe plus or minus 15% to the end of the universe?
+// 7. Play universe ending sound when we are approaching the end
+//    a. "the end" should be a black hole with nothing left to suck in
+// 9. have plants and moons fly in as comets
+// 11. have nebulas fade in and out
+// 12. figure out a better "universe reset"
+// 13. make the sun "pulse"
 
 document.addEventListener("DOMContentLoaded", function () {
   errorDiv = document.getElementById("errors");
@@ -72,11 +80,12 @@ try {
   var planets = [];
   var numPlanets = 1;
   var planetTrails = [];
+
   var stars = []; // Array to store star objs
-  var numStars = 200; // Number of stars to draw
+  var numStars = 20; // Number of stars to draw
 
   var nebulas = []; // Array to store nebulas objs
-  var numNebulas = 3; // Number of nebulas to draw
+  var numNebulas = 5; // Number of nebulas to draw
 
   function prettyNum(num) {
     var len = Math.ceil(Math.log10(num + 1));
@@ -169,13 +178,7 @@ try {
       stars[i].draw();
     }
 
-    // if (sunExploded) {
-    //   updateAndDrawSunParticles();
-    // } else {
     sun.draw();
-    // }
-
-    // noLoop();
 
     if (
       millis() - lastPlanetAddTime > planetAddInterval &&
@@ -206,21 +209,31 @@ try {
         planets[i].planetTrail.deactivate(); // Deactivate the trail
         planets.splice(i, 1); // Remove the planet
 
-        // If all planets are destroyed, explode the sun
-        if (planets.length === 0) {
-          sun.explodeSun();
-          break;
-        }
-
         continue; // Skip to the next iteration
       }
+    }
+
+    // If all planets are sucked in begin the black hole
+    if (
+      planetsToAdd.length === 0 &&
+      planets.length === 0 &&
+      sun.stage === "sun"
+    ) {
+      sun.beginBlackHole();
     }
 
     if (frameCount % 100 === 0) {
       if (stars.length > 0) {
         var randomIndex = floor(random(stars.length));
-        stars.splice(randomIndex, 1);
+
+        stars[randomIndex].beginExploading(function () {
+          stars.splice(randomIndex, 1);
+        });
       }
+    }
+
+    if (stars.length === 0 && sun.stage === "black hole") {
+      sun.beginBigBang();
     }
 
     textSize(20);
@@ -262,15 +275,15 @@ try {
         Math.min(Math.max(Math.floor(this.mass / 10) * 10, this.lowestMass), 80)
       ];
 
-    this.stage = "sun"; // "sun", "supernova", or "blackhole"
+    this.stage = "sun"; // "sun", "big bang", or "black hole"
     this.particles = [];
     this.numParticles = 400;
 
     this.draw = function () {
-      if (this.stage === "supernova") {
-        this.drawSupernova();
+      if (this.stage === "big bang") {
+        this.drawBigBang();
         return;
-      } else if (this.stage === "blackhole") {
+      } else if (this.stage === "black hole") {
         this.drawBlackHole();
         return;
       }
@@ -289,9 +302,7 @@ try {
         this.currentColor = this.colorsByMass[massIndex];
       }
 
-      fill(this.currentColor);
-      noStroke();
-      ellipse(this.pos.x, this.pos.y, this.d, this.d);
+      this.drawSun();
     };
 
     this.applyForce = function (f) {
@@ -305,8 +316,26 @@ try {
       return f;
     };
 
-    this.explodeSun = function () {
-      this.stage = "supernova";
+    this.beginSun = function () {
+      this.stage = "sun";
+      this.particles = [];
+    };
+
+    this.drawSun = function () {
+      fill(this.currentColor);
+      noStroke();
+      ellipse(this.pos.x, this.pos.y, this.d, this.d);
+    };
+
+    this.beginBigBang = function () {
+      this.stage = "big bang";
+
+      // update any existing particles so that they are never static
+      for (var i = 0; i < this.particles.length; i++) {
+        var particle = this.particles[i];
+        particle.vel = p5.Vector.random2D().mult(random(1, 5));
+      }
+
       for (var i = 0; i < this.numParticles; i++) {
         this.particles.push({
           pos: createVector(0, 0),
@@ -315,6 +344,47 @@ try {
           color: color(random(360), random(80, 100), random(80, 100)),
         });
       }
+
+      this.mass = random(5, 10);
+      this.pos = createVector(0, 0);
+      this.vel = createVector(0, 0);
+      this.lastGrowthTime = 0;
+      this.growthInterval = random(2000, 5000); // 5 seconds in milliseconds
+      this.growthAmount = random(1, 5); // Amount to increase the sun's mass by
+      this.d = this.mass * 2;
+    };
+
+    this.drawBigBang = function () {
+      for (var i = this.particles.length - 1; i >= 0; i--) {
+        var particle = this.particles[i];
+        particle.pos.add(particle.vel);
+        particle.size *= 0.9999999999; // Slowly shrink particles
+
+        fill(particle.color);
+        noStroke();
+        ellipse(particle.pos.x, particle.pos.y, particle.size);
+
+        // Remove particles that are too small or off-screen
+        if (
+          particle.size < 0.4 ||
+          particle.pos.x < -width / 2 ||
+          particle.pos.x > width / 2 ||
+          particle.pos.y < -height / 2 ||
+          particle.pos.y > height / 2
+        ) {
+          this.particles.splice(i, 1);
+        }
+      }
+
+      this.drawSun();
+
+      if (this.particles.length === 0) {
+        setup();
+      }
+    };
+
+    this.beginBlackHole = function () {
+      this.stage = "black hole";
     };
 
     this.drawBlackHole = function () {
@@ -349,9 +419,9 @@ try {
       ellipse(0, 0, diskWidth, diskThickness);
 
       // Introduce new particles over time
-      if (frameCount % 10 === 0) {
+      if (frameCount % 50 === 0) {
         // Adjust the modulus value to control the rate of particle introduction
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < random(1, 5); i++) {
           // Adjust the number of particles introduced each time
           this.particles.push({
             pos: createVector(
@@ -392,33 +462,6 @@ try {
       }
 
       pop();
-    };
-
-    this.drawSupernova = function () {
-      for (var i = this.particles.length - 1; i >= 0; i--) {
-        var particle = this.particles[i];
-        particle.pos.add(particle.vel);
-        particle.size *= 0.9999999999; // Slowly shrink particles
-
-        fill(particle.color);
-        noStroke();
-        ellipse(particle.pos.x, particle.pos.y, particle.size);
-
-        // Remove particles that are too small or off-screen
-        if (
-          particle.size < 0.4 ||
-          particle.pos.x < -width / 2 ||
-          particle.pos.x > width / 2 ||
-          particle.pos.y < -height / 2 ||
-          particle.pos.y > height / 2
-        ) {
-          this.particles.splice(i, 1);
-        }
-      }
-
-      if (this.particles.length === 0) {
-        this.stage = "blackhole";
-      }
     };
   }
   Sun.Create = function Create() {
@@ -622,19 +665,65 @@ try {
     this.size = random(1, 3);
     this.offset = random(TWO_PI);
     this.twinkleSpeed = random(0.005, 0.015);
+    this.removeFunction = null;
+
+    this.particles = [];
+    this.numParticles = 5;
+    this.stage = "twinkle"; // "twinkle" or "exploading"
 
     this.draw = function () {
-      noStroke();
+      if (this.stage === "twinkle") {
+        noStroke();
 
-      var brightness = map(
-        sin(frameCount * this.twinkleSpeed + this.offset),
-        -1,
-        1,
-        100,
-        255
-      );
-      fill(brightness);
-      ellipse(this.pos.x, this.pos.y, this.size);
+        var brightness = map(
+          sin(frameCount * this.twinkleSpeed + this.offset),
+          -1,
+          1,
+          100,
+          255
+        );
+        fill(brightness);
+        ellipse(this.pos.x, this.pos.y, this.size);
+      } else if (this.stage === "exploading") {
+        for (var i = this.particles.length - 1; i >= 0; i--) {
+          var particle = this.particles[i];
+          particle.pos.add(p5.Vector.mult(particle.vel, 0.5));
+          particle.size *= 0.9; // Slowly shrink particles
+
+          fill(particle.color);
+          noStroke();
+          ellipse(particle.pos.x, particle.pos.y, particle.size);
+
+          // Remove particles that are too small or off-screen
+          if (
+            particle.size < 0.4 ||
+            particle.pos.x < -width / 2 ||
+            particle.pos.x > width / 2 ||
+            particle.pos.y < -height / 2 ||
+            particle.pos.y > height / 2
+          ) {
+            this.particles.splice(i, 1);
+          }
+        }
+
+        if (this.particles.length === 0) {
+          this.removeFunction();
+        }
+      }
+    };
+
+    this.beginExploading = function (removeFunction) {
+      this.stage = "exploading";
+      this.removeFunction = removeFunction;
+
+      for (var i = 0; i < this.numParticles; i++) {
+        this.particles.push({
+          pos: this.pos.copy(),
+          vel: p5.Vector.random2D(),
+          size: this.size, // Smaller particle size
+          color: color(random(360), random(80, 100), random(80, 100)),
+        });
+      }
     };
   }
   Star.Create = function Create() {
