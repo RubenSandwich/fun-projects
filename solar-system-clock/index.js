@@ -74,7 +74,7 @@ try {
   var G = 100; // Gravitational constant
   var Destabilise = 0.15;
 
-  var planetAddInterval = 1000; // Add a new planet every second
+  var planetAddInterval = 10000; // Add a new planet every second
   var lastPlanetAddTime = 0;
   var planetsToAdd = []; // planets left to add
   var orbitalRadii = []; // Array to store orbital ring radii
@@ -82,7 +82,7 @@ try {
   var sun;
 
   var planets = [];
-  var numPlanets = 1;
+  var numPlanets = 5;
   var planetTrails = [];
 
   var stars = []; // Array to store star objs
@@ -90,6 +90,8 @@ try {
 
   var nebulas = []; // Array to store nebulas objs
   var numNebulas = 5; // Number of nebulas to draw
+
+  var endSound;
 
   function prettyNum(num) {
     var len = Math.ceil(Math.log10(num + 1));
@@ -104,7 +106,15 @@ try {
     return (num / divideNum).toFixed(2) + unit + " years old";
   }
 
+  function preload() {
+    endSound = loadSound("Outer_Wilds_Original_Soundtrack_10_End_Times.mp3");
+  }
+
   function setup() {
+    endSound.onended(function () {
+      setup();
+    });
+
     createCanvas(windowWidth, windowHeight);
     frameRate(20); // maybe set to 10 when prod?
     colorMode(HSB, 360, 100, 100, 1);
@@ -164,6 +174,11 @@ try {
   }
 
   function draw() {
+    if (frameCount > 5 && !endSound.isPlaying()) {
+      endSound.play();
+      console.log("playing");
+    }
+
     var year = tickNum * yearInterval;
 
     background(10); // Very dark background
@@ -256,7 +271,7 @@ try {
     this.pos = createVector(0, 0);
     this.vel = createVector(0, 0);
     this.lastGrowthTime = 0;
-    this.growthInterval = random(2000, 5000); // 5 seconds in milliseconds
+    this.growthInterval = random(20000, 50000); // 5 seconds in milliseconds
     this.growthAmount = random(1, 5); // Amount to increase the sun's mass by
     this.d = this.mass * 2;
     this.colorsByMass = {
