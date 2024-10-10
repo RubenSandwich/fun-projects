@@ -58,14 +58,18 @@ document.ontouchmove = function (event) {
   event.preventDefault();
 };
 
+function parsePrettyNum(num) {
+  return parseFloat(num.replace(/,|_/g, ""));
+}
+
 try {
   var tickNum = 0;
   var tickIntervalRef;
   // 5 mins, which is 288 updates a day ((60 * 24) / 5)
   // 288 * 7 = 2016
-  var tickIntervalMs = 300_000;
-  var yearInterval = 48_611_111.111;
-  var endOfTheUniverseYear = 98_000_000_000; // 2016 ticks
+  var tickIntervalMs = parsePrettyNum("300_000");
+  var yearInterval = parsePrettyNum("48_611_111.111");
+  var endOfTheUniverseYear = parsePrettyNum("98_000_000_000"); // 2016 ticks
 
   var G = 100; // Gravitational constant
   var Destabilise = 0.15;
@@ -90,10 +94,10 @@ try {
   function prettyNum(num) {
     var len = Math.ceil(Math.log10(num + 1));
 
-    var divideNum = 1_000_000;
+    var divideNum = parsePrettyNum("1_000_000");
     var unit = "M";
     if (len > 9) {
-      divideNum = 1_000_000_000;
+      divideNum = parsePrettyNum("1_000_000_000");
       unit = "B";
     }
 
