@@ -62,7 +62,15 @@ function parsePrettyNum(num) {
   return parseFloat(num.replace(/,|_/g, ""));
 }
 
+// Because of our old version of p5, we don't have the normal describe
+function a11yDescribe(p5Canvas, description) {
+  var canvasElement = p5Canvas.canvas;
+  canvasElement.innerHTML = description;
+}
+
 try {
+  var p5Canvas;
+
   var tickNum = 0;
   var tickIntervalRef;
   // 5 mins, which is 288 updates a day ((60 * 24) / 5)
@@ -115,7 +123,7 @@ try {
       setup();
     });
 
-    createCanvas(windowWidth, windowHeight);
+    p5Canvas = createCanvas(windowWidth, windowHeight);
     frameRate(20); // maybe set to 10 when prod?
     colorMode(HSB, 360, 100, 100, 1);
 
@@ -176,7 +184,6 @@ try {
   function draw() {
     if (frameCount > 5 && !endSound.isPlaying()) {
       endSound.play();
-      console.log("playing");
     }
 
     var year = tickNum * yearInterval;
@@ -262,6 +269,8 @@ try {
     var universeAgeWidth = textWidth(universeAge);
 
     text(universeAge, width / 2 - universeAgeWidth - 20, height / 2 - 20);
+
+    a11yDescribe(p5Canvas, "test");
   }
 
   // class definitions
