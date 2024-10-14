@@ -14,10 +14,22 @@
     <meta property="og:title" content="solar system">
     <meta property="og:description" content="Generative code art by Michael Ruppe.">
 
-    <!-- can't go any higher than 0.9.0, as it won't work on iOS 9.3.5 -->
+    <!-- can't go any higher than these p5 versions, as it won't work on iOS 9.3.5 -->
     <script src="p5.0.9.0.min.js"></script>
     <script src="p5.sound.0.3.10.min.js"></script>
-    <!-- can't go any higher than 0.9.0, as it won't work on iOS 9.3.5 -->
+
+    <script src="celestial_bodies/utlilites.js"></script>
+    <script src="celestial_bodies/constants.js"></script>
+
+    <!-- import all of the celestial bodies classes -->
+    <script src="celestial_bodies/sun.js"></script>
+    <script src="celestial_bodies/moon.js"></script>
+    <script src="celestial_bodies/nebula.js"></script>
+    <script src="celestial_bodies/planet.js"></script>
+    <script src="celestial_bodies/planetTrail.js"></script>
+    <script src="celestial_bodies/star.js"></script>
+
+    <!-- import the main render loop logic -->
     <script src="index.js"></script>
 
   </head>
