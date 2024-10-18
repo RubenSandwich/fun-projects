@@ -48,8 +48,8 @@ Planet.Create = function Create(
   var planetVel = planetPos.copy();
   planetVel.rotate(random(1) < 0.1 ? -HALF_PI : HALF_PI); // Direction of orbit
   planetVel.normalize();
-  planetVel.mult(sqrt((G * orbitingBody.mass) / radius));
-  planetVel.mult(random(1 - Destabilise, 1 + Destabilise)); // create elliptical orbit
+  planetVel.mult(sqrt((CONSTANTS.gravity * orbitingBody.mass) / radius));
+  planetVel.mult(random(1 - CONSTANTS.destabilise, 1 + CONSTANTS.destabilise)); // create elliptical orbit
 
   return new Planet(
     mass,

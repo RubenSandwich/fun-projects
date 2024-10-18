@@ -1,3 +1,11 @@
+function parseErrorMessage(error) {
+  var fileUrl = error.filename || "";
+  var fileLoc = fileUrl.replace(/^(https?:\/\/)?[^\/]+/, "");
+  var fileNameAndLoc = fileLoc ? fileLoc + ":" + (error.lineno || "") : "";
+
+  return (error.message || error) + "\n" + fileNameAndLoc;
+}
+
 function parsePrettyNum(num) {
   return parseFloat(num.replace(/,|_/g, ""));
 }
@@ -44,14 +52,17 @@ function generateUUID() {
   });
 }
 
-// function logTimes(logUuid) {
-//   var apiUrl = "";
+function logTimes(logUuid) {
+  var apiUrl = "";
 
-//   apiUrl = apiUrl + logUuid + ".json";
+  apiUrl = apiUrl + logUuid + ".json";
 
-//   var jsonData = {
-//     hostname: document.location.hostname,
-//   };
+  var jsonData = {
+    hostname: document.location.hostname,
+  };
 
-//   httpDo(apiUrl, "PUT", "json", jsonData);
-// }
+  // we do not care if this fails
+  try {
+    httpDo(apiUrl, "PUT", "json", jsonData);
+  } catch (e) {}
+}

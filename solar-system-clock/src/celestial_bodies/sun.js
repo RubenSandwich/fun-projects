@@ -3,7 +3,7 @@ function Sun() {
   this.pos = createVector(0, 0);
   this.vel = createVector(0, 0);
   this.lastGrowthTime = 0;
-  this.growthInterval = random(20000, 50000); // 5 seconds in milliseconds
+  this.growthInterval = random(2000, 5000); // 5 seconds in milliseconds
   this.growthAmount = random(1, 5); // Amount to increase the sun's mass by
   this.d = this.mass * 2;
   this.colorsByMass = {
@@ -42,7 +42,7 @@ function Sun() {
     // Check if it's time to increase the sun's mass
     if (millis() - this.lastGrowthTime > this.growthInterval) {
       this.mass += this.growthAmount;
-      this.d = sun.mass * 2; // Update sun's diameter
+      this.d = this.mass * 2; // Update sun's diameter
       this.lastGrowthTime = millis();
 
       var massIndex = Math.min(
@@ -63,7 +63,7 @@ function Sun() {
   this.attractForce = function (child) {
     var r = p5.Vector.dist(this.pos, child.pos);
     var f = p5.Vector.sub(this.pos, child.pos);
-    f.setMag((G * this.mass * child.mass) / (r * r));
+    f.setMag((CONSTANTS.gravity * this.mass * child.mass) / (r * r));
     return f;
   };
 
