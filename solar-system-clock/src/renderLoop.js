@@ -77,7 +77,7 @@ function displayError(div, message) {
 //          sucks up another planet to grow again?
 //        3. should I add more songs?
 //            a. "Main Title" when all the planets are in place?
-//            b. "Travelers" or  when the universe is empty before "bouncing"?
+//            b. "Travelers" or  "14.3 Billion Years" when the universe is empty before "bouncing"?
 //            c. "End Times" when the sun supernovas, at 1:25 begin the black hole
 //
 //    Every few days:
