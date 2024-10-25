@@ -3,7 +3,7 @@ function Sun() {
   this.pos = createVector(0, 0);
   this.vel = createVector(0, 0);
   this.lastGrowthTime = 0;
-  this.growthInterval = random(2000, 5000); // 5 seconds in milliseconds
+  this.growthInterval = random(20000, 50000); // 5 seconds in milliseconds
   this.growthAmount = random(1, 5); // Amount to increase the sun's mass by
   this.d = this.mass * 2;
   this.colorsByMass = {
@@ -73,9 +73,18 @@ function Sun() {
   };
 
   this.drawSun = function () {
-    fill(this.currentColor);
+    // vary the color so the sun "breaths"
+    var sunColor = color(
+      hue(this.currentColor) + sin(frameCount * 0.01) * 20,
+      saturation(this.currentColor),
+      brightness(this.currentColor) + sin(frameCount * 0.05) * 5
+    );
+    fill(sunColor);
+
+    var diameter = this.d + sin(frameCount * 0.01) * 5;
+
     noStroke();
-    ellipse(this.pos.x, this.pos.y, this.d, this.d);
+    ellipse(this.pos.x, this.pos.y, diameter, diameter);
   };
 
   this.beginBigBang = function () {

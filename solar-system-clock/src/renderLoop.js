@@ -186,12 +186,9 @@ try {
 
     translate(width / 2, height / 2);
 
-    // Use additive blending for a glowing effect
-    blendMode(ADD);
     for (var i = 0; i < universeState.nebulas.length; i++) {
       universeState.nebulas[i].draw();
     }
-    blendMode(BLEND);
 
     // Draw the stars
     for (var i = 0; i < universeState.stars.length; i++) {

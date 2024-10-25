@@ -4,6 +4,7 @@ function Nebula(_pos, _size, _noiseOffset, _renderedImage) {
   this.size = _size;
   this.noiseOffset = _noiseOffset;
   this.renderedImage = _renderedImage;
+  this.frameOffset = random(0, 100);
 
   this.draw = function () {
     // var moveRadius = this.size / 4; // Adjust this value to change movement range
@@ -12,6 +13,7 @@ function Nebula(_pos, _size, _noiseOffset, _renderedImage) {
     // this.pos.x = this.initialPos.x + cos(moveAngle) * moveRadius;
     // this.pos.y = this.initialPos.y + sin(moveAngle) * moveRadius;
 
+    tint(255, 0.5 + sin((this.frameOffset + frameCount) * 0.01) * 0.2);
     image(
       this.renderedImage,
       this.pos.x - this.size / 2,
@@ -26,11 +28,9 @@ Nebula.Create = function Create() {
     random(-height / 2, height / 2)
   );
   var size = random(100, 250);
-  var hue = random(360);
   var noiseOffset = random(1000);
 
   var nebulaRender = createGraphics(size, size);
-  nebulaRender.colorMode(HSB, 360, 100, 100, 1);
   nebulaRender.noStroke();
 
   // Generate blob shape
@@ -45,8 +45,23 @@ Nebula.Create = function Create() {
     points.push(createVector(x, y));
   }
 
-  // Draw blob
-  nebulaRender.fill(hue, 80, 100, 0.05);
+  radialGradient(
+    nebulaRender.drawingContext,
+    nebulaRender.width / 2,
+    nebulaRender.height / 2,
+    nebulaRender.width / 2,
+    [
+      {
+        offset: 0,
+        color: "hsla(" + String(random(0, 360)) + ", 80%, 50%, 0.05)",
+      },
+      {
+        offset: 1,
+        color: "hsla(" + String(random(0, 360)) + ", 80%, 50%, 0.05)",
+      },
+    ]
+  );
+
   for (var j = 0; j < 5; j++) {
     // Draw multiple layers for a glowing effect
     nebulaRender.beginShape();
@@ -60,5 +75,5 @@ Nebula.Create = function Create() {
     nebulaRender.endShape(CLOSE);
   }
 
-  return new Nebula(nebulaPos, size, noiseOffset, nebulaRender);
+  return new Nebula(nebulaPos, size, noiseOffset, nebulaRender.get());
 };
