@@ -25,6 +25,7 @@ function prettyNumString(num) {
 
 function radialGradient(ctx, x, y, radius, colorStops) {
   var gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  // var gradient = ctx.createLinearGradient(x, y, 200, 200);
 
   for (var index = 0; index < colorStops.length; index++) {
     var colorStop = colorStops[index];

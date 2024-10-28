@@ -1,10 +1,11 @@
-function Nebula(_pos, _size, _noiseOffset, _renderedImage) {
+function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
   this.pos = _pos;
   this.initialPos = this.pos.copy();
   this.size = _size;
   this.noiseOffset = _noiseOffset;
-  this.renderedImage = _renderedImage;
+  this.nebulaRender = _nebulaRender;
   this.frameOffset = random(0, 100);
+  this.alreadyTransparent = false;
 
   this.draw = function () {
     // var moveRadius = this.size / 4; // Adjust this value to change movement range
@@ -13,12 +14,38 @@ function Nebula(_pos, _size, _noiseOffset, _renderedImage) {
     // this.pos.x = this.initialPos.x + cos(moveAngle) * moveRadius;
     // this.pos.y = this.initialPos.y + sin(moveAngle) * moveRadius;
 
-    tint(255, 0.5 + sin((this.frameOffset + frameCount) * 0.01) * 0.2);
+    // Too slow on the ipad :(
+    // tint(255, 0.5 + sin((this.frameOffset + frameCount) * 0.01) * 0.2);
+
+    if (frameCount > 200 && !this.alreadyTransparent) {
+      this.alreadyTransparent = true;
+      this.changeAlpha(10);
+    }
+
     image(
-      this.renderedImage,
+      this.nebulaRender,
       this.pos.x - this.size / 2,
       this.pos.y - this.size / 2
     );
+  };
+
+  this.changeAlpha = function (newAlpha) {
+    var ctx = this.nebulaRender.drawingContext;
+    var ctxImage = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+    var imageData = ctxImage.data;
+    // set every fourth, alpha, value
+    for (var i = 3; i < imageData.length; i += 4) {
+      imageData[i] = newAlpha;
+    }
+
+    ctxImage.data = imageData;
+    ctx.putImageData(ctxImage, 0, 0);
+  };
+
+  this.destroy = function () {
+    this.nebulaRender.remove();
+    this.nebulaRender = null;
   };
 }
 
@@ -44,6 +71,9 @@ Nebula.Create = function Create() {
     var y = radius * sin(angle);
     points.push(createVector(x, y));
   }
+
+  // nebulaRender.colorMode(HSB, 360, 100, 100, 1);
+  // nebulaRender.fill(random(360), 80, 100, 0.05);
 
   radialGradient(
     nebulaRender.drawingContext,
@@ -75,5 +105,5 @@ Nebula.Create = function Create() {
     nebulaRender.endShape(CLOSE);
   }
 
-  return new Nebula(nebulaPos, size, noiseOffset, nebulaRender.get());
+  return new Nebula(nebulaPos, size, noiseOffset, nebulaRender);
 };

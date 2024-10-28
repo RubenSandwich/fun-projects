@@ -19,7 +19,7 @@ var universeState = {
   stars: [], // Array to store star objs
   numStars: 20, // Number of stars to draw
   nebulas: [], // Array to store nebulas objs
-  numNebulas: 5, // Number of nebulas to draw
+  numNebulas: 3, // Number of nebulas to draw
 
   endSound: null,
 };
@@ -178,16 +178,25 @@ try {
   function draw() {
     var year = universeState.tickNum * CONSTANTS.tickPeriod;
 
-    if (frameCount > 5 && !universeState.endSound.isPlaying()) {
-      universeState.endSound.play();
-    }
+    // if (frameCount > 5 && !universeState.endSound.isPlaying()) {
+    //   universeState.endSound.play();
+    // }
 
     background(10); // #0A0A0A
 
     translate(width / 2, height / 2);
 
+    blendMode(ADD);
     for (var i = 0; i < universeState.nebulas.length; i++) {
       universeState.nebulas[i].draw();
+    }
+    blendMode(BLEND);
+
+    if (frameCount > 300) {
+      for (var i = 0; i < universeState.nebulas.length; i++) {
+        universeState.nebulas[i].destroy();
+      }
+      universeState.nebulas = [];
     }
 
     // Draw the stars
@@ -208,14 +217,14 @@ try {
       universeState.lastPlanetAddTime = millis();
     }
 
-    for (var i = universeState.planetTrails.length - 1; i >= 0; i--) {
+    for (var i = 0; i < universeState.planetTrails.length; i++) {
       var shouldContinueDrawing = universeState.planetTrails[i].draw();
       if (!shouldContinueDrawing) {
         universeState.planetTrails.splice(i, 1);
       }
     }
 
-    for (var i = universeState.planets.length - 1; i >= 0; i--) {
+    for (var i = 0; i < universeState.planets.length; i++) {
       universeState.planets[i].move();
       universeState.planets[i].draw();
 
@@ -226,7 +235,8 @@ try {
           universeState.planets[i].d / 2 <=
           universeState.sun.d / 2
       ) {
-        universeState.planets[i].planetTrail.deactivate(); // Deactivate the trail
+        universeState.planets[i].planetTrail.beginWindDown(); // wind down the trail
+        universeState.planets[i].destroy();
         universeState.planets.splice(i, 1); // Remove the planet
 
         continue; // Skip to the next iteration
@@ -259,11 +269,11 @@ try {
       universeState.sun.beginBigBang();
     }
 
-    textSize(20);
-    fill(255);
-
     var universeAge = prettyNumString(year);
     var universeAgeWidth = textWidth(universeAge);
+
+    textSize(20);
+    fill(255);
     text(universeAge, width / 2 - universeAgeWidth - 20, height / 2 - 20);
 
     a11yDescribe(universeState.p5Canvas, "test");
