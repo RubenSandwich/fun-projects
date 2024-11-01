@@ -5,7 +5,7 @@ function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
   this.noiseOffset = _noiseOffset;
   this.nebulaRender = _nebulaRender;
   this.frameOffset = random(0, 100);
-  this.alreadyTransparent = false;
+  this.currentAlpha = 100;
 
   this.draw = function () {
     // var moveRadius = this.size / 4; // Adjust this value to change movement range
@@ -16,11 +16,6 @@ function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
 
     // Too slow on the ipad :(
     // tint(255, 0.5 + sin((this.frameOffset + frameCount) * 0.01) * 0.2);
-
-    if (frameCount > 200 && !this.alreadyTransparent) {
-      this.alreadyTransparent = true;
-      this.changeAlpha(10);
-    }
 
     image(
       this.nebulaRender,
@@ -41,6 +36,7 @@ function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
 
     ctxImage.data = imageData;
     ctx.putImageData(ctxImage, 0, 0);
+    this.currentAlpha = newAlpha;
   };
 
   this.destroy = function () {

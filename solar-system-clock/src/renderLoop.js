@@ -1,28 +1,6 @@
 var errorDiv;
 
-var universeState = {
-  p5Canvas: null,
-  logUuid: generateUUID(),
-
-  tickNum: 0,
-  tickIntervalRef: null,
-
-  planetAddInterval: 10000, // Add a new planet every second
-  lastPlanetAddTime: 0,
-  planetsToAdd: [], // planets left to add
-  orbitalRadii: [], // Array to store orbital ring radii
-
-  sun: null,
-  planets: [],
-  numPlanets: 1,
-  planetTrails: [],
-  stars: [], // Array to store star objs
-  numStars: 20, // Number of stars to draw
-  nebulas: [], // Array to store nebulas objs
-  numNebulas: 3, // Number of nebulas to draw
-
-  endSound: null,
-};
+var universeState;
 
 function displayError(div, message) {
   if (!div) {
@@ -100,15 +78,39 @@ document.ontouchmove = function (event) {
 
 try {
   function preload() {
+    universeState = {
+      p5Canvas: null,
+      logUuid: generateUUID(),
+
+      tickNum: 0,
+      tickIntervalRef: null,
+
+      planetAddInterval: random(1800000, 2100000), // 30 - 35 mins
+      lastPlanetAddTime: 0,
+      planetsToAdd: [], // planets left to add
+      orbitalRadii: [], // Array to store orbital ring radii
+
+      sun: null,
+      planets: [],
+      numPlanets: 5,
+      planetTrails: [],
+      stars: [], // Array to store star objs
+      numStars: 200, // Number of stars to draw
+      nebulas: [], // Array to store nebulas objs
+      numNebulas: 5, // Number of nebulas to draw
+
+      endSound: null,
+    };
+
     universeState.endSound = loadSound(
       "Outer_Wilds_Original_Soundtrack_10_End_Times.mp3"
     );
   }
 
   function setup() {
-    universeState.endSound.onended(function () {
-      setup();
-    });
+    // universeState.endSound.onended(function () {
+    //   setup();
+    // });
 
     // logTimes(CONSTANTS.logUuid);
 
@@ -173,14 +175,19 @@ try {
     universeState.tickIntervalRef = setInterval(function () {
       universeState.tickNum++;
     }, CONSTANTS.tickIntervalMs);
+
+    // we want to add the smallest mass planets first
+    universeState.planetsToAdd.sort(function (a, b) {
+      return a.mass - b.mass;
+    });
   }
 
   function draw() {
     var year = universeState.tickNum * CONSTANTS.tickPeriod;
 
-    // if (frameCount > 5 && !universeState.endSound.isPlaying()) {
-    //   universeState.endSound.play();
-    // }
+    if (frameCount > 5 && !universeState.endSound.isPlaying()) {
+      universeState.endSound.play();
+    }
 
     background(10); // #0A0A0A
 
@@ -191,13 +198,6 @@ try {
       universeState.nebulas[i].draw();
     }
     blendMode(BLEND);
-
-    if (frameCount > 300) {
-      for (var i = 0; i < universeState.nebulas.length; i++) {
-        universeState.nebulas[i].destroy();
-      }
-      universeState.nebulas = [];
-    }
 
     // Draw the stars
     for (var i = 0; i < universeState.stars.length; i++) {
@@ -250,9 +250,26 @@ try {
       universeState.sun.stage === "sun"
     ) {
       universeState.sun.beginBlackHole();
+
+      if (!universeState.endSound.isPlaying()) {
+        universeState.endSound.play();
+      }
     }
 
-    if (frameCount % 100 === 0) {
+    if (universeState.sun.stage === "black hole") {
+      if (frameCount % 200 === 0) {
+        for (var i = 0; i < universeState.nebulas.length; i++) {
+          // 30% chance for each nebula to change
+          if (random(1) < 0.3) {
+            var newAlpha =
+              universeState.nebulas[i].currentAlpha - random(5, 10);
+            universeState.nebulas[i].changeAlpha(newAlpha);
+          }
+        }
+      }
+    }
+
+    if (frameCount % 100000 === 0) {
       if (universeState.stars.length > 0) {
         var randomIndex = floor(random(universeState.stars.length));
 
@@ -266,7 +283,14 @@ try {
       universeState.stars.length === 0 &&
       universeState.sun.stage === "black hole"
     ) {
-      universeState.sun.beginBigBang();
+      universeState.sun.beginBigBang(function () {
+        for (var i = 0; i < universeState.nebulas.length; i++) {
+          universeState.nebulas[i].destroy();
+        }
+
+        // restart
+        setup();
+      });
     }
 
     var universeAge = prettyNumString(year);
