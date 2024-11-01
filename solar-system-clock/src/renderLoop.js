@@ -102,9 +102,7 @@ try {
       endSound: null,
     };
 
-    universeState.endSound = loadSound(
-      "Outer_Wilds_Original_Soundtrack_10_End_Times.mp3"
-    );
+    universeState.endSound = loadSound("End_Times.mp3");
   }
 
   function setup() {
