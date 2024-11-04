@@ -85,19 +85,27 @@ try {
       tickNum: 0,
       tickIntervalRef: null,
 
-      planetAddInterval: random(1200000, 1500000), // 20 - 25 mins
+      sun: null,
+
+      planets: [],
+      numPlanets: random(4, 7),
+      planetTrails: [],
+      planetAddInterval: CONSTANTS.getPlanetAddInterval(),
       lastPlanetAddTime: 0,
-      planetsToAdd: [], // planets left to add
+      celestialBodiesToAdd: [],
       orbitalRadii: [], // Array to store orbital ring radii
 
-      sun: null,
-      planets: [],
-      numPlanets: 5,
-      planetTrails: [],
-      stars: [], // Array to store star objs
-      numStars: 200, // Number of stars to draw
-      nebulas: [], // Array to store nebulas objs
-      numNebulas: 5, // Number of nebulas to draw
+      stars: [],
+      numStars: random(150, 220),
+      starsToAdd: [],
+      starAddInterval: CONSTANTS.getStarAddInterval(),
+      lastStarAddTime: 0,
+
+      nebulas: [],
+      numNebulas: random(4, 7),
+      nebulasToAdd: [],
+      nebulaAddInterval: CONSTANTS.getNebulaAddInterval(),
+      lastNebulaAddTime: 0,
 
       endSound: null,
     };
@@ -130,7 +138,8 @@ try {
       previousRadius = universeState.orbitalRadii[i] + 60;
     }
 
-    // Initialize the planets
+    var planetsMade = [];
+    var moonsMade = [];
     for (var i = 0; i < universeState.numPlanets; i++) {
       var planetMass = random(10, 30);
       var planetColor = color(random(360), random(80, 100), random(80, 100));
@@ -144,7 +153,7 @@ try {
         universeState.sun,
         planetTrail
       );
-      universeState.planetsToAdd.push(planet);
+      planetsMade.push(planet);
 
       // Randomly add a moon to some planets
       if (random(1) < 0.5) {
@@ -154,9 +163,45 @@ try {
 
         var moonTrail = PlanetTrail.Create(moonColor, moonTrailLength);
         var moon = Moon.Create(moonMass, moonColor, planet, moonTrail);
-        universeState.planetsToAdd.push(moon);
+        moonsMade.push(moon);
       }
     }
+
+    // Sort the planets by mass
+    planetsMade.sort(function (a, b) {
+      return a.mass - b.mass;
+    });
+
+    // Add the planets in with the moons, but never add a moon before it's planet is added
+    var celestialBodiesToAdd = [];
+    for (let i = 0; moonsMade.length > 0 || planetsMade.length > 0; i++) {
+      // always start with a planet
+      if (i === 0) {
+        celestialBodiesToAdd.push(planetsMade.shift());
+        continue;
+      }
+
+      if (random(1) < 0.5 && moonsMade.length > 0) {
+        // find the first moon where it's orbitingBody is already in line
+        var moon = moonsMade.find((m) =>
+          celestialBodiesToAdd.includes(m.orbitingBody)
+        );
+
+        if (moon) {
+          celestialBodiesToAdd.push(
+            moonsMade.splice(moonsMade.indexOf(moon), 1)[0]
+          );
+        }
+
+        continue;
+      }
+
+      if (planetsMade.length > 0) {
+        celestialBodiesToAdd.push(planetsMade.shift());
+        continue;
+      }
+    }
+    universeState.celestialBodiesToAdd = celestialBodiesToAdd;
 
     // Create stars
     for (var i = 0; i < universeState.numStars; i++) {
@@ -173,11 +218,6 @@ try {
     universeState.tickIntervalRef = setInterval(function () {
       universeState.tickNum++;
     }, CONSTANTS.tickIntervalMs);
-
-    // we want to add the smallest mass planets first
-    universeState.planetsToAdd.sort(function (a, b) {
-      return a.mass - b.mass;
-    });
   }
 
   function draw() {
@@ -203,9 +243,9 @@ try {
     if (
       millis() - universeState.lastPlanetAddTime >
         universeState.planetAddInterval &&
-      universeState.planetsToAdd.length > 0
+      universeState.celestialBodiesToAdd.length > 0
     ) {
-      var newBody = universeState.planetsToAdd.shift();
+      var newBody = universeState.celestialBodiesToAdd.shift();
       universeState.planets.push(newBody);
       universeState.planetTrails.push(newBody.planetTrail);
       universeState.lastPlanetAddTime = millis();
@@ -239,7 +279,7 @@ try {
 
     // If all planets are sucked in begin the black hole
     if (
-      universeState.planetsToAdd.length === 0 &&
+      universeState.celestialBodiesToAdd.length === 0 &&
       universeState.planets.length === 0 &&
       universeState.sun.stage === "sun"
     ) {
@@ -255,8 +295,7 @@ try {
         for (var i = 0; i < universeState.nebulas.length; i++) {
           // 30% chance for each nebula to change
           if (random(1) < 0.3) {
-            var newAlpha =
-              universeState.nebulas[i].currentAlpha - random(5, 10);
+            var newAlpha = universeState.nebulas[i].currentAlpha - random(0, 5);
             universeState.nebulas[i].changeAlpha(newAlpha);
           }
         }
@@ -264,7 +303,7 @@ try {
     }
 
     // 0.7 min
-    if (frameCount % 42000 === 0) {
+    if (frameCount % CONSTANTS.starFadeInterval === 0) {
       if (universeState.stars.length > 0) {
         var randomIndex = floor(random(universeState.stars.length));
 

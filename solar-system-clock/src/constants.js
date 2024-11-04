@@ -7,6 +7,20 @@ var CONSTANTS = {
   tickPeriod: parsePrettyNum("48_611_111.111"),
   endOfTheUniverseYear: parsePrettyNum("98_000_000_000"), // 2,016 ticks, or 7 days
 
+  getPlanetAddInterval: function () {
+    return random(1200000, 1500000); // 20 - 25 mins
+  },
+
+  getStarAddInterval: function () {
+    return random(1200000, 1500000);
+  },
+
+  getNebulaAddInterval: function () {
+    return random(1200000, 1500000);
+  },
+
+  starFadeInterval: 42000, // 0.7 min
+
   universePhasesByTick: {
     0: "big bang",
     20: "nebulas form",

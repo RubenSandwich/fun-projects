@@ -8,6 +8,10 @@ function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
   this.currentAlpha = 100;
 
   this.draw = function () {
+    if (this.currentAlpha === 0) {
+      return;
+    }
+
     // var moveRadius = this.size / 4; // Adjust this value to change movement range
     // var moveSpeed = 0.0009;
     // var moveAngle = noise(frameCount * moveSpeed + this.noiseOffset) * TWO_PI;
@@ -24,11 +28,16 @@ function Nebula(_pos, _size, _noiseOffset, _nebulaRender) {
     );
   };
 
-  this.changeAlpha = function (newAlpha) {
+  this.changeAlpha = function (alpha) {
+    if (this.currentAlpha === 0) {
+      return;
+    }
+
     var ctx = this.nebulaRender.drawingContext;
     var ctxImage = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     var imageData = ctxImage.data;
+    var newAlpha = Math.max(alpha, 0);
     // set every fourth, alpha, value
     for (var i = 3; i < imageData.length; i += 4) {
       imageData[i] = newAlpha;
