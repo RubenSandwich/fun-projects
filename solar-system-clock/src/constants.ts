@@ -1,4 +1,4 @@
-var CONSTANTS = {
+const CONSTANTS = {
   gravity: 100, // Gravitational constant
   destabilise: 0.15,
   logUuid: generateUUID(),
@@ -7,15 +7,15 @@ var CONSTANTS = {
   tickPeriod: parsePrettyNum("48_611_111.111"),
   endOfTheUniverseYear: parsePrettyNum("98_000_000_000"), // 2,016 ticks, or 7 days
 
-  getPlanetAddInterval: function () {
+  getPlanetAddInterval: (): number => {
     return random(1200000, 1500000); // 20 - 25 mins
   },
 
-  getStarAddInterval: function () {
+  getStarAddInterval: (): number => {
     return random(1200000, 1500000);
   },
 
-  getNebulaAddInterval: function () {
+  getNebulaAddInterval: (): number => {
     return random(1200000, 1500000);
   },
 
@@ -28,5 +28,7 @@ var CONSTANTS = {
     1000: "planets form",
     2222: "supernova",
     3333: "black hole",
-  },
+  } as { [key: number]: string }, // Type for universePhasesByTick
 };
+
+export default CONSTANTS;

@@ -1,8 +1,7 @@
-var errorDiv;
+let errorDiv: HTMLElement;
+let universeState: any; // Replace 'any' with the actual type if known
 
-var universeState;
-
-function displayError(div, message) {
+function displayError(div: HTMLElement | null, message: string): void {
   if (!div) {
     setTimeout(function () {
       displayError(div, message);
@@ -13,9 +12,9 @@ function displayError(div, message) {
   }
 }
 
-// Unsure... Maybe I should rotate p5?
+// Uncomment if device orientation handling is needed
 // function deviceOrientation() {
-//   var body = document.body;
+//   const body = document.body;
 //   body.classList = "";
 //   switch (window.orientation) {
 //     case 0:
@@ -31,53 +30,22 @@ function displayError(div, message) {
 // }
 // window.addEventListener("orientationchange", deviceOrientation);
 
-// TODO:
-//    Logic:
-//        1. have all universe changes (adding/removing bodies) use ticks
-//        2. Add plus or minus 15% to the end of the universe?
-//            a. should I even have a set end of the universe date?
-//        3. log the time that is takes to hit certain ticks
-//            a. and log errors
-//        4. how do I prevent planets from colliding into the sun till much much later?
-//            a. recalculate their mass and velocity when the sun grows?
-//
-//    Visuals:
-//        1. make the sun "pulse"/"breath" normally
-//        2. have nebulas fade in and out as the universe age
-//            a. should they have stars in them?
-//        3. have plants and moons fly in as comets
-//        4. after a big bang it should create nebulas with a special nebula in
-//          the center that turns into the sun
-//
-//    Questions:
-//        1. should the sun "supernova" and "black hole" at the same time?
-//        2. should the sun should grow once, and then wait it
-//          sucks up another planet to grow again?
-//        3. should I add more songs?
-//            a. "Main Title" when all the planets are in place?
-//            b. "Travelers" or  "14.3 Billion Years" when the universe is empty before "bouncing"?
-//            c. "End Times" when the sun supernovas, at 1:25 begin the black hole
-//
-//    Every few days:
-//        1. test on the ipad mini, lots missing on Safari in iOS 9.3.5
-
 document.addEventListener("DOMContentLoaded", function () {
-  errorDiv = document.getElementById("errors");
-  // deviceOrientation();
+  errorDiv = document.getElementById("errors") as HTMLElement;
 });
-// This catches script loading errors, such as Reference Errors
-window.addEventListener("error", function (e) {
+
+window.addEventListener("error", function (e: ErrorEvent) {
   console.log(e);
   displayError(errorDiv, parseErrorMessage(e));
 });
 
 // Prevent mobile touch scrolling
-document.ontouchmove = function (event) {
+document.ontouchmove = function (event: TouchEvent) {
   event.preventDefault();
 };
 
 try {
-  function preload() {
+  function preload(): void {
     universeState = {
       p5Canvas: null,
       logUuid: generateUUID(),
@@ -113,24 +81,15 @@ try {
     universeState.endSound = loadSound("End_Times.mp3");
   }
 
-  function setup() {
-    // universeState.endSound.onended(function () {
-    //   setup();
-    // });
-
-    // logTimes(CONSTANTS.logUuid);
-
+  function setup(): void {
     universeState.p5Canvas = createCanvas(windowWidth, windowHeight);
     frameRate(20); // maybe set to 10 when prod?
     colorMode(HSB, 360, 100, 100, 1);
 
     universeState.sun = Sun.Create();
 
-    // Calculate and store the orbital radii for each planet based on the sun's diameter.
-    // The initial radius is set to 1.5 times the sun's diameter, and each subsequent planet's
-    // orbital radius is spaced out by at least 60 units from the previous planet's radius.
-    var previousRadius = universeState.sun.d * 1.5;
-    for (var i = 0; i < universeState.numPlanets; i++) {
+    let previousRadius = universeState.sun.d * 1.5;
+    for (let i = 0; i < universeState.numPlanets; i++) {
       universeState.orbitalRadii.push(
         random(previousRadius, previousRadius + 40)
       );
@@ -138,15 +97,15 @@ try {
       previousRadius = universeState.orbitalRadii[i] + 60;
     }
 
-    var planetsMade = [];
-    var moonsMade = [];
-    for (var i = 0; i < universeState.numPlanets; i++) {
-      var planetMass = random(10, 30);
-      var planetColor = color(random(360), random(80, 100), random(80, 100));
-      var planetTrailLength = planetMass * random(0, 7);
+    const planetsMade: Planet[] = [];
+    const moonsMade: Moon[] = [];
+    for (let i = 0; i < universeState.numPlanets; i++) {
+      const planetMass = random(10, 30);
+      const planetColor = color(random(360), random(80, 100), random(80, 100));
+      const planetTrailLength = planetMass * random(0, 7);
 
-      var planetTrail = PlanetTrail.Create(planetColor, planetTrailLength);
-      var planet = Planet.Create(
+      const planetTrail = PlanetTrail.Create(planetColor, planetTrailLength);
+      const planet = Planet.Create(
         planetMass,
         universeState.orbitalRadii[i],
         planetColor,
@@ -157,33 +116,31 @@ try {
 
       // Randomly add a moon to some planets
       if (random(1) < 0.5) {
-        var moonMass = random(3, 6);
-        var moonColor = color(random(360), random(80, 100), random(80, 100));
-        var moonTrailLength = moonMass * 3;
+        const moonMass = random(3, 6);
+        const moonColor = color(random(360), random(80, 100), random(80, 100));
+        const moonTrailLength = moonMass * 3;
 
-        var moonTrail = PlanetTrail.Create(moonColor, moonTrailLength);
-        var moon = Moon.Create(moonMass, moonColor, planet, moonTrail);
+        const moonTrail = PlanetTrail.Create(moonColor, moonTrailLength);
+        const moon = Moon.Create(moonMass, moonColor, planet, moonTrail);
         moonsMade.push(moon);
       }
     }
 
     // Sort the planets by mass
-    planetsMade.sort(function (a, b) {
-      return a.mass - b.mass;
-    });
+    planetsMade.sort((a, b) => a.mass - b.mass);
 
-    // Add the planets in with the moons, but never add a moon before it's planet is added
-    var celestialBodiesToAdd = [];
+    // Add the planets in with the moons, but never add a moon before its planet is added
+    const celestialBodiesToAdd: (Planet | Moon)[] = [];
     for (let i = 0; moonsMade.length > 0 || planetsMade.length > 0; i++) {
       // always start with a planet
       if (i === 0) {
-        celestialBodiesToAdd.push(planetsMade.shift());
+        celestialBodiesToAdd.push(planetsMade.shift()!);
         continue;
       }
 
       if (random(1) < 0.5 && moonsMade.length > 0) {
-        // find the first moon where it's orbitingBody is already in line
-        var moon = moonsMade.find((m) =>
+        // find the first moon where its orbitingBody is already in line
+        const moon = moonsMade.find((m) =>
           celestialBodiesToAdd.includes(m.orbitingBody)
         );
 
@@ -197,21 +154,21 @@ try {
       }
 
       if (planetsMade.length > 0) {
-        celestialBodiesToAdd.push(planetsMade.shift());
+        celestialBodiesToAdd.push(planetsMade.shift()!);
         continue;
       }
     }
     universeState.celestialBodiesToAdd = celestialBodiesToAdd;
 
     // Create stars
-    for (var i = 0; i < universeState.numStars; i++) {
-      var star = Star.Create();
+    for (let i = 0; i < universeState.numStars; i++) {
+      const star = Star.Create();
       universeState.stars.push(star);
     }
 
     // Create nebulas
-    for (var i = 0; i < universeState.numNebulas; i++) {
-      var nebula = Nebula.Create();
+    for (let i = 0; i < universeState.numNebulas; i++) {
+      const nebula = Nebula.Create();
       universeState.nebulas.push(nebula);
     }
 
@@ -220,21 +177,21 @@ try {
     }, CONSTANTS.tickIntervalMs);
   }
 
-  function draw() {
-    var year = universeState.tickNum * CONSTANTS.tickPeriod;
+  function draw(): void {
+    const year = universeState.tickNum * CONSTANTS.tickPeriod;
 
     background(10); // #0A0A0A
 
     translate(width / 2, height / 2);
 
     blendMode(ADD);
-    for (var i = 0; i < universeState.nebulas.length; i++) {
+    for (let i = 0; i < universeState.nebulas.length; i++) {
       universeState.nebulas[i].draw();
     }
     blendMode(BLEND);
 
     // Draw the stars
-    for (var i = 0; i < universeState.stars.length; i++) {
+    for (let i = 0; i < universeState.stars.length; i++) {
       universeState.stars[i].draw();
     }
 
@@ -245,20 +202,20 @@ try {
         universeState.planetAddInterval &&
       universeState.celestialBodiesToAdd.length > 0
     ) {
-      var newBody = universeState.celestialBodiesToAdd.shift();
+      const newBody = universeState.celestialBodiesToAdd.shift();
       universeState.planets.push(newBody);
       universeState.planetTrails.push(newBody.planetTrail);
       universeState.lastPlanetAddTime = millis();
     }
 
-    for (var i = 0; i < universeState.planetTrails.length; i++) {
-      var shouldContinueDrawing = universeState.planetTrails[i].draw();
+    for (let i = 0; i < universeState.planetTrails.length; i++) {
+      const shouldContinueDrawing = universeState.planetTrails[i].draw();
       if (!shouldContinueDrawing) {
         universeState.planetTrails.splice(i, 1);
       }
     }
 
-    for (var i = 0; i < universeState.planets.length; i++) {
+    for (let i = 0; i < universeState.planets.length; i++) {
       universeState.planets[i].move();
       universeState.planets[i].draw();
 
@@ -292,10 +249,10 @@ try {
 
     if (universeState.sun.stage === "black hole") {
       if (frameCount % 200 === 0) {
-        for (var i = 0; i < universeState.nebulas.length; i++) {
+        for (let i = 0; i < universeState.nebulas.length; i++) {
           // 30% chance for each nebula to change
           if (random(1) < 0.3) {
-            var newAlpha = universeState.nebulas[i].currentAlpha - random(0, 5);
+            const newAlpha = universeState.nebulas[i].currentAlpha - random(0, 5);
             universeState.nebulas[i].changeAlpha(newAlpha);
           }
         }
@@ -305,7 +262,7 @@ try {
     // 0.7 min
     if (frameCount % CONSTANTS.starFadeInterval === 0) {
       if (universeState.stars.length > 0) {
-        var randomIndex = floor(random(universeState.stars.length));
+        const randomIndex = floor(random(universeState.stars.length));
 
         universeState.stars[randomIndex].beginExploading(function () {
           universeState.stars.splice(randomIndex, 1);
@@ -318,7 +275,7 @@ try {
       universeState.sun.stage === "black hole"
     ) {
       universeState.sun.beginBigBang(function () {
-        for (var i = 0; i < universeState.nebulas.length; i++) {
+        for (let i = 0; i < universeState.nebulas.length; i++) {
           universeState.nebulas[i].destroy();
         }
 
@@ -327,8 +284,8 @@ try {
       });
     }
 
-    var universeAge = prettyNumString(year);
-    var universeAgeWidth = textWidth(universeAge);
+    const universeAge = prettyNumString(year);
+    const universeAgeWidth = textWidth(universeAge);
 
     textSize(20);
     fill(255);
