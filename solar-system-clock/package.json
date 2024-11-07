@@ -2,14 +2,19 @@
   "name": "solar-system-clock",
   "version": "1.0.0",
   "description": "A simulation of the big bounce",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "browser-sync start --server -f -w"
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
   },
   "author": "Ruben Nic",
   "license": "ISC",
   "devDependencies": {
-    "browser-sync": "^2.26.12"
+    "@types/p5": "^1.7.6",
+    "parcel-bundler": "^1.12.5",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "p5": "^1.11.1"
   }
 }
