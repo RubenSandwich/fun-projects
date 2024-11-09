@@ -2,14 +2,12 @@ name: Deploy Solar System Clock
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+    paths: ["solar-system-clock/**"]
 
 jobs:
   trigger:
     runs-on: ubuntu-latest
-    # only run if files in /solar-system-clock change
-    if: github.event_name == 'push' && github.event.head_commit.modified | contains('solar-system-clock/')
     steps:
       - name: Trigger Another Repository Action
         uses: peter-evans/repository-dispatch@v3
