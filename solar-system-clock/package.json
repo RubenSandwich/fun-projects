@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "parcel index.html --open",
-    "build": "parcel build index.html --no-source-maps"
+    "build": "parcel build index.html --no-source-maps --public-url ./"
   },
   "author": "Ruben Nic",
   "license": "ISC",
