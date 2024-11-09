@@ -361,7 +361,7 @@ try {
       p5.textSize(20);
       p5.fill(255);
       p5.text(
-        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS`,
+        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS 2`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );
