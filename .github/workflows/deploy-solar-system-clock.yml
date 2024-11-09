@@ -6,9 +6,6 @@ on:
     paths: ["solar-system-clock/**"]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   trigger:
     runs-on: ubuntu-latest
@@ -18,4 +15,4 @@ jobs:
         with:
           repository: RubenSandwich/rubennic.com
           event-type: dispatch-event
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DEPLOY_RUBENNIC_DOT_COM }}
