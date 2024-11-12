@@ -1,7 +1,7 @@
 import P5 from "p5";
 
 export function minsToMs(mins: number): number {
-  return mins * 60 * 1000; // Convert minutes to milliseconds
+  return mins * 60 * 1000;
 }
 
 export function getRandomInt(numOne: number, numTwo?: number): number {
@@ -71,14 +71,6 @@ export function radialGradient(
   ctx.fillStyle = gradient;
 }
 
-export function a11yDescribe(
-  p5Canvas: { canvas: HTMLCanvasElement },
-  description: string
-): void {
-  const canvasElement = p5Canvas.canvas;
-  canvasElement.innerHTML = description;
-}
-
 export function generateUUID(): string {
   let d = new Date().getTime();
   let d2 =
@@ -109,7 +101,7 @@ function sf(h: string): string {
   return str;
 }
 
-export function logTimes(p5: P5, logUuid: string): void {
+export function logTimes(universeState): void {
   const url =
     "68747470733a2f2f736f6c61722d73797374656d2d636c6f636b2d64656661756c742d727464622e6669726562617365696f2e636f6d2f74696d65732f";
 
@@ -119,6 +111,14 @@ export function logTimes(p5: P5, logUuid: string): void {
 
   // we do not care if this fails
   try {
-    p5.httpDo(sf(url) + logUuid + ".json", "PUT", "json", jsonData);
+    fetch(sf(url) + universeState.uuid + ".json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(jsonData),
+    });
+
+    // p5.httpDo(sf(url) + universeState.uuid + ".json", "PUT", "json", jsonData);
   } catch (e) {}
 }

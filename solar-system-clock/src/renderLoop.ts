@@ -12,9 +12,9 @@ import {
   generateUUID,
   parseErrorMessage,
   prettyNumString,
-  a11yDescribe,
   getRandomInt,
   getRandomFloat,
+  logTimes,
 } from "./utlilites";
 
 let errorDiv: HTMLElement | null = null;
@@ -66,7 +66,8 @@ document.ontouchmove = function (event: TouchEvent) {
 
 type UniverseState = {
   p5Canvas: P5.Renderer;
-  logUuid: string;
+  uuid: string;
+  logged: boolean;
 
   tickNum: number;
   tickIntervalRef: NodeJS.Timeout | null;
@@ -93,7 +94,7 @@ type UniverseState = {
   nebulaAddInterval: number;
   lastNebulaAddTime: number;
 
-  endSound: P5.Sound | null; // Replace 'p5.Sound' with the actual type if known
+  endSound: HTMLAudioElement | null; // Replace 'p5.Sound' with the actual type if known
 };
 
 try {
@@ -101,7 +102,8 @@ try {
     p5.preload = () => {
       universeState = {
         p5Canvas: null,
-        logUuid: generateUUID(),
+        uuid: generateUUID(),
+        logged: false,
 
         tickNum: 0,
         tickIntervalRef: null,
@@ -131,7 +133,11 @@ try {
         endSound: null,
       };
 
-      // universeState.endSound = p5.loadSound("End_Times.mp3");
+      // document.getElementById("myAudio");
+
+      let audioUrl = require("../End_Times.mp3");
+      universeState.endSound = new Audio(audioUrl);
+      universeState.endSound.preload = "auto";
     };
 
     p5.setup = () => {
@@ -242,6 +248,23 @@ try {
     };
 
     p5.draw = () => {
+      if (p5.frameCount > 300 && !universeState.logged) {
+        universeState.logged = true;
+        // logTimes(universeState);
+
+        console.log(universeState.endSound);
+
+        universeState.endSound.play();
+
+        // universeState.endSound.addEventListener("canplaythrough", () => {
+        //   universeState.endSound.play();
+        // });
+
+        // if (universeState.endSound?.paused) {
+        //   universeState.endSound.play();
+        // }
+      }
+
       const year = universeState.tickNum * CONSTANTS.tickPeriod;
 
       p5.background(10); // #0A0A0A
@@ -361,7 +384,9 @@ try {
       p5.textSize(20);
       p5.fill(255);
       p5.text(
-        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS 2`,
+        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS ${
+          universeState.logged ? " 2" : ""
+        }`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );

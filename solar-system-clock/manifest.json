@@ -3,9 +3,9 @@
     "short_name": "Solar System",
     "description": "Generative code art by Michael Ruppe",
     "start_url": "/",
-    "display": "standalone",
-    "background_color": "#000000",
-    "theme_color": "#000000",
+    "display": "fullscreen",
+    "background_color": "#0A0A0A",
+    "theme_color": "#0A0A0A",
     "icons": [
       {
         "src": "icon-192x192.png",

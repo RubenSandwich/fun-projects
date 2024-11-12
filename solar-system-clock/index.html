@@ -5,8 +5,13 @@
     
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
     <meta name="orientation" content="landscape">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" type="text/css" href="styles.css">
@@ -14,9 +19,7 @@
     <meta property="og:title" content="solar system">
     <meta property="og:description" content="Generative code art by Michael Ruppe.">
 
-    <!-- import the main render loop logic -->
     <script src="src/renderLoop.ts"></script>
-
   </head>
   <body>
     <div id="app"></div>
