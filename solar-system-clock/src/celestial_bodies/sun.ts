@@ -7,6 +7,7 @@ class Sun {
   mass: number;
   pos: P5.Vector;
   vel: P5.Vector;
+  growing: boolean;
   lastGrowthTime: number;
   growthInterval: number;
   growthAmount: number;
@@ -26,11 +27,12 @@ class Sun {
   numParticles: number;
   bigBangCallback: (() => void) | null;
 
-  constructor(p5: P5) {
+  constructor(p5: P5, options = { simple: false }) {
     this.p5 = p5;
     this.mass = getRandomInt(20, 35);
     this.pos = this.p5.createVector(0, 0);
     this.vel = this.p5.createVector(0, 0);
+    this.growing = !options.simple;
     this.lastGrowthTime = 0;
     this.growthInterval = CONSTANTS.getPlanetAddInterval();
     this.growthAmount = getRandomInt(1, 5); // Amount to increase the sun's mass by
@@ -77,7 +79,10 @@ class Sun {
     }
 
     // Check if it's time to increase the sun's mass
-    if (this.p5.millis() - this.lastGrowthTime > this.growthInterval) {
+    if (
+      this.growing &&
+      this.p5.millis() - this.lastGrowthTime > this.growthInterval
+    ) {
       this.mass += this.growthAmount;
       this.d = this.mass * 2; // Update sun's diameter
       this.lastGrowthTime = this.p5.millis();

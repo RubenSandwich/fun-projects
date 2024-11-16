@@ -17,14 +17,46 @@ import {
   logTimes,
 } from "./utlilites";
 
+import end_times from "../assets/End_Times.mp3";
+
+// TODO:
+//    Logic:
+//        1. have all universe changes (adding/removing bodies) use ticks
+//        2. Add plus or minus 15% to the end of the universe?
+//            a. should I even have a set end of the universe date?
+//        3. log the time that is takes to hit certain ticks
+//            a. and log errors
+//        4. how do I prevent planets from colliding into the sun till much much later?
+//            a. recalculate their mass and velocity when the sun grows?
+//
+//    Visuals:
+//        2. have nebulas fade in and out as the universe age
+//            a. should they have stars in them?
+//        3. have plants and moons fly in as comets
+//        4. after a big bang it should create nebulas with a special nebula in
+//          the center that turns into the sun
+//
+//    Questions:
+//        1. should the sun "supernova" and "black hole" at the same time?
+//        2. should the sun should grow once, and then wait it
+//          sucks up another planet to grow again?
+//        3. should I add more songs?
+//            a. "Main Title" when all the planets are in place?
+//            b. "Travelers" or  "14.3 Billion Years" when the universe is empty before "bouncing"?
+//            c. "End Times" when the sun supernovas, at 1:25 begin the black hole
+//
+//    Every few days:
+//        1. test on the ipad mini, lots missing on Safari in iOS 9.3.5
+
 let errorDiv: HTMLElement | null = null;
 let universeState: UniverseState; // Replace 'any' with the actual type if known
+let startUniverse: () => void;
 
 function displayError(div: HTMLElement | null, message: string): void {
   if (!div) {
     setTimeout(function () {
       displayError(div, message);
-    }, 1000);
+    }, 500);
   } else {
     div.style.display = "block";
     div.innerText = message;
@@ -51,6 +83,23 @@ function displayError(div: HTMLElement | null, message: string): void {
 
 document.addEventListener("DOMContentLoaded", function () {
   errorDiv = document.getElementById("errors") as HTMLElement;
+
+  const checkStartUniverse = () => {
+    if (!startUniverse) {
+      setTimeout(function () {
+        checkStartUniverse();
+      }, 500);
+    } else {
+      console.log(document.getElementById("startScreen"));
+      const startScreen = document.getElementById("startScreen");
+      startScreen.style.display = "none"; // Hide the start screen
+      startUniverse();
+    }
+  };
+
+  document.getElementById("startButton")?.addEventListener("click", () => {
+    checkStartUniverse();
+  });
 });
 
 // This catches script loading errors, such as Reference Errors
@@ -98,6 +147,145 @@ type UniverseState = {
 };
 
 try {
+  const simpleUniverse = (p5: P5) => {
+    let simpleUniverseState = {
+      p5Canvas: null,
+      sun: null,
+
+      planets: [],
+      numPlanets: getRandomInt(1, 3),
+      planetTrails: [],
+      orbitalRadii: [],
+
+      stars: [],
+      numStars: getRandomInt(75, 100),
+    };
+
+    p5.setup = () => {
+      simpleUniverseState.p5Canvas = p5.createCanvas(
+        p5.windowWidth,
+        p5.windowHeight
+      );
+      // p5.frameRate(20); // maybe set to 10 when prod?
+      p5.colorMode(p5.HSB, 360, 100, 100, 1);
+
+      simpleUniverseState.sun = new Sun(p5, { simple: true });
+
+      let previousRadius = simpleUniverseState.sun.d * 1.5;
+      for (let i = 0; i < simpleUniverseState.numPlanets; i++) {
+        simpleUniverseState.orbitalRadii.push(
+          getRandomInt(previousRadius, previousRadius + 40)
+        );
+
+        previousRadius = simpleUniverseState.orbitalRadii[i] + 60;
+      }
+
+      const planetsMade: Planet[] = [];
+      const moonsMade: Moon[] = [];
+      for (let i = 0; i < simpleUniverseState.numPlanets; i++) {
+        const planetMass = getRandomInt(10, 30);
+        const planetColor = p5.color(
+          getRandomInt(360),
+          getRandomInt(80, 100),
+          getRandomInt(80, 100)
+        );
+        const planetTrailLength = planetMass * getRandomInt(0, 7);
+
+        const planetTrail = new PlanetTrail(p5, planetColor, planetTrailLength);
+        const planet = new Planet(
+          p5,
+          planetMass,
+          simpleUniverseState.orbitalRadii[i],
+          planetColor,
+          simpleUniverseState.sun,
+          planetTrail
+        );
+        planetsMade.push(planet);
+        simpleUniverseState.planetTrails.push(planetTrail);
+
+        // Randomly add a moon to some planets
+        if (getRandomFloat(1) < 0.5) {
+          const moonMass = getRandomInt(3, 6);
+          const moonColor = p5.color(
+            getRandomInt(360),
+            getRandomInt(80, 100),
+            getRandomInt(80, 100)
+          );
+          const moonTrailLength = moonMass * 3;
+
+          const moonTrail = new PlanetTrail(p5, moonColor, moonTrailLength);
+          const moon = new Moon(p5, moonMass, moonColor, planet, moonTrail);
+          moonsMade.push(moon);
+          simpleUniverseState.planetTrails.push(moonTrail);
+        }
+      }
+
+      // Sort the planets by mass
+      planetsMade.sort((a, b) => a.mass - b.mass);
+
+      // Add the planets in with the moons, but never add a moon before its planet is added
+      const celestialBodiesToAdd: (Planet | Moon)[] = [];
+      for (let i = 0; moonsMade.length > 0 || planetsMade.length > 0; i++) {
+        // always start with a planet
+        if (i === 0) {
+          celestialBodiesToAdd.push(planetsMade.shift()!);
+          continue;
+        }
+
+        if (getRandomFloat(1) < 0.5 && moonsMade.length > 0) {
+          // find the first moon where its orbitingBody is already in line
+          const moon = moonsMade.find((m) =>
+            m.orbitingBody
+              ? celestialBodiesToAdd.includes(m.orbitingBody)
+              : false
+          );
+
+          if (moon) {
+            celestialBodiesToAdd.push(
+              moonsMade.splice(moonsMade.indexOf(moon), 1)[0]
+            );
+          }
+
+          continue;
+        }
+
+        if (planetsMade.length > 0) {
+          celestialBodiesToAdd.push(planetsMade.shift()!);
+          continue;
+        }
+      }
+      simpleUniverseState.planets = celestialBodiesToAdd;
+
+      // Create stars
+      for (let i = 0; i < simpleUniverseState.numStars; i++) {
+        const star = new Star(p5);
+        simpleUniverseState.stars.push(star);
+      }
+    };
+
+    p5.draw = () => {
+      p5.frameRate(20);
+      p5.background(10); // #0A0A0A
+      p5.translate(p5.width / 2, p5.height / 2);
+
+      // Draw the stars
+      for (let i = 0; i < simpleUniverseState.stars.length; i++) {
+        simpleUniverseState.stars[i].draw();
+      }
+
+      simpleUniverseState.sun.draw();
+
+      for (let i = 0; i < simpleUniverseState.planets.length; i++) {
+        simpleUniverseState.planets[i].move();
+        simpleUniverseState.planets[i].draw();
+      }
+
+      for (let i = 0; i < simpleUniverseState.planetTrails.length; i++) {
+        simpleUniverseState.planetTrails[i].draw();
+      }
+    };
+  };
+
   const universe = (p5: P5) => {
     p5.preload = () => {
       universeState = {
@@ -133,10 +321,7 @@ try {
         endSound: null,
       };
 
-      // document.getElementById("myAudio");
-
-      let audioUrl = require("../End_Times.mp3");
-      universeState.endSound = new Audio(audioUrl);
+      universeState.endSound = new Audio(end_times);
       universeState.endSound.preload = "auto";
     };
 
@@ -252,9 +437,7 @@ try {
         universeState.logged = true;
         // logTimes(universeState);
 
-        console.log(universeState.endSound);
-
-        universeState.endSound.play();
+        // universeState.endSound.play();
 
         // universeState.endSound.addEventListener("canplaythrough", () => {
         //   universeState.endSound.play();
@@ -384,9 +567,7 @@ try {
       p5.textSize(20);
       p5.fill(255);
       p5.text(
-        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS ${
-          universeState.logged ? " 2" : ""
-        }`,
+        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0}`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );
@@ -395,7 +576,18 @@ try {
     };
   };
 
-  new P5(universe);
+  startUniverse = () => {
+    new P5(universe);
+  };
+
+  if (window.location.href.includes("?mode=webapp")) {
+    startUniverse();
+  } else {
+    document.addEventListener("DOMContentLoaded", function () {
+      const startCanvasElement = document.getElementById("startCanvas");
+      new P5(simpleUniverse, startCanvasElement);
+    });
+  }
 } catch (e) {
   console.log(e);
   displayError(errorDiv, parseErrorMessage(e));

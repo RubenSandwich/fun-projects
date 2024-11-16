@@ -1,0 +1,70 @@
+body {
+  overflow: hidden;
+  background-color: #1a1a1a;
+  padding: 0;
+  margin: 0;
+  max-height: 768px; /* ipad mini 1 screen res */
+}
+
+#startScreen {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh; /* Full height to center items vertically */
+  width: 100vw;
+  color: white;
+}
+
+#startCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+}
+
+#startButtonContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10%;
+}
+
+#startButton {
+  background: none; /* Remove default background */
+  border: 2px solid white; /* White outline */
+  border-radius: 25px; /* Rounded corners */
+  color: white; /* Text color */
+  padding: 10px 20px; /* Padding for the button */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s, color 0.3s; /* Transition for hover effects */
+  margin-bottom: 0.5rem;
+}
+
+#startButton:hover {
+  background-color: white; /* Change background on hover */
+  color: #0a0a0a; /* Change text color on hover */
+}
+
+#errors {
+  display: none;
+  padding: 28px;
+  font-size: 14px;
+  overflow-y: auto;
+  height: 768px;
+  color: white;
+}
+
+@media screen and (orientation: landscape) {
+  body {
+    width: 100vh;
+    height: 100vw;
+    transform-origin: 0 0;
+  }
+}
+
+body.rotation-90 {
+  transform: rotate(90deg) translateY(-100%);
+}
+body.rotation90 {
+  transform: rotate(-90deg) translateX(-100%);
+}
