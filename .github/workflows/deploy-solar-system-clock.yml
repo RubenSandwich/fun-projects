@@ -14,5 +14,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           repository: RubenSandwich/rubennic.com
-          event-type: dispatch-event
+          event-type: publish-website
           token: ${{ secrets.DEPLOY_RUBENNIC_DOT_COM }}
