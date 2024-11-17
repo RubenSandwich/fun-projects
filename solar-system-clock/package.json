@@ -24,6 +24,7 @@
   "author": "Ruben Nic",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^22.9.0",
     "@types/p5": "^1.7.6",
     "parcel-bundler": "^1.12.5",
     "parcel-plugin-pwa-manifest": "^3.1.1",

@@ -49,6 +49,9 @@ export function prettyNumString(num: number): string {
   if (len > 9) {
     divideNum = 1_000_000_000;
     unit = "B";
+  } else if (len > 12) {
+    divideNum = 1_000_000_000_000;
+    unit = "T";
   }
 
   return `${(num / divideNum).toFixed(2)}${unit} years old`;

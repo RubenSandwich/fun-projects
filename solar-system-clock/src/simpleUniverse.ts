@@ -8,10 +8,26 @@ import { Star } from "./celestial_bodies/star";
 
 import { getRandomInt, getRandomFloat } from "./utlilites";
 
+type SimpleUniverseState = {
+  p5Canvas: P5.Renderer;
+  sun: Sun;
+
+  planets: (Planet | Moon)[];
+  numPlanets: number;
+  planetTrails: PlanetTrail[];
+  orbitalRadii: number[];
+
+  stars: Star[];
+  numStars: number;
+};
+
 export const SimpleUniverse = (p5: P5) => {
-  let simpleUniverseState = {
-    p5Canvas: null,
-    sun: null,
+  let simpleUniverseState: SimpleUniverseState = {
+    // this is fine, as I just want to get a basic
+    // scaffold of simpleUniverseState here, and these get
+    // build during setup so will never actually be null
+    p5Canvas: null!,
+    sun: null!,
 
     planets: [],
     numPlanets: getRandomInt(1, 3),

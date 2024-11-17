@@ -19,6 +19,7 @@ import {
   logTimes,
 } from "./utlilites";
 
+// @ts-ignore: ts(2307) - This is the requested lay to load asset URLs in parcel
 import end_times from "../assets/End_Times.mp3";
 
 // TODO:
@@ -92,9 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
         checkStartUniverse();
       }, 500);
     } else {
-      console.log(document.getElementById("startScreen"));
-      const startScreen = document.getElementById("startScreen");
-      startScreen.style.display = "none"; // Hide the start screen
       startUniverse();
     }
   };
@@ -125,41 +123,41 @@ type UniverseState = {
 
   sun: Sun;
 
-  planets: Planet[];
+  planets: (Planet | Moon)[];
   numPlanets: number;
   planetTrails: PlanetTrail[];
   planetAddInterval: number;
   lastPlanetAddTime: number;
-  celestialBodiesToAdd: any[]; // Replace 'any' with the actual type if known
-  orbitalRadii: number[]; // Array to store orbital ring radii
+  celestialBodiesToAdd: (Planet | Moon)[];
+  orbitalRadii: number[];
 
-  stars: Star[]; // Replace 'Star' with the actual type if known
+  stars: Star[];
   numStars: number;
-  starsToAdd: any[]; // Replace 'any' with the actual type if known
+  starsToAdd: Star[];
   starAddInterval: number;
   lastStarAddTime: number;
 
-  nebulas: Nebula[]; // Replace 'Nebula' with the actual type if known
+  nebulas: Nebula[];
   numNebulas: number;
-  nebulasToAdd: any[]; // Replace 'any' with the actual type if known
+  nebulasToAdd: Nebula[];
   nebulaAddInterval: number;
   lastNebulaAddTime: number;
 
-  endSound: HTMLAudioElement | null; // Replace 'p5.Sound' with the actual type if known
+  endSound: HTMLAudioElement | null;
 };
 
 try {
   const BigBounceUniverse = (p5: P5) => {
     p5.preload = () => {
       universeState = {
-        p5Canvas: null,
+        p5Canvas: null!,
+        sun: null!,
+
         uuid: generateUUID(),
         logged: false,
 
         tickNum: 0,
         tickIntervalRef: null,
-
-        sun: null,
 
         planets: [],
         numPlanets: 3, //getRandomInt(4, 7),
@@ -336,9 +334,12 @@ try {
         universeState.celestialBodiesToAdd.length > 0
       ) {
         const newBody = universeState.celestialBodiesToAdd.shift();
-        universeState.planets.push(newBody);
-        universeState.planetTrails.push(newBody.planetTrail);
-        universeState.lastPlanetAddTime = p5.millis();
+
+        if (newBody) {
+          universeState.planets.push(newBody);
+          universeState.planetTrails.push(newBody.planetTrail);
+          universeState.lastPlanetAddTime = p5.millis();
+        }
       }
 
       for (let i = 0; i < universeState.planetTrails.length; i++) {
@@ -430,7 +431,9 @@ try {
       p5.textSize(20);
       p5.fill(255);
       p5.text(
-        `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0}`,
+        !CONSTANTS.debug
+          ? `${universeAge}`
+          : `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0}`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );
@@ -440,14 +443,24 @@ try {
   };
 
   startUniverse = () => {
+    const startScreen = document.getElementById("startScreen");
+    if (!startScreen) {
+      throw new Error("startScreen element is undefined.");
+    }
+
+    startScreen.style.display = "none"; // Hide the start screen
     new P5(BigBounceUniverse);
   };
 
-  if (window.location.href.includes("?mode=webapp")) {
+  if (window.location.href.includes("?mode=webapp") || CONSTANTS.debug) {
     startUniverse();
   } else {
     document.addEventListener("DOMContentLoaded", function () {
       const startCanvasElement = document.getElementById("startCanvas");
+      if (!startCanvasElement) {
+        throw new Error("startCanvasElement element is undefined.");
+      }
+
       new P5(SimpleUniverse, startCanvasElement);
     });
   }
