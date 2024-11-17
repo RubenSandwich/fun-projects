@@ -1,17 +1,32 @@
 {
   "name": "solar-system-clock",
   "version": "1.0.0",
-  "description": "A simulation of the big bounce",
+  "description": "Generative simulation/art of the big bounce",
   "main": "index.html",
   "scripts": {
     "start": "parcel index.html --open",
     "build": "parcel build index.html --no-source-maps --public-url ./"
+  },
+  "pwaManifest": {
+    "name": "Solar System Clock",
+    "short_name": "Solar System Clock",
+    "description": "Generative simulation/art of the big bounce",
+    "start_url": "/?mode=webapp",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#1a1a1a",
+    "theme_color": "#1a1a1a",
+    "generateIconOptions": {
+      "baseIcon": "./assets/icon.png",
+      "genFavicons": true
+    }
   },
   "author": "Ruben Nic",
   "license": "ISC",
   "devDependencies": {
     "@types/p5": "^1.7.6",
     "parcel-bundler": "^1.12.5",
+    "parcel-plugin-pwa-manifest": "^3.1.1",
     "typescript": "^5.6.3"
   },
   "dependencies": {
