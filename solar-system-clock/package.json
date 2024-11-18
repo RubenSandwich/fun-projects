@@ -12,6 +12,7 @@
     "short_name": "Solar System Clock",
     "description": "Generative simulation/art of the big bounce",
     "start_url": "/?mode=webapp",
+    "scope": "/solar-system-clock/",
     "display": "fullscreen",
     "orientation": "landscape",
     "background_color": "#1a1a1a",
