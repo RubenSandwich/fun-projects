@@ -13,9 +13,8 @@ type SimpleUniverseState = {
   p5Renderer: P5.Renderer;
   sun: Sun;
 
-  canvasGlobalAlpha: number;
-  fadeIntervalRef: NodeJS.Timeout | null;
   fading: boolean;
+  startedFadeTimeout: boolean;
 
   planets: (Planet | Moon)[];
   numPlanets: number;
@@ -34,9 +33,8 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
     p5Renderer: null!,
     sun: null!,
 
-    canvasGlobalAlpha: 1.0,
-    fadeIntervalRef: null,
     fading: false,
+    startedFadeTimeout: false,
 
     planets: [],
     numPlanets: getRandomInt(1, 3),
@@ -51,10 +49,6 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
 
   const beginFade = () => {
     simpleUniverseState.fading = true;
-
-    simpleUniverseState.fadeIntervalRef = setInterval(function () {
-      simpleUniverseState.canvasGlobalAlpha -= 0.05;
-    }, 250);
   };
 
   const SimpleUniverse = (p5: P5) => {
@@ -161,21 +155,23 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
     };
 
     p5.draw = () => {
-      if (simpleUniverseState.fading) {
+      // Yeah this is gross, but p5.noLoop() needs to be run inside of p5.draw()
+      if (
+        simpleUniverseState.fading &&
+        !simpleUniverseState.startedFadeTimeout
+      ) {
+        simpleUniverseState.startedFadeTimeout = true;
+
         const canvas = simpleUniverseState.p5Renderer.elt;
-        const setAlpha = Math.max(0, simpleUniverseState.canvasGlobalAlpha);
 
-        // Maybe I should do this through CSS transitions...
-        // e.g. transition: opacity 0.5s ease-in-out;
-        canvas.style.opacity = setAlpha.toString(10);
-        startButtonContainer.style.opacity = setAlpha.toString(10);
+        canvas.style.opacity = "0";
+        startButtonContainer.style.opacity = "0";
 
-        if (simpleUniverseState.canvasGlobalAlpha <= -0.35) {
+        setTimeout(() => {
           p5.noLoop();
           p5.remove();
-          clearInterval(simpleUniverseState.fadeIntervalRef || undefined);
           finishedFading();
-        }
+        }, 1000);
       }
 
       p5.frameRate(20);

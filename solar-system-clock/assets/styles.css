@@ -21,12 +21,18 @@ body {
   left: 0;
   top: 0;
   z-index: -1;
+  transition: opacity 0.75s ease-in-out;
+
+  > * {
+    transition: opacity 0.75s ease-in-out;
+  }
 }
 
 #startButtonContainer {
   display: flex;
   flex-direction: column;
   margin-bottom: 10%;
+  transition: opacity 0.75s ease-in-out;
 }
 
 #startButton {
