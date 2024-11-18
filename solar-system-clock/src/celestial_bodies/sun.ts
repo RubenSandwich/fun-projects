@@ -2,6 +2,12 @@ import P5 from "p5";
 import CONSTANTS from "../constants";
 import { getRandomInt } from "../utlilites";
 
+enum SunStage {
+  SUN = "sun",
+  BIG_BANG = "big bang",
+  BLACK_HOLE = "black hole",
+}
+
 class Sun {
   p5: P5;
   mass: number;
@@ -17,7 +23,7 @@ class Sun {
   lowestMass: number;
   highestMass: number;
   currentColor: P5.Color;
-  stage: string; // "sun", "big bang", or "black hole"
+  stage: SunStage;
   particles: {
     pos: P5.Vector;
     vel: P5.Vector;
@@ -62,7 +68,7 @@ class Sun {
         Math.min(Math.max(Math.floor(this.mass / 10) * 10, this.lowestMass), 80)
       ];
 
-    this.stage = "sun"; // "sun", "big bang", or "black hole"
+    this.stage = SunStage.SUN;
     this.particles = [];
     this.numParticles = 400;
 
@@ -70,10 +76,10 @@ class Sun {
   }
 
   draw(): void {
-    if (this.stage === "big bang") {
+    if (this.stage === SunStage.BIG_BANG) {
       this.drawBigBang();
       return;
-    } else if (this.stage === "black hole") {
+    } else if (this.stage === SunStage.BLACK_HOLE) {
       this.drawBlackHole();
       return;
     }
@@ -84,7 +90,7 @@ class Sun {
       this.p5.millis() - this.lastGrowthTime > this.growthInterval
     ) {
       this.mass += this.growthAmount;
-      this.d = this.mass * 2; // Update sun's diameter
+      this.d = this.mass * 2;
       this.lastGrowthTime = this.p5.millis();
 
       const massIndex = Math.min(
@@ -110,7 +116,7 @@ class Sun {
   }
 
   beginSun(): void {
-    this.stage = "sun";
+    this.stage = SunStage.SUN;
     this.particles = [];
   }
 
@@ -132,7 +138,7 @@ class Sun {
 
   beginBigBang(bigBangCallback: () => void): void {
     this.bigBangCallback = bigBangCallback;
-    this.stage = "big bang";
+    this.stage = SunStage.BIG_BANG;
 
     // update any existing particles so that they are never static
     for (let i = 0; i < this.particles.length; i++) {
@@ -161,7 +167,7 @@ class Sun {
     this.vel = this.p5.createVector(0, 0);
     this.lastGrowthTime = 0;
     this.growthInterval = CONSTANTS.getPlanetAddInterval();
-    this.growthAmount = getRandomInt(1, 5); // Amount to increase the sun's mass by
+    this.growthAmount = getRandomInt(1, 5);
     this.d = this.mass * 2;
   }
 
@@ -195,7 +201,7 @@ class Sun {
   }
 
   beginBlackHole(): void {
-    this.stage = "black hole";
+    this.stage = SunStage.BLACK_HOLE;
   }
 
   drawBlackHole(): void {
@@ -231,16 +237,14 @@ class Sun {
 
     // Introduce new particles over time
     if (this.p5.frameCount % 50 === 0) {
-      // Adjust the modulus value to control the rate of particle introduction
       for (let i = 0; i < getRandomInt(1, 5); i++) {
-        // Adjust the number of particles introduced each time
         this.particles.push({
           pos: this.p5.createVector(
             getRandomInt(-this.p5.width / 2, this.p5.width / 2),
             getRandomInt(-this.p5.height / 2, this.p5.height / 2)
           ),
           vel: this.p5.createVector(0, 0),
-          size: getRandomInt(1, 3), // Smaller particle size
+          size: getRandomInt(1, 3),
           color: this.p5.color(
             getRandomInt(360),
             getRandomInt(80, 100),
@@ -260,7 +264,7 @@ class Sun {
       const force = this.d / 8 / distance;
       const spiralForce = this.p5
         .createVector(Math.cos(angle + force), Math.sin(angle + force))
-        .mult(force * 0.1); // Move slowly
+        .mult(force * 0.1);
       particle.vel.add(spiralForce);
       particle.pos.add(particle.vel);
 
@@ -279,4 +283,4 @@ class Sun {
   }
 }
 
-export { Sun };
+export { Sun, SunStage };

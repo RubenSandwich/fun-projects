@@ -45,16 +45,17 @@ export function prettyNumString(num: number): string {
   const len = Math.ceil(Math.log10(num + 1));
 
   let divideNum = 1_000_000;
-  let unit = "M";
+  let unit = "m";
+
   if (len > 9) {
     divideNum = 1_000_000_000;
-    unit = "B";
+    unit = "b";
   } else if (len > 12) {
     divideNum = 1_000_000_000_000;
-    unit = "T";
+    unit = "t";
   }
 
-  return `${(num / divideNum).toFixed(2)}${unit} years old`;
+  return `${num === 0 ? "<1" : (num / divideNum).toFixed(2)}${unit} years old`;
 }
 
 export function radialGradient(

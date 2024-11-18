@@ -2,12 +2,13 @@ import { generateUUID, getRandomInt, minsToMs } from "./utlilites";
 
 const CONSTANTS = {
   debug: (process.env.NODE_ENV ?? "") === "development",
+  backgroundColor: "#1a1a1a",
   gravity: 100, // Gravitational constant
   destabilise: 0.15,
   logUuid: generateUUID(),
 
-  tickIntervalMs: 300_000, // every 5 mins, which is 288 updates a day ((60 * 24) / 5)
-  tickPeriod: 48_611_111.111,
+  tickIntervalMs: 150_000, // every 5 mins, which is 288 updates a day ((60 * 24) / 5)
+  tickPeriod: 24_305_555.555,
   endOfTheUniverseYear: 98_000_000_000, // 2,016 ticks, or 7 days
 
   getPlanetAddInterval: (): number => {

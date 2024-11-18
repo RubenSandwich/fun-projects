@@ -1,13 +1,13 @@
 import P5 from "p5";
 
-import { Sun } from "./celestial_bodies/sun";
+import { Sun, SunStage } from "./celestial_bodies/sun";
 import { Planet } from "./celestial_bodies/planet";
 import { Moon } from "./celestial_bodies/moon";
 import { Nebula } from "./celestial_bodies/nebula";
 import { PlanetTrail } from "./celestial_bodies/planetTrail";
 import { Star, StarStage } from "./celestial_bodies/star";
 
-import { SimpleUniverse } from "./simpleUniverse";
+import { simpleUniverseCreator } from "./simpleUniverse";
 
 import CONSTANTS from "./constants";
 import {
@@ -23,20 +23,24 @@ import {
 import end_times from "../assets/End_Times.mp3";
 
 // TODO:
-//    Logic:
-//        1. start at a bug bang
-//
-//    Visuals:
-//        2. have nebulas fade in and out as the universe age
-//            a. should they have stars in them?
-//        3. have plants and moons fly in as comets
-//        4. after a big bang it should create nebulas with a special nebula in
+//    1. start at the big bang
+//    2. the sun should only grow when it "eats" a planet
+//    3. create a comet class that randomly flys by
+//        a. If it hits the sun and make it grow
+//    4. have nebulas fade in and out as the universe age
+//        a. should they have stars in them?
+//    5. have plants and moons fly in as comets
+//    6. after a big bang it should create nebulas with a special nebula in
 //          the center that turns into the sun
+//    7. have stars fade in and out as the universe age
+//    8. The "black hole" stage should also supernova
+//        a. which means that a small dense core will be left behind that turns into the black hole
+//    9. the black hole should slowly grow
+//    10. once the universe is empty the black hole should collapse and expload into a big bang
+//        a. this isn't really what happens as black holes slowly evaporate
 //
 //    Questions:
-//        2. should the sun should grow once, and then wait it
-//          sucks up another planet to grow again?
-//        3. should I add more songs?
+//        1. should I add more songs?
 //            a. "Main Title" when all the planets are in place?
 //            b. "Travelers" or  "14.3 Billion Years" when the universe is empty before "bouncing"?
 //            c. "End Times" when the sun supernovas, at 1:25 begin the black hole
@@ -46,7 +50,12 @@ import end_times from "../assets/End_Times.mp3";
 
 let errorDiv: HTMLElement | null = null;
 let universeState: UniverseState; // Replace 'any' with the actual type if known
-let startUniverse: () => void;
+let startBigBounceUniverse: () => void;
+
+let simpleUniverse = {
+  beginFade: () => {},
+  fading: false,
+};
 
 function displayError(div: HTMLElement | null, message: string): void {
   if (!div) {
@@ -80,18 +89,15 @@ function displayError(div: HTMLElement | null, message: string): void {
 document.addEventListener("DOMContentLoaded", function () {
   errorDiv = document.getElementById("errors") as HTMLElement;
 
-  const checkStartUniverse = () => {
-    if (!startUniverse) {
-      setTimeout(function () {
-        checkStartUniverse();
-      }, 500);
-    } else {
-      startUniverse();
-    }
-  };
+  const startButtonEle = document.getElementById(
+    "startButton"
+  )! as HTMLButtonElement;
 
-  document.getElementById("startButton")?.addEventListener("click", () => {
-    checkStartUniverse();
+  startButtonEle.addEventListener("click", () => {
+    if (!simpleUniverse.fading) {
+      simpleUniverse.beginFade();
+      startButtonEle.disabled = true;
+    }
   });
 });
 
@@ -107,7 +113,7 @@ document.ontouchmove = function (event: TouchEvent) {
 };
 
 type UniverseState = {
-  p5Canvas: P5.Renderer;
+  p5Renderer: P5.Renderer;
   uuid: string;
   logged: boolean;
 
@@ -143,7 +149,7 @@ try {
   const BigBounceUniverse = (p5: P5) => {
     p5.preload = () => {
       universeState = {
-        p5Canvas: null!,
+        p5Renderer: null!,
         sun: null!,
 
         uuid: generateUUID(),
@@ -180,7 +186,10 @@ try {
     };
 
     p5.setup = () => {
-      universeState.p5Canvas = p5.createCanvas(p5.windowWidth, p5.windowHeight);
+      universeState.p5Renderer = p5.createCanvas(
+        p5.windowWidth,
+        p5.windowHeight
+      );
       // p5.frameRate(20); // maybe set to 10 when prod?
       p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
@@ -304,7 +313,7 @@ try {
 
       const year = universeState.tickNum * CONSTANTS.tickPeriod;
 
-      p5.background(10); // #0A0A0A
+      p5.background(CONSTANTS.backgroundColor);
 
       p5.translate(p5.width / 2, p5.height / 2);
 
@@ -330,7 +339,11 @@ try {
 
         if (newBody) {
           universeState.planets.push(newBody);
-          universeState.planetTrails.push(newBody.planetTrail);
+
+          if (newBody.planetTrail) {
+            universeState.planetTrails.push(newBody.planetTrail);
+          }
+
           universeState.lastPlanetAddTime = p5.millis();
         }
       }
@@ -364,7 +377,7 @@ try {
       if (
         universeState.celestialBodiesToAdd.length === 0 &&
         universeState.planets.length === 0 &&
-        universeState.sun.stage === "sun"
+        universeState.sun.stage === SunStage.SUN
       ) {
         universeState.sun.beginBlackHole();
 
@@ -373,7 +386,7 @@ try {
         // }
       }
 
-      // if (universeState.sun.stage === "black hole") {
+      // if (universeState.sun.stage === SunStage.BLACK_HOLE) {
       if (p5.frameCount % 100 === 0) {
         for (let i = 0; i < universeState.nebulas.length; i++) {
           // 30% chance for each nebula to change
@@ -405,7 +418,7 @@ try {
 
       if (
         universeState.stars.length === 0 &&
-        universeState.sun.stage === "black hole"
+        universeState.sun.stage === SunStage.BLACK_HOLE
       ) {
         universeState.sun.beginBigBang(function () {
           for (let i = 0; i < universeState.nebulas.length; i++) {
@@ -426,7 +439,7 @@ try {
       p5.text(
         !CONSTANTS.debug
           ? `${universeAge}`
-          : `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS`,
+          : `${frameRate ? frameRate.toFixed(2) : 0} FPS\n${universeAge}`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );
@@ -435,7 +448,7 @@ try {
     };
   };
 
-  startUniverse = () => {
+  startBigBounceUniverse = () => {
     const startScreen = document.getElementById("startScreen");
     if (!startScreen) {
       throw new Error("startScreen element is undefined.");
@@ -446,13 +459,22 @@ try {
   };
 
   if (window.location.href.includes("?mode=webapp") || CONSTANTS.debug) {
-    startUniverse();
+    startBigBounceUniverse();
   } else {
     document.addEventListener("DOMContentLoaded", function () {
       const startCanvasElement = document.getElementById("startCanvas");
       if (!startCanvasElement) {
         throw new Error("startCanvasElement element is undefined.");
       }
+
+      const { beginFade, fading, SimpleUniverse } = simpleUniverseCreator(
+        startBigBounceUniverse
+      );
+
+      simpleUniverse = {
+        beginFade,
+        fading,
+      };
 
       new P5(SimpleUniverse, startCanvasElement);
     });
