@@ -73,6 +73,26 @@ class Sun {
     this.numParticles = 400;
 
     this.bigBangCallback = null;
+
+    if (!options.simple) {
+      this.stage = SunStage.BIG_BANG;
+
+      for (let i = 0; i < this.numParticles; i++) {
+        this.particles.push({
+          pos: this.p5.createVector(
+            this.p5.random(-this.d / 2, this.d / 2),
+            this.p5.random(-this.d / 2, this.d / 2)
+          ),
+          vel: P5.Vector.random2D().mult(getRandomInt(1, 5)),
+          size: getRandomInt(1, 3),
+          color: this.p5.color(
+            getRandomInt(360),
+            getRandomInt(80, 100),
+            getRandomInt(80, 100)
+          ),
+        });
+      }
+    }
   }
 
   draw(): void {

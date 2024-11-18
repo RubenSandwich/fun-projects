@@ -159,7 +159,7 @@ try {
         tickIntervalRef: null,
 
         planets: [],
-        numPlanets: 3, //getRandomInt(4, 7),
+        numPlanets: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
         planetTrails: [],
         planetAddInterval: CONSTANTS.getPlanetAddInterval(),
         lastPlanetAddTime: 0,
@@ -167,13 +167,13 @@ try {
         orbitalRadii: [], // Array to store orbital ring radii
 
         stars: [],
-        numStars: 100, //getRandomInt(150, 220),
+        numStars: !CONSTANTS.debug ? getRandomInt(150, 220) : 100,
         starsToAdd: [],
         starAddInterval: CONSTANTS.getStarAddInterval(),
         lastStarAddTime: 0,
 
         nebulas: [],
-        numNebulas: getRandomInt(4, 7),
+        numNebulas: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
         nebulasToAdd: [],
         nebulaAddInterval: CONSTANTS.getNebulaAddInterval(),
         lastNebulaAddTime: 0,
@@ -190,7 +190,7 @@ try {
         p5.windowWidth,
         p5.windowHeight
       );
-      // p5.frameRate(20); // maybe set to 10 when prod?
+      p5.frameRate(!CONSTANTS.debug ? 20 : 60);
       p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
       universeState.sun = new Sun(p5);

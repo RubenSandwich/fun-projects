@@ -14,7 +14,7 @@ class Nebula {
   constructor(p5: P5) {
     this.p5 = p5;
     this.frameOffset = getRandomInt(100);
-    this.currentAlpha = 100;
+    this.currentAlpha = getRandomInt(50, 85);
 
     this.pos = this.p5.createVector(
       getRandomInt(-this.p5.width / 2, this.p5.width / 2),
@@ -56,11 +56,11 @@ class Nebula {
       [
         {
           offset: 0,
-          color: "hsla(" + String(getRandomInt(360)) + ", 80%, 50%, 0.05)",
+          color: `hsla(${getRandomInt(360)}, 80%, 50%, 0.05)`,
         },
         {
           offset: 1,
-          color: "hsla(" + String(getRandomInt(360)) + ", 80%, 50%, 0.05)",
+          color: `hsla(${getRandomInt(360)}, 80%, 50%, 0.05)`,
         },
       ]
     );
@@ -83,6 +83,11 @@ class Nebula {
       );
       this.nebulaRender.endShape(this.p5.CLOSE);
     }
+
+    // It's a long story, but between our blending and radial gradiant
+    // this is the best way to be confident on our pixel's alpha value
+    // to avoid a harsh transition on our inital alpha change
+    this.changeAlpha(this.currentAlpha);
   }
 
   draw(): void {
