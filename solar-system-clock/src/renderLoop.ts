@@ -5,7 +5,7 @@ import { Planet } from "./celestial_bodies/planet";
 import { Moon } from "./celestial_bodies/moon";
 import { Nebula } from "./celestial_bodies/nebula";
 import { PlanetTrail } from "./celestial_bodies/planetTrail";
-import { Star } from "./celestial_bodies/star";
+import { Star, StarStage } from "./celestial_bodies/star";
 
 import { SimpleUniverse } from "./simpleUniverse";
 
@@ -24,13 +24,7 @@ import end_times from "../assets/End_Times.mp3";
 
 // TODO:
 //    Logic:
-//        1. have all universe changes (adding/removing bodies) use ticks
-//        2. Add plus or minus 15% to the end of the universe?
-//            a. should I even have a set end of the universe date?
-//        3. log the time that is takes to hit certain ticks
-//            a. and log errors
-//        4. how do I prevent planets from colliding into the sun till much much later?
-//            a. recalculate their mass and velocity when the sun grows?
+//        1. start at a bug bang
 //
 //    Visuals:
 //        2. have nebulas fade in and out as the universe age
@@ -40,7 +34,6 @@ import end_times from "../assets/End_Times.mp3";
 //          the center that turns into the sun
 //
 //    Questions:
-//        1. should the sun "supernova" and "black hole" at the same time?
 //        2. should the sun should grow once, and then wait it
 //          sucks up another planet to grow again?
 //        3. should I add more songs?
@@ -394,7 +387,7 @@ try {
       }
       // }
 
-      if (p5.frameCount % 25 === 0) {
+      if (p5.frameCount % 1000 === 0) {
         if (universeState.stars.length > 0) {
           const randomIndex = Math.floor(
             getRandomInt(universeState.stars.length)
@@ -402,7 +395,7 @@ try {
 
           const star = universeState.stars[randomIndex];
 
-          if (star && star.stage !== "exploading") {
+          if (star && star.stage !== StarStage.Exploding) {
             universeState.stars[randomIndex].beginExploading(function () {
               universeState.stars.splice(randomIndex, 1);
             });
@@ -433,7 +426,7 @@ try {
       p5.text(
         !CONSTANTS.debug
           ? `${universeAge}`
-          : `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0}`,
+          : `${universeAge}\n${frameRate ? frameRate.toFixed(2) : 0} FPS`,
         p5.width / 2 - universeAgeWidth - 20,
         p5.height / 2 - 40
       );
