@@ -1,5 +1,5 @@
-## Noodling
+## solar system clock
 
-**Noun: Informal**
+Creative coding simulation of the big bounce
 
-The action of improvising or playing casually on a musical instrument.
+MIT License

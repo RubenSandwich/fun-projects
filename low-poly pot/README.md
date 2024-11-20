@@ -1,5 +1,7 @@
-## Noodling
+## low-poly pot and base
 
-**Noun: Informal**
+Quick 3d design of a low poly pot and base
 
-The action of improvising or playing casually on a musical instrument.
+![low-poly pot and base](./pictures/IMG_4526.JPG)
+
+MIT License

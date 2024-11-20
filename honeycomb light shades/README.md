@@ -1,4 +1,4 @@
-## Light Shades
+## Honeycomb Light Shades
 
 Wide varied of honeycomb light shades
 

@@ -1,5 +1,5 @@
-## Noodling
+## mini concertina
 
-**Noun: Informal**
+A mostly 3d printed 10 button anglo concertina, **still a WIP**
 
-The action of improvising or playing casually on a musical instrument.
+MIT License
