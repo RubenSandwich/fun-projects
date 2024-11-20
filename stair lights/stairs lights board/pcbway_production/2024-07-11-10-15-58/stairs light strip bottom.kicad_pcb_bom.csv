@@ -1,6 +1,0 @@
-﻿Designator,Quantity,Value,Footprint,Package,MPN,DNP,Mount_Type,Description,Height,Mouser Part Number,Mouser Price/Stock,Manufacturer_Name
-"MH1, MH2, MH3, MH4",4,MountingHole_2.2mm_M2,MountingHole_2.2mm_M2,,,,tht,,,,,
-barrel jack,1,PRT-00119,PRT00119,,PRT-00119,,tht,SparkFun Accessories DC Barrel Power Jack/Connector,11,474-PRT-00119,https://www.mouser.co.uk/ProductDetail/SparkFun/PRT-00119?qs=WyAARYrbSnbnQpS9xf%252Bx5A%3D%3D,SparkFun
-light strip terminal block,1,EBWA-02-A,EBWA02A,,EBWA-02-A,,tht,Euro Block 2P,9.008,737-EBWA-02-A,https://www.mouser.co.uk/ProductDetail/Adam-Tech/EBWA-02-A?qs=HoCaDK9Nz5cgBIK%2FOdkl1w%3D%3D,Adam Tech
-pir terminal block,1,EBWA-04-A,EBWA04A,,EBWA-04-A,,tht,"4 Position Wire to Board Terminal Block Horizontal with Board 0.138"" (3.50mm) Through Hole ",8.89,737-EBWA-04-A,https://www.mouser.co.uk/ProductDetail/Adam-Tech/EBWA-04-A?qs=HoCaDK9Nz5cB9c5N0S8WdA%3D%3D,Adam Tech
-"pir-motion-sensor1, pwm-dimmer1",2,Conn_01x04_Socket,4_through_holes,,,,tht,"Generic connector, single row, 01x04, script generated",,,,

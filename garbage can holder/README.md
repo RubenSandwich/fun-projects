@@ -1,5 +1,7 @@
-## Noodling
+## garbage can holder
 
-**Noun: Informal**
+Garbage can holder to keep garbage cans from blowing in the wind
 
-The action of improvising or playing casually on a musical instrument.
+![photo of finished garbage can holder](./pictures/IMG_5185.jpeg)
+
+MIT License
