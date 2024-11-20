@@ -5,7 +5,9 @@ Collection of casio f-91w projects and files
 
 # Casio Vibration Module
 
-Vibration Module that fits behind the internal circut board
+Vibration Module that fits behind the internal casio f-91w circuit board
+
+![back of the vibration module](./pictures/IMG_7770.jpeg)
 
 ## TODO
 
