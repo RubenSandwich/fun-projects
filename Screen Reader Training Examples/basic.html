@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="author" content="Ruben Nic" />
+    <meta
+      name="description"
+      content="Basic Example from Screen Reader Training"
+    />
+    <title>Basic Example</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: row;
+        padding: 0% 35% 5% 10%;
+        background-color: #f9f9f9;
+      }
+      a {
+        color: #808080;
+      }
+      .fit-picture {
+        max-width: 100%;
+      }
+      .block {
+        display: block;
+      }
+      .margins {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+      .reference {
+        position: fixed;
+        background-color: #e0e0e0;
+        margin-left: 1rem;
+        padding: 1rem;
+      }
+    </style>
+        <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            var screenReaderReference = document.getElementById('reference');
+    
+            var screenReaderDocs;
+            // I should really be using feature detection but this are screen reader examples, but code examples ¯\_(ツ)_/¯
+            if (navigator.userAgent.toLowerCase().indexOf('chrome') == -1) {
+              screenReaderDocs = `<h2>VoiceOver Reference</h2>
+              <h3>Turning On/Off</h3>
+              <ul>
+                <li>Command + F5</li>
+                or
+                <li>Hold Command + Press Touch ID 3 times</li>
+              </ul>
+              <h3>Basic Navigation</h3>
+              <ul>
+                <li>Control + Option = VO</li>
+                <li>Control = Pause Reading</li>
+                <li>VO + Right Arrow = Next Element</li>
+                <li>VO + Left Arrow = Previous Element</li>
+                <li>VO + Shift + Down Arrow = Enter Content</li>
+                <li>VO + Shift + Up Arrow = Exit Content</li>
+                <li>VO + Space = Interact with Element</li>
+              </ul>`;
+            } else {
+              screenReaderDocs = `<h2>ChromeVox Reference</h2>
+              <h3>Turning On/Off</h3>
+              <ul>
+                <li>Shift + Alt + (double tap) A</li>
+              </ul>
+              <h3>Basic Navigation</h3>
+              <ul>
+                <li>Shift + Alt = ChromeVox</li>
+                <li>Control = Pause Reading</li>
+                <li>ChromeVox + Down Arrow = Next Element</li>
+                <li>ChromeVox + Up Arrow = Previous Element</li>
+                <li>ChromeVox + Space = Interact with Element</li>
+              </ul>`;
+            }
+            
+            screenReaderReference.insertAdjacentHTML(
+              'afterbegin', 
+              screenReaderDocs,
+            );
+          });
+        </script>
+  </head>
+  <body>
+    <main>
+      <h1>Basic Example</h1>
+
+      <p>
+        Use this example to get comfortable moving to and from elements with
+        VoiceOver.
+      </p>
+
+      <p>
+        This is a longer bit of text so you can practice stopping and starting
+        VoiceOver. The rest of this test doesn't really say anything important.
+        It just goes on and on without having much of a point.
+      </p>
+
+      <ul>
+        <li>List Item 1</li>
+        <li>List Item 2</li>
+      </ul>
+
+      <a href="./basic.html">This link reloads the page.</a>
+
+      <p>
+        The next image does not have an alt tag.
+      </p>
+
+      <img class="fit-picture" src="./images/artemis.jpg" />
+
+      <p>
+        However, this image does have an alt tag.
+      </p>
+
+      <img
+        class="fit-picture"
+        src="./images/sad.jpg"
+        alt="Women sadly resting her head on her hand. She is sad because she does not know what the last image is."
+      />
+
+      <button type="button" class="block margins">
+        Button with no action
+      </button>
+
+      <button type="button" disabled="true" class="block margins">
+        Disabled button
+      </button>
+
+      <a href="./rotor.html">Go to the Rotor example.</a>
+    </main>
+    <aside>
+      <div class="reference" id="reference">
+      </div>
+    </aside>
+  </body>
+</html>

@@ -433,15 +433,17 @@ try {
       const universeAge = prettyNumString(year);
       const universeAgeWidth = p5.textWidth(universeAge);
       const frameRate = p5.frameRate();
+      const textSize = 15;
 
-      p5.textSize(20);
+      p5.textSize(textSize);
+      p5.noStroke();
       p5.fill(255);
       p5.text(
         !CONSTANTS.debug
           ? `${universeAge}`
           : `${frameRate ? frameRate.toFixed(2) : 0} FPS\n${universeAge}`,
-        p5.width / 2 - universeAgeWidth - 20,
-        p5.height / 2 - 40
+        p5.width / 2 - universeAgeWidth - 10,
+        p5.height / 2 - (!CONSTANTS.debug ? 10 : 20)
       );
 
       p5.describe("test");

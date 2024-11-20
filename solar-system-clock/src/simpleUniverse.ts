@@ -45,8 +45,6 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
     numStars: getRandomInt(75, 100),
   };
 
-  const startButtonContainer = document.getElementById("startButtonContainer")!;
-
   const beginFade = () => {
     simpleUniverseState.fading = true;
   };
@@ -55,7 +53,8 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
     p5.setup = () => {
       simpleUniverseState.p5Renderer = p5.createCanvas(
         p5.windowWidth,
-        p5.windowHeight
+        p5.windowHeight,
+        document.getElementById("startCanvas")!
       );
       p5.frameRate(20);
       p5.colorMode(p5.HSB, 360, 100, 100, 1);
@@ -165,7 +164,7 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
         const canvas = simpleUniverseState.p5Renderer.elt;
 
         canvas.style.opacity = "0";
-        startButtonContainer.style.opacity = "0";
+        document.getElementById("startButtonContainer")!.style.opacity = "0";
 
         setTimeout(() => {
           p5.noLoop();
@@ -193,6 +192,20 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
       for (let i = 0; i < simpleUniverseState.planetTrails.length; i++) {
         simpleUniverseState.planetTrails[i].draw();
       }
+
+      const versionString = `v${CONSTANTS.version}`;
+      const versionStringWidth = p5.textWidth(versionString);
+
+      p5.textSize(15);
+      p5.noStroke();
+      p5.fill(255);
+      p5.text(
+        versionString,
+        p5.width / 2 - versionStringWidth - 10,
+        p5.height / 2 - 10
+      );
+
+      p5.describe("test");
     };
   };
 

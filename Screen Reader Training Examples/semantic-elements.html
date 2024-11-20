@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="author" content="Ruben Nic" />
+    <meta
+      name="description"
+      content="Semantic Example from Screen Reader Training"
+    />
+    <title>Semantic Elements Example</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        padding: 0 25%;
+        background-color: #f9f9f9;
+      }
+      a {
+        color: #808080;
+      }
+      .margins {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+      .safari-button {
+        display: block;
+        text-align: center;
+        cursor: default;
+        color: revert;
+        padding-top: 2px;
+        padding-right: 6px;
+        padding-bottom: 3px;
+        padding-left: 6px;
+        border-top-width: 2px;
+        border-right-width: 2px;
+        border-bottom-width: 2px;
+        border-left-width: 2px;
+        border-top-style: revert;
+        border-right-style: revert;
+        border-bottom-style: revert;
+        border-left-style: revert;
+        border-top-color: revert;
+        border-right-color: revert;
+        border-bottom-color: revert;
+        border-left-color: revert;
+        border-image-source: revert;
+        border-image-slice: revert;
+        border-image-width: revert;
+        border-image-outset: revert;
+        border-image-repeat: revert;
+        background-color: revert;
+        box-sizing: border-box;
+        margin-top: 0em;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 11px;
+        font-family: system-ui;
+        font-variant-caps: normal;
+        letter-spacing: normal;
+        word-spacing: normal;
+        line-height: normal;
+        text-transform: none;
+        text-indent: 0px;
+        text-shadow: none;
+        -webkit-appearance: button;
+      }
+      .button-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .fit-picture {
+        max-width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Semantic Elements Example</h1>
+      <p>
+        Important: Before doing this example please Enable Safari Keyboard
+        Accessibility. The setting can be found at:
+        <b>"Safari Preferences"</b> then <b>"Advanced"</b> then
+        <b>"Accessibility</b>
+        then <b>"Press Tab to highlight each item on a webpage"</b>.
+      </p>
+
+      <img
+        class="fit-picture"
+        src="./images/safariTabHighlight.png"
+        alt="Example of Safari Keyboard Accessibility setting enabled."
+      />
+
+      <p>
+        This example shows you the importance of using Semantic HTML elements.
+        Use a screen reader to navigate this page and also try tabbing through
+        this page.
+      </p>
+
+      <div class="button-container">
+        <button type="button" class="block margins">
+          HTML Element Button
+        </button>
+
+        <div class="safari-button margins block">
+          Div Element with no role
+        </div>
+
+        <div class="safari-button margins" role="button">
+          Div Element with role "button"
+        </div>
+
+        <div class="safari-button margins" tabindex="0" role="button">
+          Div Element with role "button" and tabindex
+        </div>
+      </div>
+
+      <a href="https://www.deque.com/blog/accessible-aria-buttons/">
+        Read more about the problems of using Divs as button.
+      </a>
+    </main>
+  </body>
+</html>

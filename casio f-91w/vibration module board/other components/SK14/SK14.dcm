@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP SK14
+D Schottky Diodes & Rectifiers Schottky, SMA, 40V, 1A
+K
+F https://www.arrow.com/en/products/sk14/diotec-semiconductor-ag?region=europe
+$ENDCMP
+#
+#End Doc Library

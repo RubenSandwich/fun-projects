@@ -1,0 +1,8 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "3000")(type "KiCad")(uri "${KIPRJMOD}/symbols/3000.kicad_sym")(options "")(descr ""))
+  (lib (name "C0805C226M9PAC7800")(type "KiCad")(uri "${KIPRJMOD}/symbols/C0805C226M9PAC7800.kicad_sym")(options "")(descr ""))
+  (lib (name "CR0805-JW-102ELF")(type "KiCad")(uri "${KIPRJMOD}/symbols/CR0805-JW-102ELF.kicad_sym")(options "")(descr ""))
+  (lib (name "IRLML2803TRPBF")(type "KiCad")(uri "${KIPRJMOD}/symbols/IRLML2803TRPBF.kicad_sym")(options "")(descr ""))
+  (lib (name "SK14")(type "KiCad")(uri "${KIPRJMOD}/symbols/SK14.kicad_sym")(options "")(descr ""))
+)

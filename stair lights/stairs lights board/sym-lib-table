@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "EBWA-04-A")(type "KiCad")(uri "${KIPRJMOD}/symbols/EBWA-04-A.kicad_sym")(options "")(descr ""))
+  (lib (name "PRT-00119")(type "KiCad")(uri "${KIPRJMOD}/symbols/PRT-00119.kicad_sym")(options "")(descr ""))
+  (lib (name "EBWA-02-A")(type "KiCad")(uri "${KIPRJMOD}/symbols/EBWA-02-A.kicad_sym")(options "")(descr ""))
+)

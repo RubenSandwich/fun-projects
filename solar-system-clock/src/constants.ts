@@ -1,7 +1,11 @@
+import * as packageJson from "../package.json";
+
 import { generateUUID, getRandomInt, minsToMs } from "./utlilites";
 
 const CONSTANTS = {
   debug: (process.env.NODE_ENV ?? "") === "development",
+  version: packageJson.version,
+
   backgroundColor: "#1a1a1a",
   gravity: 100, // Gravitational constant
   destabilise: 0.15,

@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP CR0805-JW-102ELF
+D BOURNS - CR0805-JW-102ELF - RES, THICK FILM, 1K, 5%, 0.125W, 0805
+K
+F https://www.bourns.com/pdfs/chpreztr.pdf
+$ENDCMP
+#
+#End Doc Library

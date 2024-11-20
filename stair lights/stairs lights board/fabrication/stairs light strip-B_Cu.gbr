@@ -1,0 +1,123 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,8.0.2-1*%
+%TF.CreationDate,2024-07-11T16:18:04-04:00*%
+%TF.ProjectId,stairs light strip,73746169-7273-4206-9c69-676874207374,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Copper,L2,Bot*%
+%TF.FilePolarity,Positive*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 8.0.2-1) date 2024-07-11 16:18:04*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,ComponentPad*%
+%ADD10C,1.950000*%
+%TD*%
+%TA.AperFunction,ComponentPad*%
+%ADD11R,1.950000X1.950000*%
+%TD*%
+%TA.AperFunction,ComponentPad*%
+%ADD12C,4.743000*%
+%TD*%
+%TA.AperFunction,Conductor*%
+%ADD13C,0.200000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+%TO.P,pir-motion-sensor1,1,Pin_1*%
+%TO.N,Net-(pir-motion-sensor1-Pin_1)*%
+X195133398Y-91440000D03*
+%TO.P,pir-motion-sensor1,2,Pin_2*%
+%TO.N,Net-(pir-motion-sensor1-Pin_2)*%
+X198133398Y-91440000D03*
+%TO.P,pir-motion-sensor1,3,Pin_3*%
+%TO.N,Net-(pir-motion-sensor1-Pin_3)*%
+X200883398Y-91440000D03*
+%TO.P,pir-motion-sensor1,4,Pin_4*%
+%TO.N,Net-(pir-motion-sensor1-Pin_4)*%
+X203633398Y-91440000D03*
+%TD*%
+D11*
+%TO.P,pir terminal block,1,1*%
+%TO.N,Net-(pir-motion-sensor1-Pin_3)*%
+X240803398Y-95540000D03*
+D10*
+%TO.P,pir terminal block,2,2*%
+%TO.N,Net-(pir-motion-sensor1-Pin_4)*%
+X240803398Y-99040000D03*
+%TO.P,pir terminal block,3,3*%
+%TO.N,Net-(pir-motion-sensor1-Pin_2)*%
+X240803398Y-102540000D03*
+%TO.P,pir terminal block,4,4*%
+%TO.N,Net-(pir-motion-sensor1-Pin_1)*%
+X240803398Y-106040000D03*
+%TD*%
+D12*
+%TO.P,barrel jack,1,1*%
+%TO.N,Net-(pir-motion-sensor1-Pin_3)*%
+X170952398Y-100544000D03*
+%TO.P,barrel jack,2,2*%
+%TO.N,Net-(pir-motion-sensor1-Pin_4)*%
+X164952398Y-100544000D03*
+%TO.P,barrel jack,3,3*%
+%TO.N,unconnected-(barrel-jack1-Pad3)*%
+X167952398Y-105244000D03*
+%TD*%
+D10*
+%TO.P,pwm-dimmer1,1,Pin_1*%
+%TO.N,Net-(pir-motion-sensor1-Pin_1)*%
+X215453398Y-133810000D03*
+%TO.P,pwm-dimmer1,2,Pin_2*%
+%TO.N,Net-(pir-motion-sensor1-Pin_2)*%
+X215453398Y-130810000D03*
+%TO.P,pwm-dimmer1,3,Pin_3*%
+%TO.N,Net-(pwm-dimmer1-Pin_3)*%
+X215453398Y-128310000D03*
+%TO.P,pwm-dimmer1,4,Pin_4*%
+%TO.N,Net-(pwm-dimmer1-Pin_4)*%
+X215453398Y-125810000D03*
+%TD*%
+%TO.P,light strip terminal block,1,1*%
+%TO.N,Net-(pwm-dimmer1-Pin_3)*%
+X240853398Y-121285000D03*
+%TO.P,light strip terminal block,2,2*%
+%TO.N,Net-(pwm-dimmer1-Pin_4)*%
+X240853398Y-124785000D03*
+%TD*%
+D13*
+%TO.N,Net-(pir-motion-sensor1-Pin_4)*%
+X164952398Y-93948400D02*
+X164952398Y-100544000D01*
+X203633398Y-93948400D02*
+X164952398Y-93948400D01*
+X203633398Y-99040000D02*
+X203633398Y-93948400D01*
+X240803398Y-99040000D02*
+X203633398Y-99040000D01*
+X203633398Y-91440000D02*
+X203633398Y-93948400D01*
+%TO.N,Net-(pwm-dimmer1-Pin_4)*%
+X215453398Y-125810000D02*
+X230613398Y-125810000D01*
+X240853398Y-124785000D02*
+X230764398Y-124785000D01*
+X230613398Y-125810000D02*
+X230764398Y-125659000D01*
+X240558398Y-125080000D02*
+X240853398Y-124785000D01*
+X230764398Y-125659000D02*
+X230764398Y-124785000D01*
+%TO.N,Net-(pwm-dimmer1-Pin_3)*%
+X246060398Y-121285000D02*
+X246187398Y-121158000D01*
+X240853398Y-121285000D02*
+X246060398Y-121285000D01*
+X246147398Y-128310000D02*
+X246187398Y-128270000D01*
+X215453398Y-128310000D02*
+X246147398Y-128310000D01*
+X246187398Y-121158000D02*
+X246187398Y-128270000D01*
+%TD*%
+M02*

@@ -3,7 +3,7 @@ body {
   background-color: #1a1a1a;
   padding: 0;
   margin: 0;
-  max-height: 768px; /* ipad mini 1 screen res */
+  border: 0;
 }
 
 #startScreen {
@@ -17,14 +17,13 @@ body {
 }
 
 #startCanvas {
-  position: absolute;
-  left: 0;
+  min-height: -webkit-fill-available; /* I hate you mobile iOS sooo muuuccchhh */
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
-  transition: opacity 0.75s ease-out;
-}
-
-#startCanvas > * {
   transition: opacity 0.75s ease-out;
 }
 
