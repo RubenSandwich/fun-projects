@@ -1,5 +1,7 @@
-## Noodling
+## boyce park vectors
 
-**Noun: Informal**
+[Seasons icons in the back of boyce park ski lodge](https://maps.app.goo.gl/xzQKHrSm8WABwsoK7)
 
-The action of improvising or playing casually on a musical instrument.
+![Photograph of the seasons icons](./IMG_3484.jpg)
+
+MIT License
