@@ -1,4 +1,4 @@
-23368345941001433
+23370078051724638
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -95388,3 +95388,10 @@ MOSFET (N-Channel)
 0
 3
 3
+footprints
+WCR0805LF1003FPLT
+WCR0805-ren1
+Resistor
+0
+2
+2

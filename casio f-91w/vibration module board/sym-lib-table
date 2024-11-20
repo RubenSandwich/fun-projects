@@ -5,4 +5,5 @@
   (lib (name "CR0805-JW-102ELF")(type "KiCad")(uri "${KIPRJMOD}/symbols/CR0805-JW-102ELF.kicad_sym")(options "")(descr ""))
   (lib (name "IRLML2803TRPBF")(type "KiCad")(uri "${KIPRJMOD}/symbols/IRLML2803TRPBF.kicad_sym")(options "")(descr ""))
   (lib (name "SK14")(type "KiCad")(uri "${KIPRJMOD}/symbols/SK14.kicad_sym")(options "")(descr ""))
+  (lib (name "WCR0805LF1003FPLT")(type "KiCad")(uri "${KIPRJMOD}/symbols/WCR0805LF1003FPLT.kicad_sym")(options "")(descr ""))
 )
