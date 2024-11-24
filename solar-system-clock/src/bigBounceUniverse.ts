@@ -14,6 +14,7 @@ import {
   getRandomInt,
   getRandomFloat,
   logTimes,
+  describeUniverse,
 } from "./utlilites";
 
 // @ts-ignore: ts(2307) - This is the requested lay to load asset URLs in parcel
@@ -49,6 +50,8 @@ type UniverseState = {
   nebulaAddInterval: number;
   lastNebulaAddTime: number;
 
+  prevDescription: string;
+
   endSound: HTMLAudioElement | null;
 };
 
@@ -83,6 +86,7 @@ export const bigBounceUniverse = (p5: P5) => {
     nebulaAddInterval: CONSTANTS.getNebulaAddInterval(),
     lastNebulaAddTime: 0,
 
+    prevDescription: "",
     endSound: null,
   };
 
@@ -347,6 +351,17 @@ export const bigBounceUniverse = (p5: P5) => {
       p5.height / 2 - (!CONSTANTS.debug ? 10 : 20)
     );
 
-    p5.describe("test");
+    const description = describeUniverse({
+      sun: universeState.sun,
+      numPlanets: universeState.numPlanets,
+      numStars: universeState.numStars,
+      numNebulas: universeState.numNebulas,
+      universeAge,
+    });
+
+    if (description !== universeState.prevDescription) {
+      p5.describe(description);
+      universeState.prevDescription = description;
+    }
   };
 };

@@ -6,7 +6,7 @@ import { Moon } from "./celestial_bodies/moon";
 import { PlanetTrail } from "./celestial_bodies/planetTrail";
 import { Star } from "./celestial_bodies/star";
 
-import { getRandomInt, getRandomFloat } from "./utlilites";
+import { getRandomInt, getRandomFloat, describeUniverse } from "./utlilites";
 import CONSTANTS from "./constants";
 
 type SimpleUniverseState = {
@@ -23,6 +23,8 @@ type SimpleUniverseState = {
 
   stars: Star[];
   numStars: number;
+
+  prevDescription: string;
 };
 
 const simpleUniverseCreator = (finishedFading: () => void) => {
@@ -43,6 +45,8 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
 
     stars: [],
     numStars: getRandomInt(75, 100),
+
+    prevDescription: "",
   };
 
   const beginFade = () => {
@@ -205,7 +209,16 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
         p5.height / 2 - 10
       );
 
-      p5.describe("test");
+      const description = describeUniverse({
+        sun: simpleUniverseState.sun,
+        numPlanets: simpleUniverseState.numPlanets,
+        numStars: simpleUniverseState.numStars,
+      });
+
+      if (description !== simpleUniverseState.prevDescription) {
+        p5.describe(description);
+        simpleUniverseState.prevDescription = description;
+      }
     };
   };
 

@@ -84,7 +84,9 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// This catches script loading errors, such as Reference Errors
+// This catches script loading errors, such as Reference Errors,
+// because debugging Safari on iOS 9.3.5 doesn't work anymore due
+// apple limitations
 window.addEventListener("error", function (e: ErrorEvent) {
   console.log(e);
   displayError(errorDiv, parseErrorMessage(e));

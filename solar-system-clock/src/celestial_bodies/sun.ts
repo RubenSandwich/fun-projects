@@ -213,10 +213,14 @@ class Sun {
       }
     }
 
-    this.drawSun();
+    // this.drawSun();
 
-    if (this.particles.length === 0 && this.bigBangCallback) {
-      this.bigBangCallback();
+    if (this.particles.length === 0) {
+      if (this.bigBangCallback) {
+        this.bigBangCallback();
+      }
+      
+      this.stage = SunStage.SUN;
     }
   }
 

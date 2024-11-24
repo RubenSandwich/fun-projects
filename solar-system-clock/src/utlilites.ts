@@ -1,4 +1,4 @@
-import P5 from "p5";
+import { Sun, SunStage } from "./celestial_bodies/sun";
 
 export function minsToMs(mins: number): number {
   return mins * 60 * 1000;
@@ -75,6 +75,55 @@ export function radialGradient(
   ctx.fillStyle = gradient;
 }
 
+export function describeUniverse({
+  sun,
+  numPlanets,
+  numStars,
+  numNebulas,
+  universeAge,
+}: {
+  sun: Sun;
+  numPlanets: number;
+  numStars: number;
+  numNebulas?: number;
+  universeAge?: string;
+}): string {
+  let description = "";
+
+  console.log(`sun stage ${sun.stage}`);
+
+  switch (sun.stage) {
+    case SunStage.SUN:
+      description += `A universe with a bright sun in the middle${
+        numPlanets > 0 ? ` and ${numPlanets} planets orbiting it.` : "."
+      }`;
+      break;
+    case SunStage.BLACK_HOLE:
+      description += "A universe with a black hole at its center.";
+      break;
+    case SunStage.BIG_BANG:
+      description += "A universe that just big banged.";
+      return description;
+  }
+
+  if (universeAge && numNebulas) {
+    description += ` The universe is ${universeAge} and `;
+
+    if (numStars > 100 && numNebulas > 3) {
+      description += "has plenty of stars and nebulas.";
+    } else if (numStars > 50 || numNebulas > 2) {
+      description += "has a few stars and nebulas.";
+    } else if (numStars > 20 || numNebulas > 1) {
+      description += "is almost at heat death.";
+    }
+  } else {
+    // This will only happen in the simple universe
+    description += " The universe is full of stars.";
+  }
+
+  return description;
+}
+
 export function generateUUID(): string {
   let d = new Date().getTime();
   let d2 =
@@ -122,7 +171,5 @@ export function logTimes(universeState): void {
       },
       body: JSON.stringify(jsonData),
     });
-
-    // p5.httpDo(sf(url) + universeState.uuid + ".json", "PUT", "json", jsonData);
   } catch (e) {}
 }
