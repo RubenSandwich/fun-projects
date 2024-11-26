@@ -16,25 +16,21 @@ const CONSTANTS = {
   endOfTheUniverseYear: 98_000_000_000, // 2,016 ticks, or 7 days
 
   getPlanetAddInterval: (): number => {
-    return !CONSTANTS.debug
+    return CONSTANTS.debug
       ? getRandomInt(minsToMs(0.01), minsToMs(0.1))
       : getRandomInt(minsToMs(0.01), minsToMs(0.1));
   },
 
-  getStarAddInterval: (): number => {
-    return !CONSTANTS.debug
-      ? getRandomInt(minsToMs(20), minsToMs(25))
+  getStarChangeInterval: (): number => {
+    return CONSTANTS.debug
+      ? getRandomInt(minsToMs(0.01), minsToMs(0.1))
       : getRandomInt(minsToMs(20), minsToMs(25));
   },
 
-  getNebulaAddInterval: (): number => {
-    return !CONSTANTS.debug
-      ? getRandomInt(minsToMs(20), minsToMs(25))
+  getNebulaChangeInterval: (): number => {
+    return CONSTANTS.debug
+      ? getRandomInt(minsToMs(0.01), minsToMs(0.1))
       : getRandomInt(minsToMs(20), minsToMs(25));
-  },
-
-  getStarFadeInterval: (): number => {
-    return !CONSTANTS.debug ? minsToMs(0.7) : minsToMs(0.7);
   },
 
   universePhasesByTick: {

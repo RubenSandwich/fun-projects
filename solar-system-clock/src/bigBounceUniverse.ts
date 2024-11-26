@@ -41,14 +41,14 @@ type UniverseState = {
   stars: Star[];
   numStars: number;
   starsToAdd: Star[];
-  starAddInterval: number;
-  lastStarAddTime: number;
+  starChangeInterval: number;
+  lastStarChangeTime: number;
 
   nebulas: Nebula[];
   numNebulas: number;
-  nebulasToAdd: Nebula[];
-  nebulaAddInterval: number;
-  lastNebulaAddTime: number;
+  nebulasFullyChanged: number;
+  nebulaChangeInterval: number;
+  lastNebulaChangeTime: number;
 
   prevDescription: string;
 
@@ -77,14 +77,14 @@ export const bigBounceUniverse = (p5: P5) => {
     stars: [],
     numStars: !CONSTANTS.debug ? getRandomInt(150, 220) : 100,
     starsToAdd: [],
-    starAddInterval: CONSTANTS.getStarAddInterval(),
-    lastStarAddTime: 0,
+    starChangeInterval: CONSTANTS.getStarChangeInterval(),
+    lastStarChangeTime: 0,
 
     nebulas: [],
     numNebulas: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
-    nebulasToAdd: [],
-    nebulaAddInterval: CONSTANTS.getNebulaAddInterval(),
-    lastNebulaAddTime: 0,
+    nebulasFullyChanged: 0,
+    nebulaChangeInterval: CONSTANTS.getNebulaChangeInterval(),
+    lastNebulaChangeTime: 0,
 
     prevDescription: "",
     endSound: null,
@@ -186,7 +186,7 @@ export const bigBounceUniverse = (p5: P5) => {
     // Create stars
     for (let i = 0; i < universeState.numStars; i++) {
       const star = new Star(p5);
-      universeState.stars.push(star);
+      universeState.starsToAdd.push(star);
     }
 
     // Create nebulas
@@ -201,23 +201,13 @@ export const bigBounceUniverse = (p5: P5) => {
   };
 
   p5.draw = () => {
-    if (p5.frameCount > 300 && !universeState.logged) {
-      universeState.logged = true;
-      // logTimes(universeState);
-
-      // universeState.endSound.play();
-
-      // universeState.endSound.addEventListener("canplaythrough", () => {
-      //   universeState.endSound.play();
-      // });
-
-      // if (universeState.endSound?.paused) {
-      //   universeState.endSound.play();
-      // }
-    }
+    // universeState.endSound.addEventListener("canplaythrough", () => {
+    //   universeState.endSound.play();
+    // });
 
     const year = universeState.tickNum * CONSTANTS.tickPeriod;
 
+    // !! General Drawing !!
     p5.background(CONSTANTS.backgroundColor);
 
     p5.translate(p5.width / 2, p5.height / 2);
@@ -234,31 +224,6 @@ export const bigBounceUniverse = (p5: P5) => {
     }
 
     universeState.sun.draw();
-
-    if (
-      p5.millis() - universeState.lastPlanetAddTime >
-        universeState.planetAddInterval &&
-      universeState.celestialBodiesToAdd.length > 0
-    ) {
-      const newBody = universeState.celestialBodiesToAdd.shift();
-
-      if (newBody) {
-        universeState.planets.push(newBody);
-
-        if (newBody.planetTrail) {
-          universeState.planetTrails.push(newBody.planetTrail);
-        }
-
-        universeState.lastPlanetAddTime = p5.millis();
-      }
-    }
-
-    for (let i = 0; i < universeState.planetTrails.length; i++) {
-      const shouldContinueDrawing = universeState.planetTrails[i].draw();
-      if (!shouldContinueDrawing) {
-        universeState.planetTrails.splice(i, 1);
-      }
-    }
 
     for (let i = 0; i < universeState.planets.length; i++) {
       universeState.planets[i].move();
@@ -278,61 +243,176 @@ export const bigBounceUniverse = (p5: P5) => {
       }
     }
 
-    // If all planets are sucked in begin the black hole
-    if (
-      universeState.celestialBodiesToAdd.length === 0 &&
-      universeState.planets.length === 0 &&
-      universeState.sun.stage === SunStage.SUN
-    ) {
-      universeState.sun.beginBlackHole();
-
-      // if (!universeState.endSound.isPlaying()) {
-      //   universeState.endSound.play();
-      // }
-    }
-
-    // if (universeState.sun.stage === SunStage.BLACK_HOLE) {
-    if (p5.frameCount % 100 === 0) {
-      for (let i = 0; i < universeState.nebulas.length; i++) {
-        // 30% chance for each nebula to change
-        if (getRandomFloat(1) < 0.3) {
-          const newAlpha =
-            universeState.nebulas[i].currentAlpha - getRandomInt(10, 15);
-
-          universeState.nebulas[i].changeAlpha(newAlpha);
-        }
+    for (let i = 0; i < universeState.planetTrails.length; i++) {
+      const shouldContinueDrawing = universeState.planetTrails[i].draw();
+      if (!shouldContinueDrawing) {
+        universeState.planetTrails.splice(i, 1);
       }
     }
-    // }
 
-    if (p5.frameCount % 1000 === 0) {
-      if (universeState.stars.length > 0) {
-        const randomIndex = Math.floor(
-          getRandomInt(universeState.stars.length)
-        );
+    // !! Special stage drawings !!
+    const sketchEpoch = p5.millis();
+    switch (universeState.sun.stage) {
+      // begin fading in nebulas and stars
+      case SunStage.NEBULA:
+        if (
+          sketchEpoch - universeState.lastStarChangeTime >
+            universeState.starChangeInterval &&
+          universeState.starsToAdd.length > 0
+        ) {
+          const newStar = universeState.starsToAdd.shift();
 
-        const star = universeState.stars[randomIndex];
+          if (newStar) {
+            universeState.stars.push(newStar);
+          }
 
-        if (star && star.stage !== StarStage.Exploding) {
-          universeState.stars[randomIndex].beginExploading(function () {
-            universeState.stars.splice(randomIndex, 1);
+          universeState.lastStarChangeTime = p5.millis();
+        }
+
+        if (
+          sketchEpoch - universeState.lastNebulaChangeTime >
+            universeState.nebulaChangeInterval &&
+          universeState.nebulasFullyChanged !== universeState.numNebulas
+        ) {
+          const getRandomNebula = () => {
+            const randomIndex = Math.floor(
+              getRandomInt(universeState.nebulas.length - 1)
+            );
+
+            return universeState.nebulas[randomIndex];
+          };
+
+          // get a random nebula that isn't at full alpha
+          let nebula;
+          while (true) {
+            nebula = getRandomNebula();
+
+            if (!nebula.atFullAlpha()) {
+              break;
+            }
+          }
+
+          const setAlpha = nebula.currentAlpha + getRandomInt(3, 5);
+          nebula.changeAlpha(setAlpha);
+
+          if (nebula.atFullAlpha()) {
+            universeState.nebulasFullyChanged = +1;
+          }
+
+          universeState.lastNebulaChangeTime = p5.millis();
+        }
+
+        // actually wait till all nebulas have reached full brightness
+        if (universeState.nebulasFullyChanged === universeState.numNebulas) {
+          universeState.sun.stage = SunStage.SUN;
+        }
+        break;
+
+      case SunStage.SUN:
+        if (
+          sketchEpoch - universeState.lastPlanetAddTime >
+            universeState.planetAddInterval &&
+          universeState.celestialBodiesToAdd.length > 0
+        ) {
+          const newBody = universeState.celestialBodiesToAdd.shift();
+
+          if (newBody) {
+            universeState.planets.push(newBody);
+
+            if (newBody.planetTrail) {
+              universeState.planetTrails.push(newBody.planetTrail);
+            }
+
+            universeState.lastPlanetAddTime = p5.millis();
+          }
+        }
+
+        if (
+          sketchEpoch - universeState.lastStarChangeTime >
+            universeState.starChangeInterval &&
+          universeState.starsToAdd.length > 0
+        ) {
+          const newStar = universeState.starsToAdd.shift();
+
+          if (newStar) {
+            universeState.stars.push(newStar);
+          }
+
+          universeState.lastStarChangeTime = p5.millis();
+        }
+
+        // If all planets are sucked in begin the black hole
+        if (
+          universeState.celestialBodiesToAdd.length === 0 &&
+          universeState.planets.length === 0
+        ) {
+          universeState.sun.beginBlackHole();
+
+          // if (!universeState.endSound.isPlaying()) {
+          //   universeState.endSound.play();
+          // }
+        }
+        break;
+
+      // During the black hold stage begin fading out
+      case SunStage.BLACK_HOLE:
+        if (
+          universeState.nebulas.length > 0 &&
+          sketchEpoch - universeState.lastNebulaChangeTime >
+            universeState.nebulaChangeInterval
+        ) {
+          const randomIndex = Math.floor(
+            getRandomInt(universeState.nebulas.length - 1)
+          );
+
+          const nebula = universeState.nebulas[randomIndex];
+
+          if (nebula.currentAlpha === 0) {
+            universeState.nebulas.splice(randomIndex, 1);
+          } else {
+            const setAlpha = nebula.currentAlpha - getRandomInt(3, 5);
+            nebula.changeAlpha(setAlpha);
+          }
+
+          universeState.lastNebulaChangeTime = p5.millis();
+        }
+
+        if (
+          universeState.stars.length > 0 &&
+          sketchEpoch - universeState.lastStarChangeTime >
+            universeState.starChangeInterval
+        ) {
+          const randomIndex = Math.floor(
+            getRandomInt(universeState.stars.length)
+          );
+
+          const star = universeState.stars[randomIndex];
+
+          if (star && star.stage !== StarStage.Exploding) {
+            universeState.stars[randomIndex].beginExploading(function () {
+              universeState.stars.splice(randomIndex, 1);
+            });
+          }
+
+          universeState.lastStarChangeTime = p5.millis();
+        }
+
+        if (
+          universeState.stars.length === 0 &&
+          universeState.nebulas.length === 0
+        ) {
+          universeState.sun.beginBigBang(function () {
+            for (let i = 0; i < universeState.nebulas.length; i++) {
+              universeState.nebulas[i].destroy();
+            }
+
+            // restart
+            // TODO: refactor out a better setup function
+            p5.setup();
           });
         }
-      }
-    }
 
-    if (
-      universeState.stars.length === 0 &&
-      universeState.sun.stage === SunStage.BLACK_HOLE
-    ) {
-      universeState.sun.beginBigBang(function () {
-        for (let i = 0; i < universeState.nebulas.length; i++) {
-          universeState.nebulas[i].destroy();
-        }
-
-        // restart
-        p5.setup();
-      });
+        break;
     }
 
     const universeAge = prettyNumString(year);

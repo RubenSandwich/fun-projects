@@ -1,5 +1,5 @@
 import P5 from "p5";
-import { getRandomInt, radialGradient } from "../utlilites"; // Adjust the import path as necessary
+import { getRandomFloat, getRandomInt, radialGradient } from "../utlilites"; // Adjust the import path as necessary
 
 class Nebula {
   p5: P5;
@@ -10,16 +10,25 @@ class Nebula {
   nebulaRender: P5.Graphics | null;
   frameOffset: number;
   currentAlpha: number;
+  maxAlpha: number;
 
   constructor(p5: P5) {
     this.p5 = p5;
     this.frameOffset = getRandomInt(100);
-    this.currentAlpha = getRandomInt(50, 85);
+    this.currentAlpha = 0;
+    this.maxAlpha = getRandomInt(50, 85);
 
+    // prevent nebulas from spawning at [-100, 100] in both x and y,
+    // because we don't want anything close to the sun
     this.pos = this.p5.createVector(
-      getRandomInt(-this.p5.width / 2, this.p5.width / 2),
-      getRandomInt(-this.p5.height / 2, this.p5.height / 2)
+      getRandomFloat(1) < 0.5
+        ? getRandomInt(-this.p5.width / 2, -40)
+        : getRandomInt(40, this.p5.width / 2),
+      getRandomFloat(1) < 0.5
+        ? getRandomInt(-this.p5.height / 2, -40)
+        : getRandomInt(40, this.p5.height / 2)
     );
+
     this.initialPos = this.pos.copy();
     this.size = getRandomInt(100, 250);
     this.noiseOffset = getRandomInt(1000);
@@ -87,7 +96,7 @@ class Nebula {
     // It's a long story, but between our blending and radial gradiant
     // this is the best way to be confident on our pixel's alpha value
     // to avoid a harsh transition on our inital alpha change
-    this.changeAlpha(this.currentAlpha);
+    // this.changeAlpha(this.currentAlpha);
   }
 
   draw(): void {
@@ -102,8 +111,12 @@ class Nebula {
     );
   }
 
-  changeAlpha(alpha: number): void {
-    if (this.currentAlpha === 0 || !this.nebulaRender) {
+  atFullAlpha(): boolean {
+    return this.currentAlpha === this.maxAlpha;
+  }
+
+  changeAlpha(alpha: number) {
+    if (!this.nebulaRender) {
       return;
     }
 
@@ -116,7 +129,8 @@ class Nebula {
     );
 
     const imageData = ctxImage.data;
-    const newAlpha = Math.max(alpha, 0);
+    const newAlpha = Math.min(this.maxAlpha, Math.max(alpha, 0));
+
     // set every fourth alpha value
     for (let i = 3; i < imageData.length; i += 4) {
       imageData[i] = newAlpha;

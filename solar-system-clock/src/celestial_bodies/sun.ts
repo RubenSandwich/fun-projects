@@ -3,8 +3,9 @@ import CONSTANTS from "../constants";
 import { getRandomInt } from "../utlilites";
 
 enum SunStage {
-  SUN = "sun",
   BIG_BANG = "big bang",
+  NEBULA = "nebula",
+  SUN = "sun",
   BLACK_HOLE = "black hole",
 }
 
@@ -219,8 +220,8 @@ class Sun {
       if (this.bigBangCallback) {
         this.bigBangCallback();
       }
-      
-      this.stage = SunStage.SUN;
+
+      this.stage = SunStage.NEBULA;
     }
   }
 

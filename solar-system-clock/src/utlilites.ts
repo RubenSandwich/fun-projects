@@ -90,9 +90,15 @@ export function describeUniverse({
 }): string {
   let description = "";
 
-  console.log(`sun stage ${sun.stage}`);
-
   switch (sun.stage) {
+    case SunStage.NEBULA:
+      description += `An universe with a small nebula in the middle${
+        (numNebulas || 0) > 0
+          ? ` and slowly stars and nebulas are fading in.`
+          : "."
+      }`;
+      return description;
+
     case SunStage.SUN:
       description += `A universe with a bright sun in the middle${
         numPlanets > 0 ? ` and ${numPlanets} planets orbiting it.` : "."
