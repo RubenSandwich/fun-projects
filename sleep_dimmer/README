@@ -1,0 +1,9 @@
+
+
+
+mpremote connect list
+
+> /dev/cu.usbmodem101 e661a4d4176a492c 2e8a:0005 MicroPython Board in FS mode
+
+mpremote connect /dev/tty.usbmodem101 fs cp main.py :
+cp main.py :
