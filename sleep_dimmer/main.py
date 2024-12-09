@@ -1,7 +1,7 @@
 
 from machine import ADC, Pin, Timer
 from micropython import alloc_emergency_exception_buf
-from math import acos, pi
+from math import acos, pi, sin
 
 import time
 import neopixel
@@ -44,6 +44,42 @@ class Dimmer:
             trigger=Pin.IRQ_RISING,
             handler=self._zeroDetectIsr
         )
+
+        #  Used in breathing mode
+        sine_range_min = 0.4
+        sine_range_max = 1
+        self.TOTAL_PERIOD = 2 # Period in seconds
+        self.AMPLITUDE = (sine_range_max - sine_range_min) / 2
+        self.OFFSET = (sine_range_max + sine_range_min) / 2
+        self.BREATHE_UPDATES_PER_SEC = 25
+        self.breathe_timer = Timer()
+
+        #  Used in sleeping mode
+        self.sleep_timer = Timer()
+
+
+    def startBreathing(self):
+        self.breathe_timer.init(
+            period=(1000 // self.BREATHE_UPDATES_PER_SEC),
+            mode=Timer.PERIODIC,
+            callback=self.generate_sine_wave
+        )
+
+    def stopBreathing(self):
+        self.breathe_timer.deinit()
+
+    def generate_sine_wave(self, timer):
+        current_time = time.ticks_ms() / 1000
+        sine_value = self.OFFSET + self.AMPLITUDE * \
+            sin(pi * current_time / self.TOTAL_PERIOD)
+
+        self.value = sine_value
+
+    def startSleep(self):
+        pass
+
+    def stopSleep(self):
+        pass
 
     def _zeroDetectIsr(self, pin):
         if 0 == self._freq:
@@ -94,7 +130,8 @@ class Dimmer:
 
     @value.setter
     def value(self, p):
-        if p < 0.2:  # below 20% the light flickers
+        # below 20% the light flickers, so we also turn off the interrupts
+        if p < 0.2:
             p = 0.2
 
             if self.interrupt_active:
@@ -179,7 +216,6 @@ class ButtonWithRGB:
         self.debounce_ms = 750
         self._next_debounce = time.ticks_ms()
 
-        self._light_state = LightStates.Off
         self.button = Pin(button_pin, Pin.IN, Pin.PULL_UP)
         self.button.irq(
             trigger=Pin.IRQ_FALLING,
@@ -194,13 +230,12 @@ class ButtonWithRGB:
             LightStates.Sleep: (173, 216, 230), # light blue
         }
 
-    @property
-    def light_state(self):
-        return self._light_state
-
     def set_brightness(self, new_brightness):
         self.brightness = new_brightness
         self.color_max = int((new_brightness / 100) * self.pixel_max)
+
+    def set_color_by_light_state(self, new_light_state):
+        self.set_color(self.light_state_color[new_light_state])
 
     def set_color(self, rgb):
         r, g, b = rgb
@@ -221,11 +256,7 @@ class ButtonWithRGB:
     def __debounce_handler(self, pin):
         if time.ticks_ms() > self._next_debounce:
             self._next_debounce = time.ticks_ms() + self.debounce_ms
-
-            self._light_state = LightStates.next_state(self._light_state)
-            self.set_color(self.light_state_color[self.light_state])
-
-            self.pressed_callback(pin, self._light_state)
+            self.pressed_callback(pin)
 
     def __map_color_brightness(self, value):
         src_min, src_max = (0, self.pixel_max)
@@ -236,43 +267,61 @@ class ButtonWithRGB:
         return int(mapped_value)
 
 
-pin = Pin("LED", Pin.OUT)
+# BEGIN - Input callbacks
+def button_pressed(pin):
+    global light_state, dimmer, potentiometer
+
+    prev_light_state = light_state
+    light_state = LightStates.next_state(light_state)
+    button_with_rgb.set_color_by_light_state(light_state)
+
+    if prev_light_state == LightStates.Breath:
+        dimmer.stopBreathing()
+    elif prev_light_state == LightStates.Sleep:
+        dimmer.stopSleep()
 
 
-def button_pressed(pin, light_state):
-    dimmer.value = value
-    print("Button pressed!")
-
-
-button_with_rgb = ButtonWithRGB(Pin(0), Pin(1), button_pressed)
-button_with_rgb.set_brightness(1)
-button_with_rgb.set_color((255, 0, 0))
+    if light_state == LightStates.Breath:
+        dimmer.startBreathing()
+    elif light_state == LightStates.Potentiometer:
+        dimmer.value = potentiometer.percentage()
+    elif light_state == LightStates.Sleep:
+        dimmer.startSleep()
+    elif light_state == LightStates.Off:
+        dimmer.value = 0
 
 
 def potentiometer_changed(value):
-    print("Potentiometer Percentage Turned: {:.2f}%".format(value))
+    global light_state, dimmer
+
+    if light_state != LightStates.Potentiometer:
+        return
 
     dimmer.value = value
 
-    if value == 1.0:
-        pin.on()
-    else:
-        pin.off()
+# END - Input callbacks
+
+
+light_state = LightStates.Off
+pin = Pin("LED", Pin.OUT)
+pin.on()
+
+button_with_rgb = ButtonWithRGB(Pin(0), Pin(1), button_pressed)
+button_with_rgb.set_brightness(10)
+button_with_rgb.set_color((0, 0, 0))
 
 potentiometer = Potentiometer(Pin(26), 1000, potentiometer_changed)
 
 dimmer = Dimmer(4, 2)
-dimmer.value = potentiometer.percentage()
+dimmer.value = 0
 
 
 async def main():
     while True:
         await asyncio.sleep(1)
 
-
 try:
     asyncio.run(main())
 except KeyboardInterrupt:
     pin.off()
     button_with_rgb.off()
-    print("Finished.")
