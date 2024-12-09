@@ -12,7 +12,6 @@ class Dimmer:
         self._cnt = 0
         self._freq = 0
         self._timer = Timer()
-        self._mode = Timer.ONE_SHOT
         self._pwm = Pin(pwm_pin, Pin.OUT)
         self._fpulse = fpulse
         self._ppulse = 100.0 / fpulse + 0.11
@@ -36,32 +35,33 @@ class Dimmer:
         #  Used in sleeping mode
         self.sleep_update_timer = Timer()
         self.sleep_finished_timer = Timer()
+        self.sleep_finished_callback = None
         self.SLEEP_UPDATES_PER_MIN = 5
         self.SLEEP_FADE_OUT_MINS = 5
 
         self.sleep_index = 0
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
-        self.step_size = 1.0 / (num_steps - 1)
-        # TODO: step_size should have an offset, as any value below 0.2 does nothing
+        self.step_size = 0.8 / (num_steps - 1) # offset because below 0.2 the dimmer zeros out
 
     def startBreathing(self):
         self.breathe_timer.init(
             period=(1000 // self.BREATHE_UPDATES_PER_SEC),
             mode=Timer.PERIODIC,
-            callback=self.generate_sine_wave
+            callback=self.set_dimmer_to_sine_wave_value
         )
 
     def stopBreathing(self):
         self.breathe_timer.deinit()
 
-    def generate_sine_wave(self, timer):
+    def set_dimmer_to_sine_wave_value(self, timer):
         current_time = time.ticks_ms() / 1000
         sine_value = self.OFFSET + self.AMPLITUDE * \
             sin(pi * current_time / self.TOTAL_PERIOD)
 
         self.value = sine_value
 
-    def startSleep(self):
+    def startSleep(self, callback):
+        self.sleep_finished_callback = callback
         self.sleep_index = 0
         self.sleep_update_timer.init(
             period=(1000 * 60 // self.SLEEP_UPDATES_PER_MIN),
@@ -76,15 +76,19 @@ class Dimmer:
         )
 
     def stopSleepTimer(self, timer):
+        if self.sleep_finished_callback:
+            self.sleep_finished_callback()
+
         self.stopSleep()
 
     def stopSleep(self):
         self.sleep_index = 0
         self.sleep_update_timer.deinit()
         self.sleep_finished_timer.deinit()
+        self.sleep_finished_callback = None
 
     def slowly_fade(self, timer):
-        new_value = 1 - (self.step_size * self.sleep_index)
+        new_value = 1 - (self.step_size * self.sleep_index) #count down from 1.0
         self.value = new_value
 
         self.sleep_index = self.sleep_index + 1
@@ -103,7 +107,7 @@ class Dimmer:
         if 1 == self._cnt:
             self._timer.init(
                 freq=self._freq,
-                mode=self._mode,
+                mode=Timer.ONE_SHOT,
                 callback=self._dimmDelayIsr
             )
 
@@ -112,7 +116,7 @@ class Dimmer:
             self._pwm.on()
             self._timer.init(
                 freq=self._fpulse,
-                mode=self._mode,
+                mode=Timer.ONE_SHOT,
                 callback=self._dimmDelayIsr
             )
 
@@ -138,7 +142,7 @@ class Dimmer:
 
     @value.setter
     def value(self, p):
-        # below 20% the light flickers, so we also turn off the interrupts
+        # below 20% the light flickers, so we also turn off the interrupt
         if p < 0.2:
             p = 0.2
 
@@ -169,10 +173,10 @@ class Dimmer:
 
 class Potentiometer:
     def __init__(self, pin, threshold=1000, callback=None):
-        self.adc = ADC(pin)
+        self._potentiometer = ADC(pin)
         self.threshold = threshold
         self.callback = callback
-        self.last_value = self.adc.read_u16()
+        self.last_value = self._potentiometer.read_u16()
         self.timer = Timer()
         self.start_monitoring()
 
@@ -184,7 +188,7 @@ class Potentiometer:
         )
 
     def check_value(self, timer):
-        current_value = self.adc.read_u16()
+        current_value = self._potentiometer.read_u16()
 
         if abs(current_value - self.last_value) > self.threshold:
             if self.callback:
@@ -193,7 +197,7 @@ class Potentiometer:
             self.last_value = current_value
 
     def percentage(self):
-        return round(self.adc.read_u16() / 65535, 2)
+        return round(self._potentiometer.read_u16() / 65535, 2)
 
 
 class LightStates:
@@ -241,6 +245,7 @@ class ButtonWithRGB:
     def set_brightness(self, new_brightness):
         self.brightness = new_brightness
         self.color_max = int((new_brightness / 100) * self.pixel_max)
+        self.set_color(self.np[0]) # type: ignore
 
     def set_color_by_light_state(self, new_light_state):
         self.set_color(self.light_state_color[new_light_state])
@@ -276,6 +281,12 @@ class ButtonWithRGB:
 
 
 # BEGIN - Input callbacks
+def finished_sleeping():
+    global light_state
+
+    light_state = LightStates.Off
+    button_with_rgb.set_color_by_light_state(light_state)
+
 def button_pressed(pin):
     global light_state, dimmer, potentiometer
 
@@ -294,7 +305,7 @@ def button_pressed(pin):
     elif light_state == LightStates.Potentiometer:
         dimmer.value = potentiometer.percentage()
     elif light_state == LightStates.Sleep:
-        dimmer.startSleep()
+        dimmer.startSleep(finished_sleeping)
     elif light_state == LightStates.Off:
         dimmer.value = 0
 
@@ -311,19 +322,19 @@ def potentiometer_changed(value):
 
 
 light_state = LightStates.Off
-pin = Pin("LED", Pin.OUT)
+pin = Pin("LED", Pin.OUT) # pi pico board LED
 pin.on()
 
 button_with_rgb = ButtonWithRGB(Pin(0), Pin(1), button_pressed)
 button_with_rgb.set_brightness(10)
-button_with_rgb.set_color((0, 0, 0))
+button_with_rgb.set_color_by_light_state(light_state)
 
 potentiometer = Potentiometer(Pin(26), 1000, potentiometer_changed)
 
 dimmer = Dimmer(4, 2)
 dimmer.value = 0
 
-
+# run loop
 try:
     while True:
         time.sleep(0.1)
