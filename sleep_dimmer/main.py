@@ -43,14 +43,14 @@ class Dimmer:
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
         self.step_size = 0.8 / (num_steps - 1) # offset because below 0.2 the dimmer zeros out
 
-    def startBreathing(self):
+    def start_breathing(self):
         self.breathe_timer.init(
             period=(1000 // self.BREATHE_UPDATES_PER_SEC),
             mode=Timer.PERIODIC,
             callback=self.set_dimmer_to_sine_wave_value
         )
 
-    def stopBreathing(self):
+    def stop_breathing(self):
         self.breathe_timer.deinit()
 
     def set_dimmer_to_sine_wave_value(self, timer):
@@ -60,7 +60,7 @@ class Dimmer:
 
         self.value = sine_value
 
-    def startSleep(self, callback):
+    def start_sleeping(self, callback):
         self.sleep_finished_callback = callback
         self.sleep_index = 0
         self.sleep_update_timer.init(
@@ -72,16 +72,16 @@ class Dimmer:
         self.sleep_finished_timer.init(
             period=(1000 * 60 * self.SLEEP_FADE_OUT_MINS),
             mode=Timer.ONE_SHOT,
-            callback=self.stopSleepTimer
+            callback=self.stop_sleeping_timer
         )
 
-    def stopSleepTimer(self, timer):
+    def stop_sleeping_timer(self, timer):
         if self.sleep_finished_callback:
             self.sleep_finished_callback()
 
-        self.stopSleep()
+        self.stop_sleeping()
 
-    def stopSleep(self):
+    def stop_sleeping(self):
         self.sleep_index = 0
         self.sleep_update_timer.deinit()
         self.sleep_finished_timer.deinit()
@@ -237,9 +237,9 @@ class ButtonWithRGB:
 
         self.light_state_color = {
             LightStates.Off: (0, 0, 0), # off
-            LightStates.Potentiometer: (144, 238, 144),  # light green
-            LightStates.Breath: (255, 255, 224), # light yellow
-            LightStates.Sleep: (173, 216, 230), # light blue
+            LightStates.Potentiometer: (0, 255, 0),  # green
+            LightStates.Breath: (255, 165, 0), # orange
+            LightStates.Sleep: (0, 0, 255), # blue
         }
 
     def set_brightness(self, new_brightness):
@@ -295,17 +295,17 @@ def button_pressed(pin):
     button_with_rgb.set_color_by_light_state(light_state)
 
     if prev_light_state == LightStates.Breath:
-        dimmer.stopBreathing()
+        dimmer.stop_breathing()
     elif prev_light_state == LightStates.Sleep:
-        dimmer.stopSleep()
+        dimmer.stop_sleeping()
 
 
     if light_state == LightStates.Breath:
-        dimmer.startBreathing()
+        dimmer.start_breathing()
     elif light_state == LightStates.Potentiometer:
         dimmer.value = potentiometer.percentage()
     elif light_state == LightStates.Sleep:
-        dimmer.startSleep(finished_sleeping)
+        dimmer.start_sleeping(finished_sleeping)
     elif light_state == LightStates.Off:
         dimmer.value = 0
 
