@@ -24,12 +24,12 @@ class Dimmer:
         self.DIMMER_OFFSET = 0.2
 
         #  Used in breathing mode
-        sine_range_min = 0.4
-        sine_range_max = 1
-        self.TOTAL_PERIOD = 2 # Period in seconds
+        sine_range_min = 0.35
+        sine_range_max = 0.80
+        self.TOTAL_PERIOD = 5 # Period in seconds
         self.AMPLITUDE = (sine_range_max - sine_range_min) / 2
         self.OFFSET = (sine_range_max + sine_range_min) / 2
-        self.BREATHE_UPDATES_PER_SEC = 25
+        self.BREATHE_UPDATES_PER_SEC = 10
         self.breathe_timer = Timer()
 
         #  Used in sleeping mode
@@ -44,6 +44,7 @@ class Dimmer:
         self.step_size = (1 - self.DIMMER_OFFSET) / (num_steps - 1) # offset because below DIMMER_OFFSET the dimmer doesn't work
 
     def start_breathing(self):
+        self.value = self.DIMMER_OFFSET
         self.breathe_timer.init(
             period=(1000 // self.BREATHE_UPDATES_PER_SEC),
             mode=Timer.PERIODIC,
@@ -61,6 +62,7 @@ class Dimmer:
         self.value = sine_value
 
     def start_sleeping(self, callback):
+        self.value = 1
         self.sleep_finished_callback = callback
         self.sleep_index = 0
         self.sleep_update_timer.init(
@@ -155,6 +157,10 @@ class Dimmer:
         else:
             if not self.interrupt_active:
                 self.set_interrupt(True)
+
+        # above this the dimmer gets angry :(
+        if p > 0.98:
+            p = 0.98
 
         p = min(1, max(0, p))
 
@@ -352,3 +358,4 @@ try:
 except KeyboardInterrupt:
     pin.off()
     button_with_rgb.off()
+    dimmer.set_inital_off()
