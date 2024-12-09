@@ -5,27 +5,6 @@ from math import acos, pi, sin
 
 import time
 import neopixel
-import uasyncio as asyncio
-
-# # Define an asynchronous background task
-# async def background_task():
-#     while True:
-#         print("Background task is running.")
-#         await asyncio.sleep(2)  # Delay for 2 seconds
-
-# # Define the main function
-# async def main():
-#     # Create the background task
-#     asyncio.create_task(background_task())
-
-#     # Main task (e.g., timer)
-#     for i in range(10):
-#         print("Main task iteration:", i)
-#         await asyncio.sleep(1)  # Delay for 1 second
-
-# # Run the main function
-# asyncio.run(main())
-
 
 class Dimmer:
     def __init__(self, pwm_pin, zc_pin, fpulse=4000):
@@ -55,8 +34,15 @@ class Dimmer:
         self.breathe_timer = Timer()
 
         #  Used in sleeping mode
-        self.sleep_timer = Timer()
+        self.sleep_update_timer = Timer()
+        self.sleep_finished_timer = Timer()
+        self.SLEEP_UPDATES_PER_MIN = 5
+        self.SLEEP_FADE_OUT_MINS = 5
 
+        self.sleep_index = 0
+        num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
+        self.step_size = 1.0 / (num_steps - 1)
+        # TODO: step_size should have an offset, as any value below 0.2 does nothing
 
     def startBreathing(self):
         self.breathe_timer.init(
@@ -76,10 +62,32 @@ class Dimmer:
         self.value = sine_value
 
     def startSleep(self):
-        pass
+        self.sleep_index = 0
+        self.sleep_update_timer.init(
+            period=(1000 * 60 // self.SLEEP_UPDATES_PER_MIN),
+            mode=Timer.PERIODIC,
+            callback=self.slowly_fade
+        )
+
+        self.sleep_finished_timer.init(
+            period=(1000 * 60 * self.SLEEP_FADE_OUT_MINS),
+            mode=Timer.ONE_SHOT,
+            callback=self.stopSleepTimer
+        )
+
+    def stopSleepTimer(self, timer):
+        self.stopSleep()
 
     def stopSleep(self):
-        pass
+        self.sleep_index = 0
+        self.sleep_update_timer.deinit()
+        self.sleep_finished_timer.deinit()
+
+    def slowly_fade(self, timer):
+        new_value = 1 - (self.step_size * self.sleep_index)
+        self.value = new_value
+
+        self.sleep_index = self.sleep_index + 1
 
     def _zeroDetectIsr(self, pin):
         if 0 == self._freq:
@@ -316,12 +324,9 @@ dimmer = Dimmer(4, 2)
 dimmer.value = 0
 
 
-async def main():
-    while True:
-        await asyncio.sleep(1)
-
 try:
-    asyncio.run(main())
+    while True:
+        time.sleep(0.1)
 except KeyboardInterrupt:
     pin.off()
     button_with_rgb.off()
