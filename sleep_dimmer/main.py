@@ -36,8 +36,8 @@ class Dimmer:
         self.sleep_update_timer = Timer()
         self.sleep_finished_timer = Timer()
         self.sleep_finished_callback = None
-        self.SLEEP_UPDATES_PER_MIN = 5
-        self.SLEEP_FADE_OUT_MINS = 5
+        self.SLEEP_UPDATES_PER_MIN = 10
+        self.SLEEP_FADE_OUT_MINS = 30
 
         self.sleep_index = 0
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
@@ -81,6 +81,7 @@ class Dimmer:
         if self.sleep_finished_callback:
             self.sleep_finished_callback()
 
+        self.off()
         self.stop_sleeping()
 
     def stop_sleeping(self):
@@ -130,6 +131,9 @@ class Dimmer:
     def set_interrupt(self, new_interrupt_active):
         self.interrupt_active = new_interrupt_active
 
+        # I have a feeling a bit more work is needed here
+        # print("interrupt_active = {}".format(new_interrupt_active))
+
         if self.interrupt_active:
             self._zc.irq(
                 trigger=Pin.IRQ_RISING,
@@ -138,8 +142,9 @@ class Dimmer:
         else:
             self._zc.irq(handler=None)
 
-    def set_inital_off(self):
-        self.value = self.DIMMER_OFFSET
+    def off(self):
+        # we go below the offset to turn off the interrupt
+        self.value = self.DIMMER_OFFSET - 0.05
 
     @property
     def value(self):
@@ -316,7 +321,7 @@ def button_pressed(pin):
     elif light_state == LightStates.Sleep:
         dimmer.start_sleeping(finished_sleeping)
     elif light_state == LightStates.Off:
-        dimmer.value = 0
+        dimmer.off()
 
 
 def potentiometer_changed(value):
@@ -325,7 +330,13 @@ def potentiometer_changed(value):
     if light_state != LightStates.Potentiometer:
         return
 
-    dimmer.value = value
+    src_min, src_max = (0, 1.0)
+    tgt_min, tgt_max = (dimmer.DIMMER_OFFSET + 0.1, 1.0)
+
+    mapped_value = (value - src_min) / (src_max - src_min) * \
+            (tgt_max - tgt_min) + tgt_min
+
+    dimmer.value = mapped_value
 
 # END - Input callbacks
 
@@ -349,7 +360,7 @@ potentiometer = Potentiometer(
 )
 
 dimmer = Dimmer(pwm_pin=4, zc_pin=2)
-dimmer.set_inital_off()
+dimmer.off()
 
 # run loop
 try:
@@ -358,4 +369,4 @@ try:
 except KeyboardInterrupt:
     pin.off()
     button_with_rgb.off()
-    dimmer.set_inital_off()
+    dimmer.off()
