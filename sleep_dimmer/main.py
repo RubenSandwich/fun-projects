@@ -172,10 +172,10 @@ class Dimmer:
 
 
 class Potentiometer:
-    def __init__(self, pin, threshold=1000, callback=None):
-        self._potentiometer = ADC(pin)
+    def __init__(self, pot_pin, threshold=1000, changed_callback=None):
+        self._potentiometer = ADC(Pin(pot_pin))
         self.threshold = threshold
-        self.callback = callback
+        self.callback = changed_callback
         self.last_value = self._potentiometer.read_u16()
         self.timer = Timer()
         self.start_monitoring()
@@ -220,7 +220,7 @@ class LightStates:
 
 class ButtonWithRGB:
     def __init__(self, led_pin, button_pin, pressed_callback):
-        self.np = neopixel.NeoPixel(led_pin, 1)
+        self.np = neopixel.NeoPixel(Pin(led_pin), 1)
         self.brightness = 100
         self.pixel_max = 255  # hardware max
         self.color_max = 255  # mapped max
@@ -325,13 +325,21 @@ light_state = LightStates.Off
 pin = Pin("LED", Pin.OUT) # pi pico board LED
 pin.on()
 
-button_with_rgb = ButtonWithRGB(Pin(0), Pin(1), button_pressed)
+button_with_rgb = ButtonWithRGB(
+    led_pin=0,
+    button_pin=1,
+    pressed_callback=button_pressed
+)
 button_with_rgb.set_brightness(10)
 button_with_rgb.set_color_by_light_state(light_state)
 
-potentiometer = Potentiometer(Pin(26), 1000, potentiometer_changed)
+potentiometer = Potentiometer(
+    pot_pin=26,
+    threshold=1000,
+    changed_callback=potentiometer_changed
+)
 
-dimmer = Dimmer(4, 2)
+dimmer = Dimmer(pwm_pin=4, zc_pin=2)
 dimmer.value = 0
 
 # run loop
