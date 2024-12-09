@@ -17,11 +17,11 @@ class Dimmer:
         self._ppulse = 100.0 / fpulse + 0.11
         self._zc = Pin(zc_pin,  Pin.IN)
         self._val = 1
-        self.interrupt_active = True
-        self._zc.irq(
-            trigger=Pin.IRQ_RISING,
-            handler=self._zeroDetectIsr
-        )
+        self.interrupt_active = False
+        self._zc.irq(handler=None)
+
+        # below this, the dimmer doesn't work
+        self.DIMMER_OFFSET = 0.2
 
         #  Used in breathing mode
         sine_range_min = 0.4
@@ -41,7 +41,7 @@ class Dimmer:
 
         self.sleep_index = 0
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
-        self.step_size = 0.8 / (num_steps - 1) # offset because below 0.2 the dimmer zeros out
+        self.step_size = (1 - self.DIMMER_OFFSET) / (num_steps - 1) # offset because below DIMMER_OFFSET the dimmer doesn't work
 
     def start_breathing(self):
         self.breathe_timer.init(
@@ -136,6 +136,9 @@ class Dimmer:
         else:
             self._zc.irq(handler=None)
 
+    def set_inital_off(self):
+        self.value = self.DIMMER_OFFSET
+
     @property
     def value(self):
         return self._val
@@ -143,8 +146,8 @@ class Dimmer:
     @value.setter
     def value(self, p):
         # below 20% the light flickers, so we also turn off the interrupt
-        if p < 0.2:
-            p = 0.2
+        if p < self.DIMMER_OFFSET:
+            p = self.DIMMER_OFFSET
 
             if self.interrupt_active:
                 self.set_interrupt(False)
@@ -340,7 +343,7 @@ potentiometer = Potentiometer(
 )
 
 dimmer = Dimmer(pwm_pin=4, zc_pin=2)
-dimmer.value = 0
+dimmer.set_inital_off()
 
 # run loop
 try:
