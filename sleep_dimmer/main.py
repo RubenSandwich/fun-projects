@@ -6,27 +6,43 @@ from math import acos, pi, sin
 import time
 import neopixel
 
+
+def map_value(val, src, dst):
+    return ((val - src[0]) / (src[1]-src[0])) * (dst[1]-dst[0]) + dst[0]
+
+
 class Dimmer:
     def __init__(self, pwm_pin, zc_pin, fpulse=4000):
         alloc_emergency_exception_buf(100)
-        self._cnt = 0
-        self._freq = 0
-        self._timer = Timer()
-        self._pwm = Pin(pwm_pin, Pin.OUT)
-        self._fpulse = fpulse
-        self._ppulse = 100.0 / fpulse + 0.11
-        self._zc = Pin(zc_pin,  Pin.IN)
+        # self._cnt = 0
+        # self._freq = 0
+        # self._timer = Timer()
+        # self._pwm = Pin(pwm_pin, Pin.OUT)
+        # self._fpulse = fpulse
+        # self._ppulse = 100.0 / fpulse + 0.11
+        # self._zc = Pin(zc_pin,  Pin.IN)
+        # self._val = 1
+        # self.interrupt_active = False
+        # self._zc.irq(handler=None)
+
         self._val = 1
-        self.interrupt_active = False
-        self._zc.irq(handler=None)
+        self.zeroCrossoverPin = Pin(zc_pin, Pin.IN, Pin.PULL_DOWN)
+        self.triacFiringPin   = Pin(pwm_pin, Pin.OUT, value=0)
+        self.freq  = 200 #just to start somewhere
+        self._timer = Timer()
+
+        self.zeroCrossoverPin.irq(
+            trigger=Pin.IRQ_RISING,
+            handler=self.ZeroCrossover
+        )
 
         # below this, the dimmer doesn't work
-        self.DIMMER_OFFSET = 0.2
+        self.DIMMER_OFFSET = 20
 
         #  Used in breathing mode
-        sine_range_min = 0.35
-        sine_range_max = 0.80
-        self.TOTAL_PERIOD = 5 # Period in seconds
+        sine_range_min = 35
+        sine_range_max = 80
+        self.TOTAL_PERIOD = 5  # Period in seconds
         self.AMPLITUDE = (sine_range_max - sine_range_min) / 2
         self.OFFSET = (sine_range_max + sine_range_min) / 2
         self.BREATHE_UPDATES_PER_SEC = 10
@@ -41,7 +57,8 @@ class Dimmer:
 
         self.sleep_index = 0
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
-        self.step_size = (1 - self.DIMMER_OFFSET) / (num_steps - 1) # offset because below DIMMER_OFFSET the dimmer doesn't work
+        # offset because below DIMMER_OFFSET the dimmer doesn't work
+        self.step_size = (100 - self.DIMMER_OFFSET) / (num_steps - 1)
 
     def start_breathing(self):
         self.value = self.DIMMER_OFFSET
@@ -62,7 +79,7 @@ class Dimmer:
         self.value = sine_value
 
     def start_sleeping(self, callback):
-        self.value = 1
+        self.value = 100
         self.sleep_finished_callback = callback
         self.sleep_index = 0
         self.sleep_update_timer.init(
@@ -91,60 +108,29 @@ class Dimmer:
         self.sleep_finished_callback = None
 
     def slowly_fade(self, timer):
-        new_value = 1 - (self.step_size * self.sleep_index) #count down from 1.0
+        # count down from 100
+        new_value = 100 - (self.step_size * self.sleep_index)
         self.value = new_value
 
         self.sleep_index = self.sleep_index + 1
 
-    def _zeroDetectIsr(self, pin):
-        if 0 == self._freq:
-            self._pwm.on()
-            return
+    def triacpulse(self, timer):
+        self.triacFiringPin.high()
+        a = 2.0 * 2.0 # type: ignore - we want a small delay
+        self.triacFiringPin.low()
 
-        if 0 > self._freq:
-            self._pwm.off()
-            return
-
-        self._cnt += 1
-
-        if 1 == self._cnt:
-            self._timer.init(
-                freq=self._freq,
-                mode=Timer.ONE_SHOT,
-                callback=self._dimmDelayIsr
-            )
-
-    def _dimmDelayIsr(self, _timer):
-        if 1 == self._cnt:
-            self._pwm.on()
-            self._timer.init(
-                freq=self._fpulse,
-                mode=Timer.ONE_SHOT,
-                callback=self._dimmDelayIsr
-            )
-
-        else:
-            self._pwm.off()
-
-        self._cnt = 0
-
-    def set_interrupt(self, new_interrupt_active):
-        self.interrupt_active = new_interrupt_active
-
-        # I have a feeling a bit more work is needed here
-        # print("interrupt_active = {}".format(new_interrupt_active))
-
-        if self.interrupt_active:
-            self._zc.irq(
-                trigger=Pin.IRQ_RISING,
-                handler=self._zeroDetectIsr
-            )
-        else:
-            self._zc.irq(handler=None)
+    def ZeroCrossover(self, arg):
+        self.triacFiringPin.low()
+        # TODO: if the freq is the same can we stop the timer?
+        self._timer.init(
+            freq=self.freq,
+            mode=Timer.ONE_SHOT,
+            callback=self.triacpulse
+        )
 
     def off(self):
         # we go below the offset to turn off the interrupt
-        self.value = self.DIMMER_OFFSET - 0.05
+        self.value = self.DIMMER_OFFSET + 5
 
     @property
     def value(self):
@@ -153,35 +139,37 @@ class Dimmer:
     @value.setter
     def value(self, p):
         # below 20% the light flickers, so we also turn off the interrupt
-        if p < self.DIMMER_OFFSET:
-            p = self.DIMMER_OFFSET
+        # if p < self.DIMMER_OFFSET:
+        #     p = self.DIMMER_OFFSET
 
-            if self.interrupt_active:
-                self.set_interrupt(False)
+        #     if self.interrupt_active:
+        #         self.set_interrupt(False)
 
-        else:
-            if not self.interrupt_active:
-                self.set_interrupt(True)
+        # else:
+        #     if not self.interrupt_active:
+        #         self.set_interrupt(True)
 
         # above this the dimmer gets angry :(
-        if p > 0.98:
-            p = 0.98
+        if p > 98:
+            p = 98
 
+        p = p/100
         p = min(1, max(0, p))
+        p = acos(1 - p * 2) / pi
 
-        if not self._val == p:
-            self._val = p
-            p = acos(1 - p * 2) / pi
+        #  TODO: Maybe implement this too?
+        # if not self._val == p:
+        #     self._val = p
+        #     p = acos(1 - p * 2) / pi
 
-            if p < self._ppulse:
-                f = -1
-            elif p > 0.99:
-                f = 0
-            else:
-                f = 100 / (1 - p)
+        if p < 0.15 :
+            self.freq = 20
+        elif p > 0.99:
+            self.freq = 0
+        else:
+            self.freq = int(100 / (1 - p))
 
-            self._freq = int(f)
-
+        self._val = p
         return self._val
 
 
@@ -250,16 +238,16 @@ class ButtonWithRGB:
         self.pressed_callback = pressed_callback
 
         self.light_state_color = {
-            LightStates.Off: (0, 0, 0), # off
+            LightStates.Off: (0, 0, 0),  # off
             LightStates.Potentiometer: (0, 255, 0),  # green
-            LightStates.Breath: (255, 165, 0), # orange
-            LightStates.Sleep: (0, 0, 255), # blue
+            LightStates.Breath: (255, 165, 0),  # orange
+            LightStates.Sleep: (0, 0, 255),  # blue
         }
 
     def set_brightness(self, new_brightness):
         self.brightness = new_brightness
         self.color_max = int((new_brightness / 100) * self.pixel_max)
-        self.set_color(self.np[0]) # type: ignore
+        self.set_color(self.np[0])  # type: ignore
 
     def set_color_by_light_state(self, new_light_state):
         self.set_color(self.light_state_color[new_light_state])
@@ -286,12 +274,7 @@ class ButtonWithRGB:
             self.pressed_callback(pin)
 
     def __map_color_brightness(self, value):
-        src_min, src_max = (0, self.pixel_max)
-        tgt_min, tgt_max = (0, self.color_max)
-
-        mapped_value = (value - src_min) / (src_max - src_min) * \
-            (tgt_max - tgt_min) + tgt_min
-        return int(mapped_value)
+        return int(map_value(value, (0, self.pixel_max), (0, self.color_max)))
 
 
 # BEGIN - Input callbacks
@@ -300,6 +283,7 @@ def finished_sleeping():
 
     light_state = LightStates.Off
     button_with_rgb.set_color_by_light_state(light_state)
+
 
 def button_pressed(pin):
     global light_state, dimmer, potentiometer
@@ -313,6 +297,8 @@ def button_pressed(pin):
     elif prev_light_state == LightStates.Sleep:
         dimmer.stop_sleeping()
 
+    #  TODO: 1. Turn off potentiometer if not in mode
+    #  TODO: 2. Turn off PWM interrupts & timers if off
 
     if light_state == LightStates.Breath:
         dimmer.start_breathing()
@@ -330,11 +316,11 @@ def potentiometer_changed(value):
     if light_state != LightStates.Potentiometer:
         return
 
-    src_min, src_max = (0, 1.0)
-    tgt_min, tgt_max = (dimmer.DIMMER_OFFSET + 0.1, 1.0)
-
-    mapped_value = (value - src_min) / (src_max - src_min) * \
-            (tgt_max - tgt_min) + tgt_min
+    mapped_value = map_value(
+        value,
+        (0, 1.0),
+        (dimmer.DIMMER_OFFSET + 10, 100) # slightly higher as we don't want it to turn completely off in potentiometer mode
+    )
 
     dimmer.value = mapped_value
 
@@ -342,7 +328,7 @@ def potentiometer_changed(value):
 
 
 light_state = LightStates.Off
-pin = Pin("LED", Pin.OUT) # pi pico board LED
+pin = Pin("LED", Pin.OUT)  # pi pico board LED
 pin.on()
 
 button_with_rgb = ButtonWithRGB(
