@@ -29,7 +29,7 @@ const CONSTANTS = {
 
   getNebulaChangeInterval: (): number => {
     return CONSTANTS.debug
-      ? getRandomInt(minsToMs(0.01), minsToMs(0.1))
+      ? getRandomInt(minsToMs(0.01), minsToMs(0.05))
       : getRandomInt(minsToMs(20), minsToMs(25));
   },
 

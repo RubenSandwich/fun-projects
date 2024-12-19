@@ -292,11 +292,12 @@ export const bigBounceUniverse = (p5: P5) => {
             }
           }
 
-          const setAlpha = nebula.currentAlpha + getRandomInt(3, 5);
+          // const setAlpha = nebula.currentAlpha + getRandomInt(3, 5);
+          const setAlpha = nebula.currentAlpha + getRandomInt(13, 15);
           nebula.changeAlpha(setAlpha);
 
           if (nebula.atFullAlpha()) {
-            universeState.nebulasFullyChanged = +1;
+            universeState.nebulasFullyChanged += 1;
           }
 
           universeState.lastNebulaChangeTime = p5.millis();
