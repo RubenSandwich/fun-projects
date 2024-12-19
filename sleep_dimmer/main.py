@@ -18,13 +18,10 @@ class Dimmer:
         self._val = 1
         self.zeroCrossoverPin = Pin(zc_pin, Pin.IN, Pin.PULL_DOWN)
         self.triacFiringPin   = Pin(pwm_pin, Pin.OUT, value=0)
-        self.freq  = 200 #just to start somewhere
+        self.freq  = 200 # just to start somewhere
         self._timer = Timer()
 
-        self.zeroCrossoverPin.irq(
-            trigger=Pin.IRQ_RISING,
-            handler=self.ZeroCrossover
-        )
+        # to start remember to turn_on()
 
         # below this, the dimmer doesn't work
         self.DIMMER_OFFSET = 20
@@ -88,7 +85,7 @@ class Dimmer:
         if self.sleep_finished_callback:
             self.sleep_finished_callback()
 
-        self.off()
+        self.turn_off()
         self.stop_sleeping()
 
     def stop_sleeping(self):
@@ -111,19 +108,22 @@ class Dimmer:
 
     def ZeroCrossover(self, arg):
         self.triacFiringPin.low()
-        # TODO: if the freq is the same can we stop the timer?
         self._timer.init(
             freq=self.freq,
             mode=Timer.ONE_SHOT,
             callback=self.triacpulse
         )
 
-    def off(self):
+    def turn_off(self):
         # we go below the offset to turn off the interrupt
         self.value = self.DIMMER_OFFSET + 5
+        self.zeroCrossoverPin.irq(handler=None)
 
-    def on(self):
-        pass
+    def turn_on(self):
+        self.zeroCrossoverPin.irq(
+            trigger=Pin.IRQ_RISING,
+            handler=self.ZeroCrossover
+        )
 
     @property
     def value(self):
@@ -139,19 +139,17 @@ class Dimmer:
         p = min(1, max(0, p))
         p = acos(1 - p * 2) / pi
 
-        #  TODO: Maybe implement this too?
-        # if not self._val == p:
-        #     self._val = p
-        #     p = acos(1 - p * 2) / pi
+        #  TODO: If we are already at the value should we turn off the zeroCrossoverPin interrupt?
+        if not self._val == p:
+            self._val = p
 
-        if p < 0.15 :
-            self.freq = 20
-        elif p > 0.99:
-            self.freq = 0
-        else:
-            self.freq = int(100 / (1 - p))
+            if p < 0.15 :
+                self.freq = 20
+            elif p > 0.99:
+                self.freq = 0
+            else:
+                self.freq = int(100 / (1 - p))
 
-        self._val = p
         return self._val
 
 
@@ -281,7 +279,7 @@ def button_pressed(pin):
     elif prev_light_state == LightStates.Potentiometer:
         potentiometer.turn_off()
     elif prev_light_state == LightStates.Off:
-        dimmer.on()
+        dimmer.turn_on()
 
     light_state = LightStates.next_state(light_state)
     button_with_rgb.set_color_by_light_state(light_state)
@@ -296,7 +294,7 @@ def button_pressed(pin):
     elif light_state == LightStates.Sleep:
         dimmer.start_sleeping(finished_sleeping_callback)
     elif light_state == LightStates.Off:
-        dimmer.off()
+        dimmer.turn_off()
 
 
 def potentiometer_changed(value):
@@ -335,7 +333,6 @@ potentiometer = Potentiometer(
 )
 
 dimmer = Dimmer(pwm_pin=4, zc_pin=2)
-dimmer.off()
 
 # run loop
 try:
@@ -344,4 +341,4 @@ try:
 except KeyboardInterrupt:
     pin.off()
     button_with_rgb.off()
-    dimmer.off()
+    dimmer.turn_off()
