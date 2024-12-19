@@ -15,7 +15,7 @@ class Dimmer:
     def __init__(self, pwm_pin, zc_pin, fpulse=4000):
         alloc_emergency_exception_buf(100)
 
-        self._val = 1
+        self._val = 1.0
         self.zeroCrossoverPin = Pin(zc_pin, Pin.IN, Pin.PULL_DOWN)
         self.triacFiringPin   = Pin(pwm_pin, Pin.OUT, value=0)
         self.freq  = 200 # just to start somewhere
@@ -24,11 +24,11 @@ class Dimmer:
         # to start remember to turn_on()
 
         # below this, the dimmer doesn't work
-        self.DIMMER_OFFSET = 20
+        self.DIMMER_OFFSET = 0.2
 
         #  Used in breathing mode
-        sine_range_min = 35
-        sine_range_max = 80
+        sine_range_min = 0.35
+        sine_range_max = 0.80
         self.TOTAL_PERIOD = 5  # Period in seconds
         self.AMPLITUDE = (sine_range_max - sine_range_min) / 2
         self.OFFSET = (sine_range_max + sine_range_min) / 2
@@ -45,7 +45,7 @@ class Dimmer:
         self.sleep_index = 0
         num_steps = self.SLEEP_FADE_OUT_MINS * self.SLEEP_UPDATES_PER_MIN
         # offset because below DIMMER_OFFSET the dimmer doesn't work
-        self.step_size = (100 - self.DIMMER_OFFSET) / (num_steps - 1)
+        self.step_size = (1 - self.DIMMER_OFFSET) / (num_steps - 1)
 
     def start_breathing(self):
         self.value = self.DIMMER_OFFSET
@@ -66,7 +66,7 @@ class Dimmer:
         self.value = sine_value
 
     def start_sleeping(self, callback):
-        self.value = 100
+        self.value = 1.0
         self.sleep_finished_callback = callback
         self.sleep_index = 0
         self.sleep_update_timer.init(
@@ -95,8 +95,8 @@ class Dimmer:
         self.sleep_finished_callback = None
 
     def slowly_fade(self, timer):
-        # count down from 100
-        new_value = 100 - (self.step_size * self.sleep_index)
+        # count down from 1.0
+        new_value = 1.0 - (self.step_size * self.sleep_index)
         self.value = new_value
 
         self.sleep_index = self.sleep_index + 1
@@ -115,8 +115,8 @@ class Dimmer:
         )
 
     def turn_off(self):
-        # we go below the offset to turn off the interrupt
-        self.value = self.DIMMER_OFFSET + 5
+        # we go below the offset to completely turn off
+        self.value = self.DIMMER_OFFSET - 0.05
         self.zeroCrossoverPin.irq(handler=None)
 
     def turn_on(self):
@@ -132,10 +132,9 @@ class Dimmer:
     @value.setter
     def value(self, p):
         # above this the dimmer gets angry :(
-        if p > 98:
-            p = 98
+        if p > 0.98:
+            p = 0.98
 
-        p = p/100
         p = min(1, max(0, p))
         p = acos(1 - p * 2) / pi
 
@@ -303,13 +302,12 @@ def potentiometer_changed(value):
     if light_state != LightStates.Potentiometer:
         return
 
-    mapped_value = map_value(
-        value,
-        (0, 1.0),
-        (dimmer.DIMMER_OFFSET + 10, 100) # slightly higher as we don't want it to turn completely off in potentiometer mode
-    )
+    # slightly higher as we don't want the light to completely turn off in potentiometer mode, they should switch to the off mode
+    set_value = value
+    if set_value < dimmer.DIMMER_OFFSET + 0.05:
+        set_value = dimmer.DIMMER_OFFSET + 0.05
 
-    dimmer.value = mapped_value
+    dimmer.value = set_value
 
 # END - Input callbacks
 
