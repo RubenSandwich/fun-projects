@@ -245,9 +245,10 @@ class ButtonWithRGB:
         self.np[0] = mapped_rgb  # type: ignore
         self.np.write()
 
-    def off(self):
+    def turn_off(self):
         self.np[0] = (0, 0, 0)  # type: ignore
         self.np.write()
+        self.button.irq(handler=None)
 
     def __debounce_handler(self, pin):
         if time.ticks_ms() > self._next_debounce:
@@ -338,5 +339,5 @@ try:
         time.sleep(0.1)
 except KeyboardInterrupt:
     pin.off()
-    button_with_rgb.off()
+    button_with_rgb.turn_off()
     dimmer.turn_off()
