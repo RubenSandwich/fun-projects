@@ -1,10 +1,10 @@
 
-from machine import ADC, Pin, Timer
-from micropython import alloc_emergency_exception_buf
+from machine import ADC, Pin, Timer # type: ignore
+from micropython import alloc_emergency_exception_buf # type: ignore
 from math import acos, pi, sin
 
 import time
-import neopixel
+import neopixel # type: ignore
 
 
 def map_value(val, src, dst):
@@ -14,16 +14,6 @@ def map_value(val, src, dst):
 class Dimmer:
     def __init__(self, pwm_pin, zc_pin, fpulse=4000):
         alloc_emergency_exception_buf(100)
-        # self._cnt = 0
-        # self._freq = 0
-        # self._timer = Timer()
-        # self._pwm = Pin(pwm_pin, Pin.OUT)
-        # self._fpulse = fpulse
-        # self._ppulse = 100.0 / fpulse + 0.11
-        # self._zc = Pin(zc_pin,  Pin.IN)
-        # self._val = 1
-        # self.interrupt_active = False
-        # self._zc.irq(handler=None)
 
         self._val = 1
         self.zeroCrossoverPin = Pin(zc_pin, Pin.IN, Pin.PULL_DOWN)
@@ -132,23 +122,15 @@ class Dimmer:
         # we go below the offset to turn off the interrupt
         self.value = self.DIMMER_OFFSET + 5
 
+    def on(self):
+        pass
+
     @property
     def value(self):
         return self._val
 
     @value.setter
     def value(self, p):
-        # below 20% the light flickers, so we also turn off the interrupt
-        # if p < self.DIMMER_OFFSET:
-        #     p = self.DIMMER_OFFSET
-
-        #     if self.interrupt_active:
-        #         self.set_interrupt(False)
-
-        # else:
-        #     if not self.interrupt_active:
-        #         self.set_interrupt(True)
-
         # above this the dimmer gets angry :(
         if p > 98:
             p = 98
@@ -180,14 +162,16 @@ class Potentiometer:
         self.callback = changed_callback
         self.last_value = self._potentiometer.read_u16()
         self.timer = Timer()
-        self.start_monitoring()
 
-    def start_monitoring(self):
+    def turn_on(self):
         self.timer.init(
             period=100,
             mode=Timer.PERIODIC,
             callback=self.check_value
         )
+
+    def turn_off(self):
+        self.timer.deinit()
 
     def check_value(self, timer):
         current_value = self._potentiometer.read_u16()
@@ -278,7 +262,7 @@ class ButtonWithRGB:
 
 
 # BEGIN - Input callbacks
-def finished_sleeping():
+def finished_sleeping_callback():
     global light_state
 
     light_state = LightStates.Off
@@ -289,23 +273,28 @@ def button_pressed(pin):
     global light_state, dimmer, potentiometer
 
     prev_light_state = light_state
-    light_state = LightStates.next_state(light_state)
-    button_with_rgb.set_color_by_light_state(light_state)
 
     if prev_light_state == LightStates.Breath:
         dimmer.stop_breathing()
     elif prev_light_state == LightStates.Sleep:
         dimmer.stop_sleeping()
+    elif prev_light_state == LightStates.Potentiometer:
+        potentiometer.turn_off()
+    elif prev_light_state == LightStates.Off:
+        dimmer.on()
 
-    #  TODO: 1. Turn off potentiometer if not in mode
+    light_state = LightStates.next_state(light_state)
+    button_with_rgb.set_color_by_light_state(light_state)
+
     #  TODO: 2. Turn off PWM interrupts & timers if off
 
     if light_state == LightStates.Breath:
         dimmer.start_breathing()
     elif light_state == LightStates.Potentiometer:
-        dimmer.value = potentiometer.percentage()
+        potentiometer.turn_on()
+        potentiometer_changed(potentiometer.percentage())
     elif light_state == LightStates.Sleep:
-        dimmer.start_sleeping(finished_sleeping)
+        dimmer.start_sleeping(finished_sleeping_callback)
     elif light_state == LightStates.Off:
         dimmer.off()
 
