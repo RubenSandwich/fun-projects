@@ -1,9 +1,21 @@
+## sleep dimmer
+
+A pwm 120V AC sleep dimmer with a few modes:
+* potentiometer controller
+* breathing mode
+* 30 min wind down
+
+## BOM
+
+* pi pico w
+* [IOT DynRobot PWM AC Programmable Light Dimmer](https://www.amazon.com/gp/product/B0893K6ZPK/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
+* Potentiometer 10k Ohm
+* [Delinx AC DC Converter Module - 5V 2A Version](https://www.amazon.com/gp/product/B07SGQ6XXR/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1)
+* [ChromaTek Full-Color RGB (WS2812) 19mm Momentary Push Button Switch](https://www.amazon.com/gp/product/B0989BL58B/ref=ppx_yo_dt_b_asin_title_o06_s00?ie=UTF8&th=1)
 
 
-
-mpremote connect list
+`mpremote connect list`
 
 > /dev/cu.usbmodem101 e661a4d4176a492c 2e8a:0005 MicroPython Board in FS mode
 
-mpremote connect /dev/tty.usbmodem101 fs cp main.py :
-cp main.py :
+`mpremote connect /dev/tty.usbmodem101 fs cp main.py :`
