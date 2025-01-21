@@ -1,0 +1,40 @@
+<html lang="en">
+<meta http-equiv="content-security-policy" content="script-src 'self' 'unsafe-inline'" />
+  <head>
+    <title>Second Screen Mirror</title>
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: black;
+      }
+      video {
+        max-width: calc(100vw - 4px);
+        max-height: calc(100vh - 4px);
+      }
+      #highlight-box {
+        border: 2px solid transparent;
+
+        &.active {
+          border: 2px solid yellow;
+        }
+      }
+      #error-box {
+        max-width: 40ch;
+        color: white;
+        text-align: center;
+      }
+      </style>
+  </head>
+  <body>
+    <div id="highlight-box">
+      <video autoplay></video>
+      <div id="error-box"></div>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>

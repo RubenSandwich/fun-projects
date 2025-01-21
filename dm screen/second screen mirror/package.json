@@ -1,0 +1,38 @@
+{
+	"name": "second-screen-mirror",
+	"keywords": [],
+	"author": "Ruben Nic",
+	"license": "ISC",
+	"version": "1.0.0",
+	"description": "",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron .",
+		"test": "echo \"Error: no test specified\" && exit 1",
+    "build": "electron-builder -mw"
+	},
+	"build": {
+		"win": {
+			"target": [{
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      }]
+		},
+		"mac": {
+			"target": [
+				{
+					"target": "dmg",
+					"arch": [
+						"universal"
+					]
+				}
+			]
+		}
+	},
+	"devDependencies": {
+		"electron": "^34.0.0",
+		"electron-builder": "^25.1.8"
+	}
+}
