@@ -64,6 +64,15 @@ class PlanetTrail {
   beginWindDown(): void {
     this.windDown = true;
   }
+
+  toJSON() {
+    return {
+      path: this.path.map((point) => ({ x: point.x, y: point.y })),
+      pathLengthMax: this.pathLengthMax,
+      windDown: this.windDown,
+      trailAlphas: this.trailAlphas,
+    };
+  }
 }
 
 export { PlanetTrail };

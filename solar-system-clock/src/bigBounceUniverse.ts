@@ -134,13 +134,18 @@ export const bigBounceUniverse = (p5: P5) => {
 
 		universeState.sun = new Sun(p5);
 
-		let previousRadius = universeState.sun.d * 1.5;
+		setupNewUniverse();
+	};
+
+	const setupNewUniverse = () => {
+		// space out the planets
+		let addingRadius = universeState.sun.d * 1.5;
 		for (let i = 0; i < universeState.numPlanets; i++) {
 			universeState.orbitalRadii.push(
-				getRandomInt(previousRadius, previousRadius + 40)
+				getRandomInt(addingRadius, addingRadius + 40)
 			);
 
-			previousRadius = universeState.orbitalRadii[i] + 60;
+			addingRadius = universeState.orbitalRadii[i] + 60;
 		}
 
 		const planetsMade: Planet[] = [];
@@ -235,6 +240,35 @@ export const bigBounceUniverse = (p5: P5) => {
 	};
 
 	p5.draw = () => {
+		if (CONSTANTS.debug) {
+			p5.keyPressed = () => {
+				if (p5.key === " ") {
+					if (p5.isLooping()) {
+						console.log("paused");
+						p5.noLoop();
+
+						console.log(
+							JSON.stringify(
+								{
+									// planets: universeState.planets,
+									numPlanets: universeState.numPlanets,
+									planetTrails: universeState.planetTrails,
+									planetAddInterval: universeState.planetAddInterval,
+									// celestialBodiesToAdd: universeState.celestialBodiesToAdd,
+									orbitalRadii: universeState.orbitalRadii,
+								},
+								null,
+								2
+							)
+						);
+					} else {
+						console.log("continue");
+						p5.loop();
+					}
+				}
+			};
+		}
+
 		// universeState.endSound.addEventListener("canplaythrough", () => {
 		//   universeState.endSound.play();
 		// });
@@ -468,7 +502,7 @@ export const bigBounceUniverse = (p5: P5) => {
 
 						// restart
 						// TODO: refactor out a better setup function
-						p5.setup();
+						setupNewUniverse();
 					});
 				}
 
