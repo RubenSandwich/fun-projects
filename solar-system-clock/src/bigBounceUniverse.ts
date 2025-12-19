@@ -250,12 +250,21 @@ export const bigBounceUniverse = (p5: P5) => {
 						console.log(
 							JSON.stringify(
 								{
-									// planets: universeState.planets,
+									sun: universeState.sun,
+
+									planets: universeState.planets,
 									numPlanets: universeState.numPlanets,
+									celestialBodiesToAdd: universeState.celestialBodiesToAdd,
 									planetTrails: universeState.planetTrails,
-									planetAddInterval: universeState.planetAddInterval,
-									// celestialBodiesToAdd: universeState.celestialBodiesToAdd,
-									orbitalRadii: universeState.orbitalRadii,
+
+									stars: universeState.stars,
+									numStars: universeState.numStars,
+									starsToAdd: universeState.starsToAdd,
+
+									nebulas: universeState.nebulas,
+
+									// planetAddInterval: universeState.planetAddInterval,
+									// orbitalRadii: universeState.orbitalRadii,
 								},
 								null,
 								2

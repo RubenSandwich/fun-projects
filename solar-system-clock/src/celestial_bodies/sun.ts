@@ -1,6 +1,6 @@
 import P5 from "p5";
 import CONSTANTS from "../constants";
-import { getRandomInt } from "../utlilites";
+import { generateUUID, getRandomInt } from "../utlilites";
 
 enum SunStage {
   BIG_BANG = "big bang",
@@ -11,6 +11,7 @@ enum SunStage {
 
 class Sun {
   p5: P5;
+  id: string;
   mass: number;
   pos: P5.Vector;
   vel: P5.Vector;
@@ -36,6 +37,7 @@ class Sun {
 
   constructor(p5: P5, options = { simple: false }) {
     this.p5 = p5;
+    this.id = generateUUID();
     this.mass = getRandomInt(20, 35);
     this.pos = this.p5.createVector(0, 0);
     this.vel = this.p5.createVector(0, 0);
@@ -305,6 +307,36 @@ class Sun {
     }
 
     this.p5.pop();
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      mass: this.mass,
+      pos: { x: this.pos.x, y: this.pos.y },
+      vel: { x: this.vel.x, y: this.vel.y },
+      growing: this.growing,
+      lastGrowthTime: this.lastGrowthTime,
+      growthInterval: this.growthInterval,
+      growthAmount: this.growthAmount,
+      d: this.d,
+      stage: this.stage,
+      particles: this.particles.map(p => ({
+        pos: { x: p.pos.x, y: p.pos.y },
+        vel: { x: p.vel.x, y: p.vel.y },
+        size: p.size,
+        color: {
+          h: this.p5.hue(p.color),
+          s: this.p5.saturation(p.color),
+          b: this.p5.brightness(p.color),
+        },
+      })),
+      currentColor: {
+        h: this.p5.hue(this.currentColor),
+        s: this.p5.saturation(this.currentColor),
+        b: this.p5.brightness(this.currentColor),
+      },
+    };
   }
 }
 
