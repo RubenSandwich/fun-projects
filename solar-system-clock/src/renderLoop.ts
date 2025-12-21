@@ -5,6 +5,7 @@ import { simpleUniverseCreator } from "./simpleUniverse";
 
 import CONSTANTS from "./constants";
 import { parseErrorMessage } from "./utlilites";
+import { universeTestingStates } from "./universeTestingStates";
 
 // TODO:
 //    1. start at the big bang
@@ -114,8 +115,6 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 				p5.noLoop();
 				modal.showModal();
 
-
-
 				const currentStateTextarea = document.getElementById(
 					"currentState"
 				) as HTMLTextAreaElement;
@@ -180,6 +179,69 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		});
 	}
+
+	const loadStateBtn = document.getElementById("loadStateBtn");
+	if (loadStateBtn) {
+		loadStateBtn.addEventListener("click", () => {
+			// Create a hidden file input element
+			const fileInput = document.createElement("input");
+			fileInput.type = "file";
+			fileInput.accept = ".json";
+			fileInput.style.display = "none";
+
+			fileInput.addEventListener("change", (event) => {
+				const target = event.target as HTMLInputElement;
+				const file = target.files?.[0];
+
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = (e) => {
+						const fileContent = e.target?.result as string;
+						try {
+							const newUniverseState = JSON.parse(fileContent);
+
+							console.log("Loaded universe state:", newUniverseState);
+						} catch (error) {
+							console.error("Failed to parse JSON:", error);
+							alert("Invalid JSON file");
+						}
+					};
+					reader.readAsText(file);
+				}
+
+				// Clean up
+				document.body.removeChild(fileInput);
+			});
+
+			document.body.appendChild(fileInput);
+			fileInput.click();
+		});
+	}
+
+	// Handle saved state buttons
+	const savedStateButtons = document.querySelectorAll(".load-saved-state");
+	savedStateButtons.forEach((button) => {
+		button.addEventListener("click", (event) => {
+			const target = event.target as HTMLButtonElement;
+			const slotName = target.getAttribute("data-slot-name");
+
+			if (slotName && slotName in universeTestingStates) {
+				const stateData = universeTestingStates[slotName as keyof typeof universeTestingStates];
+				console.log(`Loading state from slot: ${slotName}`, stateData);
+
+				// Update the textarea with the loaded state
+				const currentStateTextarea = document.getElementById(
+					"currentState"
+				) as HTMLTextAreaElement;
+				currentStateTextarea.value = JSON.stringify(stateData, null, 2);
+			} else {
+				console.error(`Invalid slot name: ${slotName}`);
+			}
+		});
+	});
+
+
+
 });
 
 try {
