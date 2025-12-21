@@ -83,6 +83,28 @@ class PlanetTrail {
 			trailAlphas: this.trailAlphas,
 		};
 	}
+
+	static fromJSON(p5: P5, data: ReturnType<PlanetTrail["toJSON"]>): PlanetTrail {
+		const trail = Object.create(PlanetTrail.prototype);
+		trail.p5 = p5;
+		trail.id = data.id;
+		trail.pathLengthMax = data.pathLengthMax;
+		trail.windDown = data.windDown;
+		trail.trailAlphas = data.trailAlphas;
+
+		// Recreate path
+		trail.path = data.path.map((point) => p5.createVector(point.x, point.y));
+
+		// Recreate color
+		trail.color = p5.color(
+			data.color.hue,
+			data.color.saturation,
+			data.color.brightness,
+			data.color.alpha
+		);
+
+		return trail;
+	}
 }
 
 export { PlanetTrail };

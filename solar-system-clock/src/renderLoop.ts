@@ -36,19 +36,21 @@ let errorDiv: HTMLElement | null = null;
 let startBigBounceUniverse: () => void;
 
 let simpleUniverse = {
-  beginFade: () => {},
-  fading: false,
+	beginFade: () => {},
+	fading: false,
 };
 
+let universe;
+
 function displayError(div: HTMLElement | null, message: string): void {
-  if (!div) {
-    setTimeout(function () {
-      displayError(div, message);
-    }, 500);
-  } else {
-    div.style.display = "block";
-    div.innerText = message;
-  }
+	if (!div) {
+		setTimeout(function () {
+			displayError(div, message);
+		}, 500);
+	} else {
+		div.style.display = "block";
+		div.innerText = message;
+	}
 }
 
 // Uncomment if device orientation handling is needed
@@ -70,66 +72,111 @@ function displayError(div: HTMLElement | null, message: string): void {
 // window.addEventListener("orientationchange", deviceOrientation);
 
 document.addEventListener("DOMContentLoaded", function () {
-  errorDiv = document.getElementById("errors") as HTMLElement;
+	errorDiv = document.getElementById("errors") as HTMLElement;
 
-  const startButtonEle = document.getElementById(
-    "startButton"
-  )! as HTMLButtonElement;
+	const startButtonEle = document.getElementById(
+		"startButton"
+	)! as HTMLButtonElement;
 
-  startButtonEle.addEventListener("click", () => {
-    if (!simpleUniverse.fading) {
-      simpleUniverse.beginFade();
-      startButtonEle.disabled = true;
-    }
-  });
+	startButtonEle.addEventListener("click", () => {
+		if (!simpleUniverse.fading) {
+			simpleUniverse.beginFade();
+			startButtonEle.disabled = true;
+		}
+	});
 });
 
 // This catches script loading errors, such as Reference Errors,
 // because debugging Safari on iOS 9.3.5 doesn't work anymore due
 // apple limitations
 window.addEventListener("error", function (e: ErrorEvent) {
-  console.log(e);
-  displayError(errorDiv, parseErrorMessage(e));
+	console.log(e);
+	displayError(errorDiv, parseErrorMessage(e));
 });
 
 // Prevent mobile touch scrolling
 document.ontouchmove = function (event: TouchEvent) {
-  event.preventDefault();
+	event.preventDefault();
 };
 
+// Listen for spacebar key press
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+	if (event.code === "Space" || event.key === " ") {
+		event.preventDefault();
+
+		if (universe && CONSTANTS.debug) {
+			const p5 = universe as P5;
+			if (p5.isLooping()) {
+				console.log("paused 2");
+				p5.noLoop();
+
+        console.log(p5);
+
+        // const universeState = universe.universeState;
+				// console.log(
+				// 	JSON.stringify(
+				// 		{
+				// 			sun: universeState.sun,
+
+				// 			planets: universeState.planets,
+				// 			numPlanets: universeState.numPlanets,
+				// 			celestialBodiesToAdd: universeState.celestialBodiesToAdd,
+				// 			planetTrails: universeState.planetTrails,
+
+				// 			stars: universeState.stars,
+				// 			numStars: universeState.numStars,
+				// 			starsToAdd: universeState.starsToAdd,
+
+				// 			nebulas: universeState.nebulas,
+
+				// 			// planetAddInterval: universeState.planetAddInterval,
+				// 			// orbitalRadii: universeState.orbitalRadii,
+				// 		},
+				// 		null,
+				// 		2
+				// 	)
+				// );
+			} else {
+				console.log("continue 2");
+				p5.loop();
+			}
+		}
+	}
+});
+
 try {
-  startBigBounceUniverse = () => {
-    const startScreen = document.getElementById("startScreen");
-    if (!startScreen) {
-      throw new Error("startScreen element is undefined.");
-    }
+	startBigBounceUniverse = () => {
+		const startScreen = document.getElementById("startScreen");
+		if (!startScreen) {
+			throw new Error("startScreen element is undefined.");
+		}
 
-    startScreen.style.display = "none"; // Hide the start screen
-    new P5(bigBounceUniverse);
-  };
+		startScreen.style.display = "none"; // Hide the start screen
+		universe = new P5(bigBounceUniverse);
+	};
 
-  if (window.location.href.includes("?mode=webapp") || CONSTANTS.debug) {
-    startBigBounceUniverse();
-  } else {
-    document.addEventListener("DOMContentLoaded", function () {
-      const startCanvasElement = document.getElementById("startCanvas");
-      if (!startCanvasElement) {
-        throw new Error("startCanvasElement element is undefined.");
-      }
+	if (window.location.href.includes("?mode=webapp") || CONSTANTS.debug) {
+		startBigBounceUniverse();
+	} else {
+		document.addEventListener("DOMContentLoaded", function () {
+			const startCanvasElement = document.getElementById("startCanvas");
+			if (!startCanvasElement) {
+				throw new Error("startCanvasElement element is undefined.");
+			}
 
-      const { beginFade, fading, SimpleUniverse } = simpleUniverseCreator(
-        startBigBounceUniverse
-      );
+			const { beginFade, fading, SimpleUniverse } = simpleUniverseCreator(
+				startBigBounceUniverse
+			);
 
-      simpleUniverse = {
-        beginFade,
-        fading,
-      };
+			simpleUniverse = {
+				beginFade,
+				fading,
+			};
 
-      new P5(SimpleUniverse, startCanvasElement);
-    });
-  }
+			new P5(SimpleUniverse, startCanvasElement);
+		});
+	}
 } catch (e) {
-  console.log(e);
-  displayError(errorDiv, parseErrorMessage(e));
+	console.log(e);
+	displayError(errorDiv, parseErrorMessage(e));
 }

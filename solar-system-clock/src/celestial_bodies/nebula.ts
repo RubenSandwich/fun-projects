@@ -173,6 +173,37 @@ class Nebula {
 			maxAlpha: this.maxAlpha,
 		};
 	}
+
+	static fromJSON(p5: P5, data: ReturnType<Nebula["toJSON"]>): Promise<Nebula> {
+		return new Promise((resolve, reject) => {
+			const nebula = Object.create(Nebula.prototype);
+			nebula.p5 = p5;
+			nebula.id = data.id;
+			nebula.pos = p5.createVector(data.pos.x, data.pos.y);
+			nebula.initialPos = p5.createVector(data.initialPos.x, data.initialPos.y);
+			nebula.size = data.size;
+			nebula.noiseOffset = data.noiseOffset;
+			nebula.frameOffset = data.frameOffset;
+			nebula.currentAlpha = data.currentAlpha;
+			nebula.maxAlpha = data.maxAlpha;
+
+			// Recreate nebulaRender from base64
+			if (data.nebulaRender) {
+				nebula.nebulaRender = p5.createGraphics(data.size, data.size);
+
+				// Load the image from the data URL
+				p5.loadImage(data.nebulaRender, (img) => {
+					nebula.nebulaRender.image(img, 0, 0);
+					resolve(nebula);
+				}, (err) => {
+					reject(err);
+				});
+			} else {
+				nebula.nebulaRender = null;
+				resolve(nebula);
+			}
+		});
+	}
 }
 
 export { Nebula };

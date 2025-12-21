@@ -121,6 +121,8 @@ export const bigBounceUniverse = (p5: P5) => {
 			allStarsGone: null,
 		},
 	};
+	// @ts-ignore: ts(2339) - we are adding a custom property to p5
+	p5.universeState = universeState;
 
 	p5.preload = () => {
 		universeState.endSound = new Audio(end_times);
@@ -240,43 +242,43 @@ export const bigBounceUniverse = (p5: P5) => {
 	};
 
 	p5.draw = () => {
-		if (CONSTANTS.debug) {
-			p5.keyPressed = () => {
-				if (p5.key === " ") {
-					if (p5.isLooping()) {
-						console.log("paused");
-						p5.noLoop();
+		// if (CONSTANTS.debug) {
+		// 	p5.keyPressed = () => {
+		// 		if (p5.key === " ") {
+		// 			if (p5.isLooping()) {
+		// 				console.log("paused");
+		// 				p5.noLoop();
 
-						console.log(
-							JSON.stringify(
-								{
-									sun: universeState.sun,
+		// 				console.log(
+		// 					JSON.stringify(
+		// 						{
+		// 							sun: universeState.sun,
 
-									planets: universeState.planets,
-									numPlanets: universeState.numPlanets,
-									celestialBodiesToAdd: universeState.celestialBodiesToAdd,
-									planetTrails: universeState.planetTrails,
+		// 							planets: universeState.planets,
+		// 							numPlanets: universeState.numPlanets,
+		// 							celestialBodiesToAdd: universeState.celestialBodiesToAdd,
+		// 							planetTrails: universeState.planetTrails,
 
-									stars: universeState.stars,
-									numStars: universeState.numStars,
-									starsToAdd: universeState.starsToAdd,
+		// 							stars: universeState.stars,
+		// 							numStars: universeState.numStars,
+		// 							starsToAdd: universeState.starsToAdd,
 
-									nebulas: universeState.nebulas,
+		// 							nebulas: universeState.nebulas,
 
-									// planetAddInterval: universeState.planetAddInterval,
-									// orbitalRadii: universeState.orbitalRadii,
-								},
-								null,
-								2
-							)
-						);
-					} else {
-						console.log("continue");
-						p5.loop();
-					}
-				}
-			};
-		}
+		// 							// planetAddInterval: universeState.planetAddInterval,
+		// 							// orbitalRadii: universeState.orbitalRadii,
+		// 						},
+		// 						null,
+		// 						2
+		// 					)
+		// 				);
+		// 			} else {
+		// 				console.log("continue");
+		// 				p5.loop();
+		// 			}
+		// 		}
+		// 	};
+		// }
 
 		// universeState.endSound.addEventListener("canplaythrough", () => {
 		//   universeState.endSound.play();

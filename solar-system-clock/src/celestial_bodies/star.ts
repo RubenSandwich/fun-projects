@@ -128,6 +128,30 @@ class Star {
 			stage: this.stage,
 		};
 	}
+
+	static fromJSON(p5: P5, data: ReturnType<Star["toJSON"]>): Star {
+		const star = Object.create(Star.prototype);
+		star.p5 = p5;
+		star.id = data.id;
+		star.pos = p5.createVector(data.pos.x, data.pos.y);
+		star.size = data.size;
+		star.offset = data.offset;
+		star.brightness = data.brightness;
+		star.twinkleSpeed = data.twinkleSpeed;
+		star.removeCallback = null;
+		star.numParticles = data.numParticles;
+		star.stage = data.stage;
+
+		// Recreate particles
+		star.particles = data.particles.map((p) => ({
+			pos: p5.createVector(p.pos.x, p.pos.y),
+			vel: p5.createVector(p.vel.x, p.vel.y),
+			size: p.size,
+			color: p5.color(p.color.h, p.color.s, p.color.b),
+		}));
+
+		return star;
+	}
 }
 
 export { Star, StarStage };

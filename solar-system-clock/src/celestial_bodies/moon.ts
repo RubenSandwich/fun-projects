@@ -96,6 +96,33 @@ class Moon {
 			planetTrailId: this.planetTrail?.id ?? null,
 		};
 	}
+
+	static fromJSON(
+		p5: P5,
+		data: ReturnType<Moon["toJSON"]>,
+		orbitingBodies: Planet[],
+		planetTrails: PlanetTrail[]
+	): Moon {
+		const moon = Object.create(Moon.prototype);
+		moon.p5 = p5;
+		moon.id = data.id;
+		moon.mass = data.mass;
+		moon.d = data.d;
+		moon.pos = p5.createVector(data.pos.x, data.pos.y);
+		moon.color = p5.color(data.color.h, data.color.s, data.color.b);
+		moon.orbitingBody =
+			orbitingBodies.find((ob) => {
+				return ob.id === data.orbitingBodyId;
+			}) || null;
+		moon.orbitRadius = data.orbitRadius;
+		moon.orbitAngle = data.orbitAngle;
+		moon.planetTrail =
+			planetTrails.find((pt) => {
+        return pt.id === data.planetTrailId;
+      }) || null;
+
+		return moon;
+	}
 }
 
 export { Moon };

@@ -103,6 +103,31 @@ class Planet {
 			planetTrailId: this.planetTrail ? this.planetTrail.id : null,
 		};
 	}
+
+	static fromJSON(
+		p5: P5,
+		data: ReturnType<Planet["toJSON"]>,
+		sun: Sun,
+		planetTrails: PlanetTrail[]
+	): Planet {
+		const planet = Object.create(Planet.prototype);
+		planet.p5 = p5;
+		planet.id = data.id;
+		planet.mass = data.mass;
+		planet.pos = p5.createVector(data.pos.x, data.pos.y);
+		planet.vel = p5.createVector(data.vel.x, data.vel.y);
+		planet.d = data.d;
+		planet.color = p5.color(data.color.h, data.color.s, data.color.b);
+
+		// A planet's orbitingBody is always the sun
+		planet.orbitingBody = sun;
+		planet.planetTrail =
+			planetTrails.find((pt) => {
+        return pt.id === data.planetTrailId;
+      }) || null;
+
+		return planet;
+	}
 }
 
 export { Planet };
