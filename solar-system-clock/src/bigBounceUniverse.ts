@@ -242,44 +242,6 @@ export const bigBounceUniverse = (p5: P5) => {
 	};
 
 	p5.draw = () => {
-		// if (CONSTANTS.debug) {
-		// 	p5.keyPressed = () => {
-		// 		if (p5.key === " ") {
-		// 			if (p5.isLooping()) {
-		// 				console.log("paused");
-		// 				p5.noLoop();
-
-		// 				console.log(
-		// 					JSON.stringify(
-		// 						{
-		// 							sun: universeState.sun,
-
-		// 							planets: universeState.planets,
-		// 							numPlanets: universeState.numPlanets,
-		// 							celestialBodiesToAdd: universeState.celestialBodiesToAdd,
-		// 							planetTrails: universeState.planetTrails,
-
-		// 							stars: universeState.stars,
-		// 							numStars: universeState.numStars,
-		// 							starsToAdd: universeState.starsToAdd,
-
-		// 							nebulas: universeState.nebulas,
-
-		// 							// planetAddInterval: universeState.planetAddInterval,
-		// 							// orbitalRadii: universeState.orbitalRadii,
-		// 						},
-		// 						null,
-		// 						2
-		// 					)
-		// 				);
-		// 			} else {
-		// 				console.log("continue");
-		// 				p5.loop();
-		// 			}
-		// 		}
-		// 	};
-		// }
-
 		// universeState.endSound.addEventListener("canplaythrough", () => {
 		//   universeState.endSound.play();
 		// });
@@ -486,15 +448,25 @@ export const bigBounceUniverse = (p5: P5) => {
 					const star = universeState.stars[randomIndex];
 
 					if (star && star.stage !== StarStage.Exploding) {
-						universeState.stars[randomIndex].beginExploading(function () {
-							universeState.stars.splice(randomIndex, 1);
+						document.addEventListener(
+							"universe.starExplosionComplete",
+							() => {
+								const index = universeState.stars.findIndex(
+									(s) => s.id === star.id
+								);
+								if (index !== -1) {
+									universeState.stars.splice(index, 1);
 
-							if (universeState.stars.length === 0) {
-								universeState.times.allStarsGone = new Date();
-							}
-						});
+									if (universeState.stars.length === 0) {
+										universeState.times.allStarsGone = new Date();
+									}
+								}
+							},
+							{ once: true }
+						);
+
+						star.beginExploading();
 					}
-
 					universeState.lastStarChangeTime = p5.millis();
 				}
 

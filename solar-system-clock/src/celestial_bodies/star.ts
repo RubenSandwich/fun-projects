@@ -15,7 +15,6 @@ class Star {
 	offset: number;
 	brightness: number;
 	twinkleSpeed: number;
-	removeCallback: (() => void) | null;
 	particles: {
 		pos: P5.Vector;
 		vel: P5.Vector;
@@ -36,7 +35,6 @@ class Star {
 		this.brightness = getRandomInt(100, 255);
 		this.offset = getRandomFloat(Math.PI * 2);
 		this.twinkleSpeed = getRandomFloat(0.005, 0.015);
-		this.removeCallback = null;
 
 		this.particles = [];
 		this.numParticles = 5;
@@ -56,6 +54,7 @@ class Star {
 			);
 			this.p5.fill(this.brightness);
 			this.p5.ellipse(this.pos.x, this.pos.y, size);
+
 		} else if (this.stage === StarStage.Exploding) {
 			for (let i = this.particles.length - 1; i >= 0; i--) {
 				const particle = this.particles[i];
@@ -82,15 +81,18 @@ class Star {
 				}
 			}
 
-			if (this.particles.length === 0 && this.removeCallback) {
-				this.removeCallback();
+			if (this.particles.length === 0) {
+				document.dispatchEvent(
+					new CustomEvent("universe.starExplosionComplete", {
+						detail: { starId: this.id },
+					})
+				);
 			}
 		}
 	}
 
-	beginExploading(removeCallback: () => void): void {
+	beginExploading(): void {
 		this.stage = StarStage.Exploding;
-		this.removeCallback = removeCallback;
 
 		for (let i = 0; i < this.numParticles; i++) {
 			this.particles.push({
@@ -138,7 +140,6 @@ class Star {
 		star.offset = data.offset;
 		star.brightness = data.brightness;
 		star.twinkleSpeed = data.twinkleSpeed;
-		star.removeCallback = null;
 		star.numParticles = data.numParticles;
 		star.stage = data.stage;
 
