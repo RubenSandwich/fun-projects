@@ -33,7 +33,6 @@ class Sun {
 		color: P5.Color;
 	}[];
 	numParticles: number;
-	bigBangCallback: (() => void) | null;
 
 	constructor(p5: P5, options = { simple: false }) {
 		this.p5 = p5;
@@ -74,8 +73,6 @@ class Sun {
 		this.stage = SunStage.SUN;
 		this.particles = [];
 		this.numParticles = 400;
-
-		this.bigBangCallback = null;
 
 		if (!options.simple) {
 			this.stage = SunStage.BIG_BANG;
@@ -159,8 +156,7 @@ class Sun {
 		this.p5.ellipse(this.pos.x, this.pos.y, diameter, diameter);
 	}
 
-	beginBigBang(bigBangCallback: () => void): void {
-		this.bigBangCallback = bigBangCallback;
+	beginBigBang(): void {
 		this.stage = SunStage.BIG_BANG;
 
 		// update any existing particles so that they are never static
@@ -219,10 +215,11 @@ class Sun {
 		// this.drawSun();
 
 		if (this.particles.length === 0) {
-			if (this.bigBangCallback) {
-				this.bigBangCallback();
-			}
-
+			document.dispatchEvent(
+				new CustomEvent("universe.bigBangComplete", {
+					detail: { sunId: this.id },
+				})
+			);
 			this.stage = SunStage.NEBULA;
 		}
 	}
@@ -366,9 +363,6 @@ class Sun {
 		sun.d = data.d;
 		sun.stage = data.stage;
 		sun.numParticles = 400;
-
-    // instead of callbacks we should be using events
-		sun.bigBangCallback = null;
 
 		sun.particles = data.particles.map((p) => ({
 			pos: p5.createVector(p.pos.x, p.pos.y),

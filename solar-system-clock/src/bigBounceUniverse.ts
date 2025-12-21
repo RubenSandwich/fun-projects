@@ -474,21 +474,27 @@ export const bigBounceUniverse = (p5: P5) => {
 					universeState.stars.length === 0 &&
 					universeState.nebulas.length === 0
 				) {
-					universeState.sun.beginBigBang(function () {
-						for (let i = 0; i < universeState.nebulas.length; i++) {
-							universeState.nebulas[i].destroy();
-						}
+					// Listen for big bang complete event
+					document.addEventListener(
+						"universe.bigBangComplete",
+						() => {
+							for (let i = 0; i < universeState.nebulas.length; i++) {
+								universeState.nebulas[i].destroy();
+							}
 
-						// universeState.times.bigBangStage = new Date();
-						universeState.bounceNumber += 1;
-						logTimes(universeState);
+							// universeState.times.bigBangStage = new Date();
+							universeState.bounceNumber += 1;
+							logTimes(universeState);
 
-						// restart
-						// TODO: refactor out a better setup function
-						setupNewUniverse();
-					});
+							// restart
+							// TODO: refactor out a better setup function
+							setupNewUniverse();
+						},
+						{ once: true }
+					);
+
+					universeState.sun.beginBigBang();
 				}
-
 				break;
 		}
 
