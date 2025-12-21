@@ -78,3 +78,127 @@ body.rotation-90 {
 body.rotation90 {
   transform: rotate(-90deg) translateX(-100%);
 }
+
+/* State Dialog Styles */
+#statePopover {
+  border: 2px solid #444;
+  border-radius: 12px;
+  padding: 0;
+  background-color: #2a2a2a;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  color: white;
+}
+
+#statePopover::backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.popover-content {
+  padding: 30px;
+  position: relative;
+}
+
+.popover-content h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.popover-content h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+#currentState {
+  width: 100%;
+  min-height: 150px;
+  background-color: #1a1a1a;
+  color: white;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+.button-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.button-row button {
+  flex: 1;
+  background-color: #444;
+  border: 1px solid #666;
+  border-radius: 6px;
+  color: white;
+  padding: 12px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.button-row button:hover {
+  background-color: #555;
+  border-color: #777;
+}
+
+.button-row button:active {
+  background-color: #333;
+}
+
+.saved-states {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.load-saved-state {
+  background-color: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: white;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  text-align: left;
+}
+
+.load-saved-state:hover {
+  background-color: #4a4a4a;
+  border-color: #666;
+}
+
+.load-saved-state:active {
+  background-color: #2a2a2a;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 32px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 0.7;
+}

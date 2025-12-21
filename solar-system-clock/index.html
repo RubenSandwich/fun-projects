@@ -2,7 +2,7 @@
 <html lang="">
   <head>
     <title>solar system</title>
-    
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
@@ -28,6 +28,29 @@
     </div>
     <div id="app"></div>
     <div id="errors"></div>
+
+    <dialog id="statePopover">
+      <div class="popover-content">
+        <h2>Paused</h2>
+
+        Current State:
+        <textarea id="currentState" placeholder="State JSON will appear here..."></textarea>
+
+        <div class="button-row">
+          <button id="saveStateBtn">Save State</button>
+          <button id="loadStateBtn">Load State</button>
+        </div>
+
+        <div class="saved-states">
+          <h3>Debug States</h3>
+          <button class="load-saved-state" data-slot="1">Load State 1</button>
+          <button class="load-saved-state" data-slot="2">Load State 2</button>
+          <button class="load-saved-state" data-slot="3">Load State 3</button>
+          <button class="load-saved-state" data-slot="4">Load State 4</button>
+        </div>
+      </div>
+    </dialog>
+
     <script src="src/renderLoop.ts"></script>
   </body>
 </html>

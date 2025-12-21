@@ -105,42 +105,80 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 		event.preventDefault();
 
 		if (universe && CONSTANTS.debug) {
+			const modal = document.getElementById(
+				"statePopover"
+			) as HTMLDialogElement;
+
 			const p5 = universe as P5;
 			if (p5.isLooping()) {
-				console.log("paused 2");
 				p5.noLoop();
+				modal.showModal();
 
-        console.log(p5);
 
-        // const universeState = universe.universeState;
-				// console.log(
-				// 	JSON.stringify(
-				// 		{
-				// 			sun: universeState.sun,
 
-				// 			planets: universeState.planets,
-				// 			numPlanets: universeState.numPlanets,
-				// 			celestialBodiesToAdd: universeState.celestialBodiesToAdd,
-				// 			planetTrails: universeState.planetTrails,
+				const currentStateTextarea = document.getElementById(
+					"currentState"
+				) as HTMLTextAreaElement;
 
-				// 			stars: universeState.stars,
-				// 			numStars: universeState.numStars,
-				// 			starsToAdd: universeState.starsToAdd,
+        const universeState = universe.universeState;
+				const universeStateJSON = JSON.stringify(
+					{
+						sun: universeState.sun,
 
-				// 			nebulas: universeState.nebulas,
+						planets: universeState.planets,
+						numPlanets: universeState.numPlanets,
+						celestialBodiesToAdd: universeState.celestialBodiesToAdd,
+						planetTrails: universeState.planetTrails,
 
-				// 			// planetAddInterval: universeState.planetAddInterval,
-				// 			// orbitalRadii: universeState.orbitalRadii,
-				// 		},
-				// 		null,
-				// 		2
-				// 	)
-				// );
+						stars: universeState.stars,
+						numStars: universeState.numStars,
+						starsToAdd: universeState.starsToAdd,
+
+						nebulas: universeState.nebulas,
+
+						// planetAddInterval: universeState.planetAddInterval,
+						// orbitalRadii: universeState.orbitalRadii,
+					},
+					null,
+					2
+				);
+
+        currentStateTextarea.value = universeStateJSON;
 			} else {
-				console.log("continue 2");
+				modal.close();
 				p5.loop();
 			}
 		}
+	}
+});
+
+// Handle save state button
+document.addEventListener("DOMContentLoaded", function () {
+	const saveStateBtn = document.getElementById("saveStateBtn");
+	if (saveStateBtn) {
+		saveStateBtn.addEventListener("click", () => {
+			const currentStateTextarea = document.getElementById(
+				"currentState"
+			) as HTMLTextAreaElement;
+			const stateJSON = currentStateTextarea.value;
+
+			if (stateJSON) {
+				// Create a blob from the JSON string
+				const blob = new Blob([stateJSON], { type: "application/json" });
+				const url = URL.createObjectURL(blob);
+
+				// Create a temporary download link
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `universe-state-${Date.now()}.json`;
+				document.body.appendChild(a);
+				a.click();
+
+				// Clean up
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}
+		});
 	}
 });
 
