@@ -119,30 +119,10 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 					"currentState"
 				) as HTMLTextAreaElement;
 
-        const universeState = universe.universeState;
-				const universeStateJSON = JSON.stringify(
-					{
-						sun: universeState.sun,
+        const universeState = universe.getUniverseState();
 
-						planets: universeState.planets,
-						numPlanets: universeState.numPlanets,
-						celestialBodiesToAdd: universeState.celestialBodiesToAdd,
-						planetTrails: universeState.planetTrails,
-
-						stars: universeState.stars,
-						numStars: universeState.numStars,
-						starsToAdd: universeState.starsToAdd,
-
-						nebulas: universeState.nebulas,
-
-						// planetAddInterval: universeState.planetAddInterval,
-						// orbitalRadii: universeState.orbitalRadii,
-					},
-					null,
-					2
-				);
-
-        currentStateTextarea.value = universeStateJSON;
+        currentStateTextarea.value = JSON.stringify(universeState, null, 2);
+        console.log("Universe state:", universeState);
 			} else {
 				modal.close();
 				p5.loop();
@@ -156,12 +136,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	const saveStateBtn = document.getElementById("saveStateBtn");
 	if (saveStateBtn) {
 		saveStateBtn.addEventListener("click", () => {
-			const currentStateTextarea = document.getElementById(
-				"currentState"
-			) as HTMLTextAreaElement;
-			const stateJSON = currentStateTextarea.value;
+			if (universe) {
+        const stateJSON = JSON.stringify(universe.getUniverseState(), null, 2);
 
-			if (stateJSON) {
 				// Create a blob from the JSON string
 				const blob = new Blob([stateJSON], { type: "application/json" });
 				const url = URL.createObjectURL(blob);

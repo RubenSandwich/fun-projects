@@ -121,8 +121,54 @@ export const bigBounceUniverse = (p5: P5) => {
 			allStarsGone: null,
 		},
 	};
-	// @ts-ignore: ts(2339) - we are adding a custom property to p5
-	p5.universeState = universeState;
+
+	// @ts-ignore: ts(2339) - we are adding some custom properties to p5
+	p5.getUniverseState = () => {
+		return {
+			uuid: universeState.uuid,
+			tickNum: universeState.tickNum,
+			sun: universeState.sun.toJSON(),
+			planets: universeState.planets.map((p) => p.toJSON()),
+			numPlanets: universeState.numPlanets,
+			planetTrails: universeState.planetTrails.map((pt) => pt.toJSON()),
+			planetAddInterval: universeState.planetAddInterval,
+			lastPlanetAddTime: universeState.lastPlanetAddTime,
+			celestialBodiesToAdd: universeState.celestialBodiesToAdd.map((cb) =>
+				cb.toJSON()
+			),
+			orbitalRadii: universeState.orbitalRadii,
+			stars: universeState.stars.map((s) => s.toJSON()),
+			numStars: universeState.numStars,
+			starsToAdd: universeState.starsToAdd.map((s) => s.toJSON()),
+			starChangeInterval: universeState.starChangeInterval,
+			lastStarChangeTime: universeState.lastStarChangeTime,
+			nebulas: universeState.nebulas.map((n) => n.toJSON()),
+			numNebulas: universeState.numNebulas,
+			nebulasFullyChanged: universeState.nebulasFullyChanged,
+			nebulaChangeInterval: universeState.nebulaChangeInterval,
+			lastNebulaChangeTime: universeState.lastNebulaChangeTime,
+			bounceNumber: universeState.bounceNumber,
+			times: {
+				bigBangStage: universeState.times.bigBangStage?.toISOString() ?? null,
+				allNubulasAdded:
+					universeState.times.allNubulasAdded?.toISOString() ?? null,
+				allStarsAdded: universeState.times.allStarsAdded?.toISOString() ?? null,
+				sunStage: universeState.times.sunStage?.toISOString() ?? null,
+				allPlanetsAdded:
+					universeState.times.allPlanetsAdded?.toISOString() ?? null,
+				planetRemoved: universeState.times.planetRemoved.map((d) =>
+					d.toISOString()
+				),
+				blackHoleStage:
+					universeState.times.blackHoleStage?.toISOString() ?? null,
+				allNebulasGone:
+					universeState.times.allNebulasGone?.toISOString() ?? null,
+				allStarsGone: universeState.times.allStarsGone?.toISOString() ?? null,
+			},
+		};
+	};
+
+	p5.loadUniverseState = (stateJSON: string) => {};
 
 	p5.preload = () => {
 		universeState.endSound = new Audio(end_times);
