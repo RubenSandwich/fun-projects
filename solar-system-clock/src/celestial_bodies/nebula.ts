@@ -155,7 +155,6 @@ class Nebula {
 	toJSON() {
 		let nebulaRenderBase64 = null;
 		if (this.nebulaRender) {
-			// const ctx = this.nebulaRender.drawingContext;
 			// Get the canvas as a data URL and extract the base64 part
 			const dataURL = this.nebulaRender.elt.toDataURL();
 			nebulaRenderBase64 = dataURL;

@@ -133,9 +133,9 @@ export const bigBounceUniverse = (p5: P5) => {
 			planetTrails: universeState.planetTrails.map((pt) => pt.toJSON()),
 			planetAddInterval: universeState.planetAddInterval,
 			lastPlanetAddTime: universeState.lastPlanetAddTime,
-			celestialBodiesToAdd: universeState.celestialBodiesToAdd.map((cb) =>
-				cb.toJSON()
-			),
+			celestialBodiesToAdd: universeState.celestialBodiesToAdd.map((cb) => ({
+				id: cb.id,
+			})),
 			orbitalRadii: universeState.orbitalRadii,
 			stars: universeState.stars.map((s) => s.toJSON()),
 			numStars: universeState.numStars,
@@ -168,7 +168,148 @@ export const bigBounceUniverse = (p5: P5) => {
 		};
 	};
 
-	p5.loadUniverseState = (stateJSON: string) => {};
+	// @ts-ignore: ts(2339) - we are adding some custom properties to p5
+	p5.loadUniverseState = async (loadedData: any) => {
+		// stop the loop while we load
+		p5.noLoop();
+		// store the old state in case we need to revert
+		const oldState = universeState;
+
+		// Clear existing tick interval
+		if (universeState.tickIntervalRef !== null) {
+			clearInterval(universeState.tickIntervalRef);
+		}
+
+		try {
+			// Restore basic properties
+			universeState.uuid = loadedData.uuid;
+			universeState.tickNum = loadedData.tickNum;
+			universeState.numPlanets = loadedData.numPlanets;
+			universeState.planetAddInterval = loadedData.planetAddInterval;
+			universeState.lastPlanetAddTime = loadedData.lastPlanetAddTime;
+			universeState.orbitalRadii = loadedData.orbitalRadii;
+			universeState.numStars = loadedData.numStars;
+			universeState.starChangeInterval = loadedData.starChangeInterval;
+			universeState.lastStarChangeTime = loadedData.lastStarChangeTime;
+			universeState.numNebulas = loadedData.numNebulas;
+			universeState.nebulasFullyChanged = loadedData.nebulasFullyChanged;
+			universeState.nebulaChangeInterval = loadedData.nebulaChangeInterval;
+			universeState.lastNebulaChangeTime = loadedData.lastNebulaChangeTime;
+			universeState.bounceNumber = loadedData.bounceNumber;
+
+			// Restore times
+			universeState.times = {
+				bigBangStage: loadedData.times.bigBangStage
+					? new Date(loadedData.times.bigBangStage)
+					: null,
+				allNubulasAdded: loadedData.times.allNubulasAdded
+					? new Date(loadedData.times.allNubulasAdded)
+					: null,
+				allStarsAdded: loadedData.times.allStarsAdded
+					? new Date(loadedData.times.allStarsAdded)
+					: null,
+				sunStage: loadedData.times.sunStage
+					? new Date(loadedData.times.sunStage)
+					: null,
+				allPlanetsAdded: loadedData.times.allPlanetsAdded
+					? new Date(loadedData.times.allPlanetsAdded)
+					: null,
+				planetRemoved: loadedData.times.planetRemoved.map(
+					(d: string) => new Date(d)
+				),
+				blackHoleStage: loadedData.times.blackHoleStage
+					? new Date(loadedData.times.blackHoleStage)
+					: null,
+				allNebulasGone: loadedData.times.allNebulasGone
+					? new Date(loadedData.times.allNebulasGone)
+					: null,
+				allStarsGone: loadedData.times.allStarsGone
+					? new Date(loadedData.times.allStarsGone)
+					: null,
+			};
+
+			// Restore sun
+			universeState.sun = Sun.fromJSON(p5, loadedData.sun);
+
+			// Restore planet trails
+			const planetTrails = loadedData.planetTrails.map((pt: any) =>
+				PlanetTrail.fromJSON(p5, pt)
+			);
+			universeState.planetTrails = planetTrails;
+
+			// Restore planets and moons (need to handle interdependencies)
+			const planets = [] as Planet[];
+			const allPlanets = [] as (Planet | Moon)[];
+
+			// First pass: create all planets
+			loadedData.planets.forEach((planetData: any) => {
+				const planet = Planet.fromJSON(
+					p5,
+					planetData,
+					universeState.sun,
+					planetTrails
+				);
+
+				planets.push(planet);
+				allPlanets.push(planet);
+			});
+
+			// Second pass: create all moons (they need their parent planets to exist)
+			loadedData.planets.forEach((planetData: any) => {
+				const moon = Moon.fromJSON(p5, planetData, planets, planetTrails);
+
+				allPlanets.push(moon);
+			});
+
+			// Reconstruct planets array in original order
+			universeState.planets = allPlanets;
+
+			// Restore celestialBodiesToAdd
+			universeState.celestialBodiesToAdd = loadedData.celestialBodiesToAdd.map(
+				(cbData: any) => {
+					return planets.find((p) => p.id === cbData.id)!;
+				}
+			);
+
+			// Restore stars
+			universeState.stars = loadedData.stars.map((s: any) =>
+				Star.fromJSON(p5, s)
+			);
+
+			// Restore starsToAdd
+			universeState.starsToAdd = loadedData.starsToAdd.map((s: any) =>
+				Star.fromJSON(p5, s)
+			);
+
+			// Restore nebulas (async operation, but we'll handle it synchronously for now)
+			universeState.nebulas = [];
+			const nebulasPromise = await Promise.all(
+				loadedData.nebulas.map((n: any) => Nebula.fromJSON(p5, n))
+			)
+				.then((nebulas) => {
+					universeState.nebulas = nebulas;
+
+					return true;
+				})
+				.catch((error) => {
+					throw new Error(
+						"Failed to load nebulas, universe may be incomplete."
+					);
+				});
+		} catch (error) {
+			console.error("Error loading universe:", error);
+			Object.assign(universeState, oldState);
+
+			throw new Error(`Error loading universe: ${error}`);
+		} finally {
+			// Restart tick interval and loop
+			universeState.tickIntervalRef = setInterval(function () {
+				universeState.tickNum++;
+			}, CONSTANTS.tickIntervalMs);
+
+			p5.loop();
+		}
+	};
 
 	p5.preload = () => {
 		universeState.endSound = new Audio(end_times);

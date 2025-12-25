@@ -172,10 +172,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 				if (file) {
 					const reader = new FileReader();
-					reader.onload = (e) => {
+					reader.onload = async (e) => {
 						const fileContent = e.target?.result as string;
 						try {
 							const newUniverseState = JSON.parse(fileContent);
+
+							if (universe) {
+								await universe.loadUniverseState(newUniverseState);
+							}
 
 							console.log("Loaded universe state:", newUniverseState);
 						} catch (error) {
