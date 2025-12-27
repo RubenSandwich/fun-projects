@@ -7,6 +7,8 @@ import { Sun } from "./sun";
 class Planet {
 	p5: P5;
 	id: string;
+	// not proud of this...
+	cbType: string = "planet";
 	mass: number;
 	pos: P5.Vector;
 	vel: P5.Vector;
@@ -90,6 +92,7 @@ class Planet {
 	toJSON() {
 		return {
 			id: this.id,
+			cbType: this.cbType,
 			mass: this.mass,
 			pos: { x: this.pos.x, y: this.pos.y },
 			vel: { x: this.vel.x, y: this.vel.y },
@@ -113,6 +116,7 @@ class Planet {
 		const planet = Object.create(Planet.prototype);
 		planet.p5 = p5;
 		planet.id = data.id;
+		planet.cbType = data.cbType;
 		planet.mass = data.mass;
 		planet.pos = p5.createVector(data.pos.x, data.pos.y);
 		planet.vel = p5.createVector(data.vel.x, data.vel.y);

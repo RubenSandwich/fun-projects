@@ -41,6 +41,7 @@ class Nebula {
 		this.noiseOffset = getRandomInt(1000);
 
 		this.nebulaRender = this.p5.createGraphics(this.size, this.size);
+		this.nebulaRender.elt.id = this.id;
 		this.nebulaRender.noStroke();
 
 		// Generate blob shape
@@ -166,7 +167,7 @@ class Nebula {
 			initialPos: { x: this.initialPos.x, y: this.initialPos.y },
 			size: this.size,
 			noiseOffset: this.noiseOffset,
-			nebulaRender: nebulaRenderBase64,
+			nebulaRenderBase64: nebulaRenderBase64,
 			frameOffset: this.frameOffset,
 			currentAlpha: this.currentAlpha,
 			maxAlpha: this.maxAlpha,
@@ -187,16 +188,26 @@ class Nebula {
 			nebula.maxAlpha = data.maxAlpha;
 
 			// Recreate nebulaRender from base64
-			if (data.nebulaRender) {
+			if (data.nebulaRenderBase64) {
 				nebula.nebulaRender = p5.createGraphics(data.size, data.size);
+				nebula.nebulaRender.elt.id = nebula.id;
+				nebula.nebulaRender.noStroke();
 
 				// Load the image from the data URL
-				p5.loadImage(data.nebulaRender, (img) => {
-					nebula.nebulaRender.image(img, 0, 0);
-					resolve(nebula);
-				}, (err) => {
-					reject(err);
-				});
+				p5.loadImage(
+					data.nebulaRenderBase64,
+					(img) => {
+						// Draw the image at (0,0) on the graphics buffer
+						nebula.nebulaRender.image(img, 0, 0, data.size, data.size);
+						// Apply the correct alpha value to all pixels
+						nebula.changeAlpha(nebula.currentAlpha);
+						resolve(nebula);
+					},
+					(err) => {
+						console.error("Failed to load nebula image:", err);
+						reject(err);
+					}
+				);
 			} else {
 				nebula.nebulaRender = null;
 				resolve(nebula);

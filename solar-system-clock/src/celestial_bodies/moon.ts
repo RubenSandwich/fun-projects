@@ -6,6 +6,8 @@ import { Planet } from "./planet";
 class Moon {
 	p5: P5;
 	id: string;
+	// not proud of this...
+	cbType: string = "moon";
 	mass: number;
 	d: number;
 	pos: P5.Vector;
@@ -82,6 +84,7 @@ class Moon {
 	toJSON() {
 		return {
 			id: this.id,
+			cbType: this.cbType,
 			mass: this.mass,
 			d: this.d,
 			pos: { x: this.pos.x, y: this.pos.y },
@@ -106,6 +109,7 @@ class Moon {
 		const moon = Object.create(Moon.prototype);
 		moon.p5 = p5;
 		moon.id = data.id;
+		moon.cbType = data.cbType;
 		moon.mass = data.mass;
 		moon.d = data.d;
 		moon.pos = p5.createVector(data.pos.x, data.pos.y);

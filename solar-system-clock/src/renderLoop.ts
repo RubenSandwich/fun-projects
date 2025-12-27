@@ -119,10 +119,10 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 					"currentState"
 				) as HTMLTextAreaElement;
 
-        const universeState = universe.getUniverseState();
+				const universeState = universe.getUniverseState();
 
-        currentStateTextarea.value = JSON.stringify(universeState, null, 2);
-        console.log("Universe state:", universeState);
+				currentStateTextarea.value = JSON.stringify(universeState, null, 2);
+				console.log("Universe state:", universeState);
 			} else {
 				modal.close();
 				p5.loop();
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (saveStateBtn) {
 		saveStateBtn.addEventListener("click", () => {
 			if (universe) {
-        const stateJSON = JSON.stringify(universe.getUniverseState(), null, 2);
+				const stateJSON = JSON.stringify(universe.getUniverseState(), null, 2);
 
 				// Create a blob from the JSON string
 				const blob = new Blob([stateJSON], { type: "application/json" });
@@ -182,6 +182,12 @@ document.addEventListener("DOMContentLoaded", function () {
 							}
 
 							console.log("Loaded universe state:", newUniverseState);
+
+							// close the modal
+							const modal = document.getElementById(
+								"statePopover"
+							) as HTMLDialogElement;
+							modal.close();
 						} catch (error) {
 							console.error("Failed to parse JSON:", error);
 							alert("Invalid JSON file");
@@ -207,7 +213,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			const slotName = target.getAttribute("data-slot-name");
 
 			if (slotName && slotName in universeTestingStates) {
-				const stateData = universeTestingStates[slotName as keyof typeof universeTestingStates];
+				const stateData =
+					universeTestingStates[slotName as keyof typeof universeTestingStates];
 				console.log(`Loading state from slot: ${slotName}`, stateData);
 
 				// Update the textarea with the loaded state
@@ -220,9 +227,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			}
 		});
 	});
-
-
-
 });
 
 try {
