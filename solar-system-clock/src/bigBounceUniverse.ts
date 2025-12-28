@@ -22,6 +22,7 @@ import end_times from "../assets/End_Times.mp3";
 
 type UniverseState = {
 	p5Renderer: P5.Renderer;
+	universeStateVersion: number;
 	uuid: string;
 
 	tickNum: number;
@@ -76,6 +77,8 @@ export const bigBounceUniverse = (p5: P5) => {
 
 	const universeState: UniverseState = {
 		p5Renderer: null!,
+
+		universeStateVersion: 1,
 		sun: null!,
 
 		uuid: generateUUID(),
@@ -123,8 +126,14 @@ export const bigBounceUniverse = (p5: P5) => {
 	};
 
 	// @ts-ignore: ts(2339) - we are adding some custom properties to p5
+	p5.getUniverseStateVersion = () => {
+		return universeState.universeStateVersion;
+	};
+
+	// @ts-ignore: ts(2339) - we are adding some custom properties to p5
 	p5.getUniverseState = () => {
 		return {
+			universeStateVersion: universeState.universeStateVersion,
 			uuid: universeState.uuid,
 			tickNum: universeState.tickNum,
 			sun: universeState.sun.toJSON(),
@@ -241,7 +250,7 @@ export const bigBounceUniverse = (p5: P5) => {
 			// first pass: create all planets as they are needed to create moons
 			const allPlanets = [
 				...loadedData.celestialBodiesToAdd.reduce((arr: any[], data: any) => {
-					if (data.cbType !== "planet") {
+					if (data.className !== "planet") {
 						return arr;
 					}
 
@@ -250,7 +259,7 @@ export const bigBounceUniverse = (p5: P5) => {
 					return arr;
 				}, []),
 				...loadedData.planets.reduce((arr: any[], data: any) => {
-					if (data.cbType !== "planet") {
+					if (data.className !== "planet") {
 						return arr;
 					}
 
@@ -261,23 +270,23 @@ export const bigBounceUniverse = (p5: P5) => {
 			];
 
 			newUniverseState.planets = loadedData.planets.map((data: any) => {
-				if (data.cbType === "planet") {
+				if (data.className === "planet") {
 					return Planet.fromJSON(p5, data, universeState.sun, planetTrails);
-				} else if (data.cbType === "moon") {
+				} else if (data.className === "moon") {
 					return Moon.fromJSON(p5, data, allPlanets, planetTrails);
 				} else {
-					throw new Error(`Unknown celestial body type: ${data.cbType}`);
+					throw new Error(`Unknown celestial body type: ${data.className}`);
 				}
 			});
 
 			newUniverseState.celestialBodiesToAdd =
 				loadedData.celestialBodiesToAdd.map((data: any) => {
-					if (data.cbType === "planet") {
+					if (data.className === "planet") {
 						return Planet.fromJSON(p5, data, sun, planetTrails);
-					} else if (data.cbType === "moon") {
+					} else if (data.className === "moon") {
 						return Moon.fromJSON(p5, data, allPlanets, planetTrails);
 					} else {
-						throw new Error(`Unknown celestial body type: ${data.cbType}`);
+						throw new Error(`Unknown celestial body type: ${data.className}`);
 					}
 				});
 
