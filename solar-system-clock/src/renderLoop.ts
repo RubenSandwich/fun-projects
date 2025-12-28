@@ -100,132 +100,155 @@ document.ontouchmove = function (event: TouchEvent) {
 	event.preventDefault();
 };
 
-// Listen for spacebar key press
-document.addEventListener("keydown", (event: KeyboardEvent) => {
-	if (event.code === "Space" || event.key === " ") {
-		event.preventDefault();
-
-		if (universe && CONSTANTS.debug) {
-			const modal = document.getElementById(
-				"statePopover"
-			) as HTMLDialogElement;
-
-			const p5 = universe as P5;
-			if (p5.isLooping()) {
-				p5.noLoop();
-				modal.showModal();
-
-				const currentStateTextarea = document.getElementById(
-					"currentState"
-				) as HTMLTextAreaElement;
-
-				const universeState = universe.getUniverseState();
-
-				currentStateTextarea.value = JSON.stringify(universeState, null, 2);
-				console.log("Universe state:", universeState);
-			} else {
-				modal.close();
-				p5.loop();
-			}
-		}
-	}
-});
-
 // Handle save state button
 document.addEventListener("DOMContentLoaded", function () {
-	const saveStateBtn = document.getElementById("saveStateBtn");
-	if (saveStateBtn) {
-		saveStateBtn.addEventListener("click", () => {
-			if (universe) {
-				const stateJSON = JSON.stringify(universe.getUniverseState(), null, 2);
+	const popover = document.getElementById("statePopover") as HTMLDialogElement;
+	const closePopoverBtn = document.getElementById(
+		"closePopoverBtn"
+	) as HTMLButtonElement;
+	const loadStateBtn = document.getElementById(
+		"loadStateBtn"
+	) as HTMLButtonElement;
+	const saveStateBtn = document.getElementById(
+		"saveStateBtn"
+	) as HTMLButtonElement;
 
-				// Create a blob from the JSON string
-				const blob = new Blob([stateJSON], { type: "application/json" });
-				const url = URL.createObjectURL(blob);
 
-				// Create a temporary download link
-				const a = document.createElement("a");
-				a.href = url;
-				a.download = `universe-state-${Date.now()}.json`;
-				document.body.appendChild(a);
-				a.click();
-
-				// Clean up
-				document.body.removeChild(a);
-				URL.revokeObjectURL(url);
+	popover.addEventListener("toggle", (event) => {
+		if (event.newState === "open") {
+			if (universe.isLooping()) {
+				universe.noLoop();
 			}
-		});
-	}
+		} else if (event.newState === "closed") {
+			if (!universe.isLooping()) {
+				universe.loop();
+			}
+		}
+	});
 
-	const loadStateBtn = document.getElementById("loadStateBtn");
-	if (loadStateBtn) {
-		loadStateBtn.addEventListener("click", () => {
-			// Create a hidden file input element
-			const fileInput = document.createElement("input");
-			fileInput.type = "file";
-			fileInput.accept = ".json";
-			fileInput.style.display = "none";
+	popover.addEventListener("beforetoggle", (event) => {
+		if (event.newState === "open") {
+			const savedStateButtons = document.querySelectorAll(".load-saved-state");
 
-			fileInput.addEventListener("change", (event) => {
-				const target = event.target as HTMLInputElement;
-				const file = target.files?.[0];
+			savedStateButtons.forEach((button) => {
+				button.addEventListener("click", (event) => {
+					const target = event.target as HTMLButtonElement;
+					const slotName = target.getAttribute("data-slot-name");
 
-				if (file) {
-					const reader = new FileReader();
-					reader.onload = async (e) => {
-						const fileContent = e.target?.result as string;
-						try {
-							const newUniverseState = JSON.parse(fileContent);
+					if (slotName && slotName in universeTestingStates) {
+						const stateData =
+							universeTestingStates[
+								slotName as keyof typeof universeTestingStates
+							];
 
-							if (universe) {
-								await universe.loadUniverseState(newUniverseState);
-							}
-
-							console.log("Loaded universe state:", newUniverseState);
-
-							// close the modal
-							const modal = document.getElementById(
-								"statePopover"
-							) as HTMLDialogElement;
-							modal.close();
-						} catch (error) {
-							console.error("Failed to parse JSON:", error);
-							alert("Invalid JSON file");
-						}
-					};
-					reader.readAsText(file);
-				}
-
-				// Clean up
-				document.body.removeChild(fileInput);
+						// Update the textarea with the loaded state
+						const currentStateTextarea = document.getElementById(
+							"currentState"
+						) as HTMLTextAreaElement;
+						currentStateTextarea.value = JSON.stringify(stateData, null, 2);
+					} else {
+						console.error(`Invalid slot name: ${slotName}`);
+					}
+				});
 			});
+		}
+	});
 
-			document.body.appendChild(fileInput);
-			fileInput.click();
-		});
-	}
+	// Show and hide the modal on spacebar press
+	document.addEventListener("keydown", (event: KeyboardEvent) => {
+		if (event.code === "Space" || event.key === " ") {
+			event.preventDefault();
 
-	// Handle saved state buttons
-	const savedStateButtons = document.querySelectorAll(".load-saved-state");
-	savedStateButtons.forEach((button) => {
-		button.addEventListener("click", (event) => {
-			const target = event.target as HTMLButtonElement;
-			const slotName = target.getAttribute("data-slot-name");
+			if (universe && CONSTANTS.debug) {
+				const modal = document.getElementById(
+					"statePopover"
+				) as HTMLDialogElement;
 
-			if (slotName && slotName in universeTestingStates) {
-				const stateData =
-					universeTestingStates[slotName as keyof typeof universeTestingStates];
-				console.log(`Loading state from slot: ${slotName}`, stateData);
+				if (!modal.open) {
+					modal.showModal();
 
-				// Update the textarea with the loaded state
-				const currentStateTextarea = document.getElementById(
-					"currentState"
-				) as HTMLTextAreaElement;
-				currentStateTextarea.value = JSON.stringify(stateData, null, 2);
-			} else {
-				console.error(`Invalid slot name: ${slotName}`);
+					const currentStateTextarea = document.getElementById(
+						"currentState"
+					) as HTMLTextAreaElement;
+
+					const universeState = universe.getUniverseState();
+
+					currentStateTextarea.value = JSON.stringify(universeState, null, 2);
+				} else {
+					modal.close();
+				}
 			}
+		}
+	});
+
+	closePopoverBtn.addEventListener("click", () => {
+		popover.close();
+	});
+
+	saveStateBtn.addEventListener("click", () => {
+		if (universe) {
+			const stateJSON = JSON.stringify(universe.getUniverseState(), null, 2);
+
+			// Create a blob from the JSON string
+			const blob = new Blob([stateJSON], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+
+			// Create a temporary download link
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `universe-state-${Date.now()}.json`;
+			document.body.appendChild(a);
+			a.click();
+
+			// Clean up
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		}
+	});
+
+	loadStateBtn.addEventListener("click", () => {
+		// Create a hidden file input element
+		const fileInput = document.createElement("input");
+		fileInput.type = "file";
+		fileInput.accept = ".json";
+		fileInput.style.display = "none";
+
+		fileInput.addEventListener("change", (event) => {
+			const target = event.target as HTMLInputElement;
+			const file = target.files?.[0];
+
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = async (e) => {
+					const fileContent = e.target?.result as string;
+					try {
+						const newUniverseState = JSON.parse(fileContent);
+
+						if (universe) {
+							await universe.loadUniverseState(newUniverseState);
+						}
+
+						console.log("Loaded universe state:", newUniverseState);
+
+						// close the modal
+						const modal = document.getElementById(
+							"statePopover"
+						) as HTMLDialogElement;
+						modal.close();
+					} catch (error) {
+						console.error("Failed to parse JSON:", error);
+						alert("Invalid JSON file");
+					}
+				};
+				reader.readAsText(file);
+			}
+
+			// Clean up
+			document.body.removeChild(fileInput);
 		});
+
+		document.body.appendChild(fileInput);
+		fileInput.click();
 	});
 });
 
