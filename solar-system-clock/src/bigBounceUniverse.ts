@@ -26,7 +26,8 @@ type UniverseState = {
 	uuid: string;
 
 	tickNum: number;
-	tickIntervalRef: number | null;
+	framesSinceLastTick: number;
+	framesPerTick: number;
 
 	sun: Sun;
 
@@ -74,6 +75,7 @@ export const bigBounceUniverse = (p5: P5) => {
 	const urlParams = new URLSearchParams(window.location.search);
 	const speedModifier = urlParams.get("speedMod");
 	const speedModifierValue = speedModifier ? parseFloat(speedModifier) : 1;
+	const targetFrameRate = !CONSTANTS.debug ? 20 : 60;
 
 	const universeState: UniverseState = {
 		p5Renderer: null!,
@@ -84,7 +86,9 @@ export const bigBounceUniverse = (p5: P5) => {
 		uuid: generateUUID(),
 
 		tickNum: 0,
-		tickIntervalRef: null,
+		framesSinceLastTick: 0,
+		// 5 minutes per tick
+		framesPerTick: targetFrameRate * 60 * 5,
 
 		planets: [],
 		numPlanets: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
@@ -136,6 +140,7 @@ export const bigBounceUniverse = (p5: P5) => {
 			universeStateVersion: universeState.universeStateVersion,
 			uuid: universeState.uuid,
 			tickNum: universeState.tickNum,
+			framesSinceLastTick: universeState.framesSinceLastTick,
 			sun: universeState.sun.toJSON(),
 			planets: universeState.planets.map((p) => p.toJSON()),
 			numPlanets: universeState.numPlanets,
@@ -184,15 +189,11 @@ export const bigBounceUniverse = (p5: P5) => {
 		// store the old state in case we need to revert
 		const newUniverseState = {} as UniverseState;
 
-		// Clear existing tick interval
-		if (universeState.tickIntervalRef !== null) {
-			clearInterval(universeState.tickIntervalRef);
-		}
-
 		try {
 			// Restore basic properties
 			newUniverseState.uuid = loadedData.uuid;
 			newUniverseState.tickNum = loadedData.tickNum;
+			newUniverseState.framesSinceLastTick = loadedData.framesSinceLastTick;
 			newUniverseState.numPlanets = loadedData.numPlanets;
 			newUniverseState.planetAddInterval = loadedData.planetAddInterval;
 			newUniverseState.lastPlanetAddTime = loadedData.lastPlanetAddTime;
@@ -322,11 +323,7 @@ export const bigBounceUniverse = (p5: P5) => {
 		} catch (error) {
 			throw new Error(`Error loading universe: ${error}`);
 		} finally {
-			// Restart tick interval and loop
-			universeState.tickIntervalRef = setInterval(function () {
-				universeState.tickNum++;
-			}, CONSTANTS.tickIntervalMs);
-
+			// Restart loop
 			p5.loop();
 		}
 	};
@@ -338,7 +335,7 @@ export const bigBounceUniverse = (p5: P5) => {
 
 	p5.setup = () => {
 		universeState.p5Renderer = p5.createCanvas(p5.windowWidth, p5.windowHeight);
-		p5.frameRate(!CONSTANTS.debug ? 20 : 60);
+		p5.frameRate(targetFrameRate);
 		p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
 		universeState.sun = new Sun(p5);
@@ -441,14 +438,16 @@ export const bigBounceUniverse = (p5: P5) => {
 			universeState.nebulas.push(nebula);
 		}
 
-		universeState.tickIntervalRef = setInterval(function () {
-			universeState.tickNum++;
-		}, CONSTANTS.tickIntervalMs);
-
 		universeState.times.bigBangStage = new Date();
 	};
 
 	p5.draw = () => {
+		universeState.framesSinceLastTick++;
+		if (universeState.framesSinceLastTick >= universeState.framesPerTick) {
+			universeState.tickNum++;
+			universeState.framesSinceLastTick = 0;
+		}
+
 		// universeState.endSound.addEventListener("canplaythrough", () => {
 		//   universeState.endSound.play();
 		// });
@@ -716,9 +715,9 @@ export const bigBounceUniverse = (p5: P5) => {
 		p5.text(
 			!CONSTANTS.debug
 				? `${universeAge}`
-				: `${frameRate ? frameRate.toFixed(2) : 0} FPS\n${universeAge}`,
-			p5.width / 2 - universeAgeWidth - 10,
-			p5.height / 2 - (!CONSTANTS.debug ? 10 : 20)
+				: `${Math.round(frameRate)} FPS\n${universeAge}`,
+			p5.width / 2 - universeAgeWidth - 20,
+			p5.height / 2 - (!CONSTANTS.debug ? 20 : 40)
 		);
 
 		const description = describeUniverse({
