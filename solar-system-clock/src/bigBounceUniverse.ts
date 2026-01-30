@@ -15,6 +15,7 @@ import {
 	getRandomFloat,
 	logTimes,
 	describeUniverse,
+	minsToMs,
 } from "./utlilites";
 
 // @ts-ignore: ts(2307) - This is the requested lay to load asset URLs in parcel
@@ -77,6 +78,18 @@ export const bigBounceUniverse = (p5: P5) => {
 	const speedModifierValue = speedModifier ? parseFloat(speedModifier) : 1;
 	const targetFrameRate = !CONSTANTS.debug ? 20 : 60;
 
+	const getChangeInterval = () => {
+		return CONSTANTS.debug
+			? getRandomInt(
+					minsToMs(0.01 * speedModifierValue),
+					minsToMs(0.1 * speedModifierValue),
+				)
+			: getRandomInt(
+					minsToMs(20 * speedModifierValue),
+					minsToMs(25 * speedModifierValue),
+				);
+	};
+
 	const universeState: UniverseState = {
 		p5Renderer: null!,
 
@@ -91,23 +104,23 @@ export const bigBounceUniverse = (p5: P5) => {
 		framesPerTick: targetFrameRate * 60 * 5,
 
 		planets: [],
-		numPlanets: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
+		numPlanets: 0,
 		planetTrails: [],
-		planetAddInterval: CONSTANTS.getPlanetAddInterval(speedModifierValue),
+		planetAddInterval: 0,
 		lastPlanetAddTime: 0,
 		celestialBodiesToAdd: [],
 		orbitalRadii: [], // Array to store orbital ring radii
 
 		stars: [],
-		numStars: !CONSTANTS.debug ? getRandomInt(150, 220) : 100,
+		numStars: 0,
 		starsToAdd: [],
-		starChangeInterval: CONSTANTS.getStarChangeInterval(speedModifierValue),
+		starChangeInterval: 0,
 		lastStarChangeTime: 0,
 
 		nebulas: [],
-		numNebulas: !CONSTANTS.debug ? getRandomInt(4, 7) : 3,
+		numNebulas: 0,
 		nebulasFullyChanged: 0,
-		nebulaChangeInterval: CONSTANTS.getNebulaChangeInterval(speedModifierValue),
+		nebulaChangeInterval: 0,
 		lastNebulaChangeTime: 0,
 
 		prevDescription: "",
@@ -148,7 +161,7 @@ export const bigBounceUniverse = (p5: P5) => {
 			planetAddInterval: universeState.planetAddInterval,
 			lastPlanetAddTime: universeState.lastPlanetAddTime,
 			celestialBodiesToAdd: universeState.celestialBodiesToAdd.map((cb) =>
-				cb.toJSON()
+				cb.toJSON(),
 			),
 			orbitalRadii: universeState.orbitalRadii,
 			stars: universeState.stars.map((s) => s.toJSON()),
@@ -171,7 +184,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				allPlanetsAdded:
 					universeState.times.allPlanetsAdded?.toISOString() ?? null,
 				planetRemoved: universeState.times.planetRemoved.map((d) =>
-					d.toISOString()
+					d.toISOString(),
 				),
 				blackHoleStage:
 					universeState.times.blackHoleStage?.toISOString() ?? null,
@@ -225,7 +238,7 @@ export const bigBounceUniverse = (p5: P5) => {
 					? new Date(loadedData.times.allPlanetsAdded)
 					: null,
 				planetRemoved: loadedData.times.planetRemoved.map(
-					(d: string) => new Date(d)
+					(d: string) => new Date(d),
 				),
 				blackHoleStage: loadedData.times.blackHoleStage
 					? new Date(loadedData.times.blackHoleStage)
@@ -244,7 +257,7 @@ export const bigBounceUniverse = (p5: P5) => {
 
 			// Restore planet trails
 			const planetTrails = loadedData.planetTrails.map((pt: any) =>
-				PlanetTrail.fromJSON(p5, pt)
+				PlanetTrail.fromJSON(p5, pt),
 			);
 			newUniverseState.planetTrails = planetTrails;
 
@@ -293,18 +306,18 @@ export const bigBounceUniverse = (p5: P5) => {
 
 			// Restore stars
 			newUniverseState.stars = loadedData.stars.map((s: any) =>
-				Star.fromJSON(p5, s)
+				Star.fromJSON(p5, s),
 			);
 
 			// Restore starsToAdd
 			newUniverseState.starsToAdd = loadedData.starsToAdd.map((s: any) =>
-				Star.fromJSON(p5, s)
+				Star.fromJSON(p5, s),
 			);
 
 			// Restore nebulas (async operation, but we'll handle it synchronously for now)
 			newUniverseState.nebulas = [];
 			await Promise.all(
-				loadedData.nebulas.map((n: any) => Nebula.fromJSON(p5, n))
+				loadedData.nebulas.map((n: any) => Nebula.fromJSON(p5, n)),
 			)
 				.then((nebulas) => {
 					newUniverseState.nebulas = nebulas;
@@ -313,7 +326,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				})
 				.catch((error) => {
 					throw new Error(
-						"Failed to load nebulas, universe may be incomplete."
+						"Failed to load nebulas, universe may be incomplete.",
 					);
 				});
 
@@ -338,17 +351,33 @@ export const bigBounceUniverse = (p5: P5) => {
 		p5.frameRate(targetFrameRate);
 		p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
-		universeState.sun = new Sun(p5);
+		universeState.sun = new Sun(p5, getChangeInterval());
 
 		setupNewUniverse();
 	};
 
 	const setupNewUniverse = () => {
+		universeState.tickNum = 0;
+		universeState.framesSinceLastTick = 0;
+
+		universeState.planetAddInterval = getChangeInterval();
+		universeState.numPlanets = !CONSTANTS.debug ? getRandomInt(4, 7) : 3;
+		universeState.lastPlanetAddTime = 0;
+
+		universeState.nebulaChangeInterval = getChangeInterval();
+		universeState.numNebulas = !CONSTANTS.debug ? getRandomInt(4, 7) : 3;
+		universeState.nebulasFullyChanged = 0;
+		universeState.lastNebulaChangeTime = 0;
+
+		universeState.starChangeInterval = getChangeInterval();
+		universeState.numStars = !CONSTANTS.debug ? getRandomInt(150, 220) : 100;
+		universeState.lastStarChangeTime = 0;
+
 		// space out the planets
 		let addingRadius = universeState.sun.d * 1.5;
 		for (let i = 0; i < universeState.numPlanets; i++) {
 			universeState.orbitalRadii.push(
-				getRandomInt(addingRadius, addingRadius + 40)
+				getRandomInt(addingRadius, addingRadius + 40),
 			);
 
 			addingRadius = universeState.orbitalRadii[i] + 60;
@@ -361,7 +390,7 @@ export const bigBounceUniverse = (p5: P5) => {
 			const planetColor = p5.color(
 				getRandomInt(360),
 				getRandomInt(80, 100),
-				getRandomInt(80, 100)
+				getRandomInt(80, 100),
 			);
 			const planetTrailLength = planetMass * getRandomInt(0, 7);
 
@@ -372,7 +401,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				universeState.orbitalRadii[i],
 				planetColor,
 				universeState.sun,
-				planetTrail
+				planetTrail,
 			);
 			planetsMade.push(planet);
 
@@ -382,7 +411,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				const moonColor = p5.color(
 					getRandomInt(360),
 					getRandomInt(80, 100),
-					getRandomInt(80, 100)
+					getRandomInt(80, 100),
 				);
 				const moonTrailLength = moonMass * 3;
 
@@ -407,12 +436,14 @@ export const bigBounceUniverse = (p5: P5) => {
 			if (getRandomFloat(1) < 0.5 && moonsMade.length > 0) {
 				// find the first moon where its orbitingBody is already in line
 				const moon = moonsMade.find((m) =>
-					m.orbitingBody ? celestialBodiesToAdd.includes(m.orbitingBody) : false
+					m.orbitingBody
+						? celestialBodiesToAdd.includes(m.orbitingBody)
+						: false,
 				);
 
 				if (moon) {
 					celestialBodiesToAdd.push(
-						moonsMade.splice(moonsMade.indexOf(moon), 1)[0]
+						moonsMade.splice(moonsMade.indexOf(moon), 1)[0],
 					);
 				}
 
@@ -523,7 +554,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				) {
 					const getRandomNebula = () => {
 						const randomIndex = Math.floor(
-							getRandomInt(universeState.nebulas.length - 1)
+							getRandomInt(universeState.nebulas.length - 1),
 						);
 
 						return universeState.nebulas[randomIndex];
@@ -623,7 +654,7 @@ export const bigBounceUniverse = (p5: P5) => {
 						universeState.nebulaChangeInterval
 				) {
 					const randomIndex = Math.floor(
-						getRandomInt(universeState.nebulas.length - 1)
+						getRandomInt(universeState.nebulas.length - 1),
 					);
 
 					const nebula = universeState.nebulas[randomIndex];
@@ -648,7 +679,7 @@ export const bigBounceUniverse = (p5: P5) => {
 						universeState.starChangeInterval
 				) {
 					const randomIndex = Math.floor(
-						getRandomInt(universeState.stars.length)
+						getRandomInt(universeState.stars.length),
 					);
 
 					const star = universeState.stars[randomIndex];
@@ -658,7 +689,7 @@ export const bigBounceUniverse = (p5: P5) => {
 							"universe.starExplosionComplete",
 							() => {
 								const index = universeState.stars.findIndex(
-									(s) => s.id === star.id
+									(s) => s.id === star.id,
 								);
 								if (index !== -1) {
 									universeState.stars.splice(index, 1);
@@ -668,7 +699,7 @@ export const bigBounceUniverse = (p5: P5) => {
 									}
 								}
 							},
-							{ once: true }
+							{ once: true },
 						);
 
 						star.beginExploading();
@@ -693,13 +724,12 @@ export const bigBounceUniverse = (p5: P5) => {
 							logTimes(universeState);
 
 							// restart
-							// TODO: refactor out a better setup function
 							setupNewUniverse();
 						},
-						{ once: true }
+						{ once: true },
 					);
 
-					universeState.sun.beginBigBang();
+					universeState.sun.beginBigBang(getChangeInterval());
 				}
 				break;
 		}
@@ -717,7 +747,7 @@ export const bigBounceUniverse = (p5: P5) => {
 				? `${universeAge}`
 				: `${Math.round(frameRate)} FPS\n${universeAge}`,
 			p5.width / 2 - universeAgeWidth - 20,
-			p5.height / 2 - (!CONSTANTS.debug ? 20 : 40)
+			p5.height / 2 - (!CONSTANTS.debug ? 20 : 40),
 		);
 
 		const description = describeUniverse({

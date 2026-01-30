@@ -34,7 +34,7 @@ class Sun {
 	}[];
 	numParticles: number;
 
-	constructor(p5: P5, options = { simple: false }) {
+	constructor(p5: P5, growthInterval: number, options = { simple: false }) {
 		this.p5 = p5;
 		this.id = generateUUID();
 		this.mass = getRandomInt(20, 35);
@@ -42,7 +42,7 @@ class Sun {
 		this.vel = this.p5.createVector(0, 0);
 		this.growing = !options.simple;
 		this.lastGrowthTime = 0;
-		this.growthInterval = CONSTANTS.getPlanetAddInterval();
+		this.growthInterval = growthInterval;
 		this.growthAmount = getRandomInt(1, 5); // Amount to increase the sun's mass by
 		this.d = this.mass * 2;
 		this.colorsByMass = {
@@ -50,14 +50,14 @@ class Sun {
 			40: this.p5.color(
 				getRandomInt(20, 40),
 				getRandomInt(80, 100),
-				getRandomInt(80, 100)
+				getRandomInt(80, 100),
 			), // Orange
 			50: this.p5.color(60, getRandomInt(80, 100), getRandomInt(80, 100)), // Yellow
 			60: this.p5.color(60, getRandomInt(20, 40), getRandomInt(90, 100)), // Light Yellow
 			70: this.p5.color(
 				getRandomInt(180, 220),
 				getRandomInt(20, 40),
-				getRandomInt(80, 100)
+				getRandomInt(80, 100),
 			), // Light Blue
 			80: this.p5.color(0, 0, getRandomInt(90, 100)), // White
 		};
@@ -81,14 +81,14 @@ class Sun {
 				this.particles.push({
 					pos: this.p5.createVector(
 						this.p5.random(-this.d / 2, this.d / 2),
-						this.p5.random(-this.d / 2, this.d / 2)
+						this.p5.random(-this.d / 2, this.d / 2),
 					),
 					vel: P5.Vector.random2D().mult(getRandomInt(1, 5)),
 					size: getRandomInt(1, 3),
 					color: this.p5.color(
 						getRandomInt(360),
 						getRandomInt(80, 100),
-						getRandomInt(80, 100)
+						getRandomInt(80, 100),
 					),
 				});
 			}
@@ -115,7 +115,7 @@ class Sun {
 
 			const massIndex = Math.min(
 				Math.max(Math.floor(this.mass / 10) * 10, this.lowestMass),
-				80
+				80,
 			);
 
 			this.currentColor = this.colorsByMass[massIndex];
@@ -146,7 +146,7 @@ class Sun {
 			this.p5.hue(this.currentColor) + Math.sin(this.p5.frameCount * 0.01) * 20,
 			this.p5.saturation(this.currentColor),
 			this.p5.brightness(this.currentColor) +
-				Math.sin(this.p5.frameCount * 0.05) * 5
+				Math.sin(this.p5.frameCount * 0.05) * 5,
 		);
 		this.p5.fill(sunColor);
 
@@ -156,7 +156,7 @@ class Sun {
 		this.p5.ellipse(this.pos.x, this.pos.y, diameter, diameter);
 	}
 
-	beginBigBang(): void {
+	beginBigBang(newGrowthInterval: number): void {
 		this.stage = SunStage.BIG_BANG;
 
 		// update any existing particles so that they are never static
@@ -169,14 +169,14 @@ class Sun {
 			this.particles.push({
 				pos: this.p5.createVector(
 					this.p5.random(-this.d / 2, this.d / 2),
-					this.p5.random(-this.d / 2, this.d / 2)
+					this.p5.random(-this.d / 2, this.d / 2),
 				),
 				vel: P5.Vector.random2D().mult(getRandomInt(1, 5)),
 				size: getRandomInt(1, 3),
 				color: this.p5.color(
 					getRandomInt(360),
 					getRandomInt(80, 100),
-					getRandomInt(80, 100)
+					getRandomInt(80, 100),
 				),
 			});
 		}
@@ -185,7 +185,7 @@ class Sun {
 		this.pos = this.p5.createVector(0, 0);
 		this.vel = this.p5.createVector(0, 0);
 		this.lastGrowthTime = 0;
-		this.growthInterval = CONSTANTS.getPlanetAddInterval();
+		this.growthInterval = newGrowthInterval;
 		this.growthAmount = getRandomInt(1, 5);
 		this.d = this.mass * 2;
 	}
@@ -218,7 +218,7 @@ class Sun {
 			document.dispatchEvent(
 				new CustomEvent("universe.bigBangComplete", {
 					detail: { sunId: this.id },
-				})
+				}),
 			);
 			this.stage = SunStage.NEBULA;
 		}
@@ -265,14 +265,14 @@ class Sun {
 				this.particles.push({
 					pos: this.p5.createVector(
 						getRandomInt(-this.p5.width / 2, this.p5.width / 2),
-						getRandomInt(-this.p5.height / 2, this.p5.height / 2)
+						getRandomInt(-this.p5.height / 2, this.p5.height / 2),
 					),
 					vel: this.p5.createVector(0, 0),
 					size: getRandomInt(1, 3),
 					color: this.p5.color(
 						getRandomInt(360),
 						getRandomInt(80, 100),
-						getRandomInt(80, 100)
+						getRandomInt(80, 100),
 					),
 				});
 			}
@@ -325,7 +325,7 @@ class Sun {
 						s: this.p5.saturation(color),
 						b: this.p5.brightness(color),
 					},
-				])
+				]),
 			),
 			massIntervals: this.massIntervals,
 			lowestMass: this.lowestMass,
@@ -374,14 +374,14 @@ class Sun {
 		sun.currentColor = p5.color(
 			data.currentColor.h,
 			data.currentColor.s,
-			data.currentColor.b
+			data.currentColor.b,
 		);
 
 		sun.colorsByMass = Object.fromEntries(
 			Object.entries(data.colorsByMass).map(([mass, color]) => [
 				mass,
 				p5.color(color.h, color.s, color.b),
-			])
+			]),
 		);
 		sun.massIntervals = data.massIntervals;
 		sun.lowestMass = data.lowestMass;
