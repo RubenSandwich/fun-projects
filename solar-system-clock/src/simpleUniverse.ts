@@ -63,7 +63,7 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
       p5.frameRate(20);
       p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
-      simpleUniverseState.sun = new Sun(p5, { simple: true });
+      simpleUniverseState.sun = new Sun(p5, 0, { simple: true });
 
       let previousRadius = simpleUniverseState.sun.d * 1.5;
       for (let i = 0; i < simpleUniverseState.numPlanets; i++) {
