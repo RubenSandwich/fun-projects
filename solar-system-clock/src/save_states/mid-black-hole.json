@@ -1,0 +1,1297 @@
+{
+  "universeStateVersion": 1,
+  "uuid": "3e65b309-3a4f-4cdf-946c-3301d4144090",
+  "tickNum": 0,
+  "framesSinceLastTick": 10563,
+  "sun": {
+    "id": "ed43e3ce-8901-42b3-8a7b-db25eccc3e1c",
+    "mass": 127,
+    "pos": {
+      "x": 0,
+      "y": 0
+    },
+    "vel": {
+      "x": 0,
+      "y": 0
+    },
+    "growing": true,
+    "lastGrowthTime": 283835,
+    "growthInterval": 5586,
+    "growthAmount": 2,
+    "d": 254,
+    "colorsByMass": {
+      "30": {
+        "h": 0,
+        "s": 84,
+        "b": 49
+      },
+      "40": {
+        "h": 30,
+        "s": 98,
+        "b": 97
+      },
+      "50": {
+        "h": 60,
+        "s": 90,
+        "b": 84
+      },
+      "60": {
+        "h": 60,
+        "s": 21.999999999999996,
+        "b": 100
+      },
+      "70": {
+        "h": 184,
+        "s": 33.00000000000001,
+        "b": 83
+      },
+      "80": {
+        "h": 0,
+        "s": 0,
+        "b": 100
+      }
+    },
+    "massIntervals": [
+      30,
+      40,
+      50,
+      60,
+      70,
+      80
+    ],
+    "lowestMass": 30,
+    "highestMass": 80,
+    "stage": "black hole",
+    "particles": [
+      {
+        "pos": {
+          "x": -231.54591550770428,
+          "y": 112.4430116046243
+        },
+        "vel": {
+          "x": 1.941556882237085,
+          "y": -0.661899710370152
+        },
+        "size": 3,
+        "color": {
+          "h": 356,
+          "s": 85,
+          "b": 80
+        }
+      },
+      {
+        "pos": {
+          "x": -192.55875690401854,
+          "y": 153.66892135561474
+        },
+        "vel": {
+          "x": 1.6056951840085212,
+          "y": -0.9723224157424636
+        },
+        "size": 1,
+        "color": {
+          "h": 130,
+          "s": 95,
+          "b": 80
+        }
+      },
+      {
+        "pos": {
+          "x": -368.5061142000024,
+          "y": -267.7396205821021
+        },
+        "vel": {
+          "x": 0.5734004725364156,
+          "y": 0.4810464441343355
+        },
+        "size": 3,
+        "color": {
+          "h": 100,
+          "s": 100,
+          "b": 91
+        }
+      },
+      {
+        "pos": {
+          "x": 119.23982307248488,
+          "y": 247.93860943372556
+        },
+        "vel": {
+          "x": -0.37351645783029525,
+          "y": -1.0805766448194536
+        },
+        "size": 1,
+        "color": {
+          "h": 320,
+          "s": 89.00000000000001,
+          "b": 84
+        }
+      },
+      {
+        "pos": {
+          "x": -225.49090236345847,
+          "y": 282.7204478698131
+        },
+        "vel": {
+          "x": 0.6311272760613109,
+          "y": -0.6626002011213299
+        },
+        "size": 1,
+        "color": {
+          "h": 339.00000000000006,
+          "s": 98,
+          "b": 87
+        }
+      },
+      {
+        "pos": {
+          "x": 201.8246052907682,
+          "y": 198.66503344588446
+        },
+        "vel": {
+          "x": -0.703770850062408,
+          "y": -0.8682983180766967
+        },
+        "size": 1,
+        "color": {
+          "h": 240.99999999999997,
+          "s": 94,
+          "b": 99
+        }
+      },
+      {
+        "pos": {
+          "x": -151.56953533601555,
+          "y": 206.60484473314042
+        },
+        "vel": {
+          "x": 0.5128451098767346,
+          "y": -0.5429648394474362
+        },
+        "size": 3,
+        "color": {
+          "h": 193,
+          "s": 94,
+          "b": 95
+        }
+      },
+      {
+        "pos": {
+          "x": 375.1565820738579,
+          "y": 12.026407223275296
+        },
+        "vel": {
+          "x": -0.5219601227634745,
+          "y": -0.061158885437848844
+        },
+        "size": 2,
+        "color": {
+          "h": 240,
+          "s": 83,
+          "b": 85
+        }
+      },
+      {
+        "pos": {
+          "x": 422.5200228211945,
+          "y": -109.3574031586007
+        },
+        "vel": {
+          "x": -0.4479256503174559,
+          "y": 0.08174676601075266
+        },
+        "size": 1,
+        "color": {
+          "h": 103,
+          "s": 82,
+          "b": 87
+        }
+      },
+      {
+        "pos": {
+          "x": -369.88401239443186,
+          "y": 262.61478231010915
+        },
+        "vel": {
+          "x": 0.3746548572456166,
+          "y": -0.22836859519977862
+        },
+        "size": 1,
+        "color": {
+          "h": 180,
+          "s": 84,
+          "b": 81
+        }
+      },
+      {
+        "pos": {
+          "x": 361.41253586455156,
+          "y": -291.5889693401252
+        },
+        "vel": {
+          "x": -0.07834596550826499,
+          "y": 0.05481627486900267
+        },
+        "size": 2,
+        "color": {
+          "h": 249.99999999999994,
+          "s": 98,
+          "b": 88
+        }
+      },
+      {
+        "pos": {
+          "x": 453.334587431197,
+          "y": -161.81090448966867
+        },
+        "vel": {
+          "x": -0.08874004041323413,
+          "y": 0.025217955413684313
+        },
+        "size": 3,
+        "color": {
+          "h": 315,
+          "s": 80,
+          "b": 93
+        }
+      }
+    ],
+    "currentColor": {
+      "h": 0,
+      "s": 0,
+      "b": 100
+    }
+  },
+  "planets": [],
+  "numPlanets": 3,
+  "planetTrails": [],
+  "planetAddInterval": 3692,
+  "lastPlanetAddTime": 54357,
+  "celestialBodiesToAdd": [],
+  "orbitalRadii": [
+    139,
+    228,
+    296
+  ],
+  "stars": [
+    {
+      "id": "be777dad-4e6e-4aef-942f-09c473df9d2e",
+      "pos": {
+        "x": -447,
+        "y": 163
+      },
+      "size": 1,
+      "offset": 4.964239201443313,
+      "brightness": 190,
+      "twinkleSpeed": 0.014553482324993042,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "205f6e1a-18dc-4142-88fd-fa9c86288386",
+      "pos": {
+        "x": -180,
+        "y": 5
+      },
+      "size": 1,
+      "offset": 2.88503437033395,
+      "brightness": 250,
+      "twinkleSpeed": 0.005057840593896208,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "3ad90379-9621-4de4-83b8-70ce3c4bac6b",
+      "pos": {
+        "x": 26,
+        "y": -205
+      },
+      "size": 2,
+      "offset": 3.0553504671233838,
+      "brightness": 221,
+      "twinkleSpeed": 0.01455940451600526,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "e8d1834e-5379-4e5b-8ec1-34409f999e91",
+      "pos": {
+        "x": 375,
+        "y": -326
+      },
+      "size": 1,
+      "offset": 5.329285990804631,
+      "brightness": 153,
+      "twinkleSpeed": 0.006313093079187264,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "ec4cf251-0eef-4508-9447-9992b68fcb91",
+      "pos": {
+        "x": 162,
+        "y": 224
+      },
+      "size": 1,
+      "offset": 5.227483671636858,
+      "brightness": 155,
+      "twinkleSpeed": 0.01498068825590362,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "eb896b40-1c9e-4e7f-80d7-b1913ddf22c4",
+      "pos": {
+        "x": -97,
+        "y": 170
+      },
+      "size": 2,
+      "offset": 2.3948966401026444,
+      "brightness": 238,
+      "twinkleSpeed": 0.01056719074266194,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "f70e6476-5d21-4055-8b7f-cf5645c97251",
+      "pos": {
+        "x": 505,
+        "y": 292
+      },
+      "size": 3,
+      "offset": 3.1783336627630576,
+      "brightness": 152,
+      "twinkleSpeed": 0.008472151936036058,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "78171057-1d6e-4349-b724-9cfa349eaf3b",
+      "pos": {
+        "x": 283,
+        "y": 170
+      },
+      "size": 1,
+      "offset": 1.557202406196113,
+      "brightness": 111,
+      "twinkleSpeed": 0.012244072952432222,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "e8483364-21f7-4646-8e1a-2203e04ddf8b",
+      "pos": {
+        "x": -411,
+        "y": 309
+      },
+      "size": 1,
+      "offset": 1.0703475080666374,
+      "brightness": 124,
+      "twinkleSpeed": 0.009184175928601587,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "b80a6583-6f8d-4552-9cb7-333cc4ec2c83",
+      "pos": {
+        "x": 31,
+        "y": -264
+      },
+      "size": 1,
+      "offset": 5.310930945775863,
+      "brightness": 175,
+      "twinkleSpeed": 0.0060055243491494905,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "95a020b0-4335-4078-970b-d6a7105e8857",
+      "pos": {
+        "x": -40,
+        "y": -190
+      },
+      "size": 1,
+      "offset": 5.3717493451739315,
+      "brightness": 111,
+      "twinkleSpeed": 0.009828556170564223,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "e9e9315c-0d86-4842-8099-bfc84f311cc1",
+      "pos": {
+        "x": -43,
+        "y": 97
+      },
+      "size": 3,
+      "offset": 2.7084776779549617,
+      "brightness": 233,
+      "twinkleSpeed": 0.010403838999902222,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "8b63314d-7e7e-4564-b9c1-b24ff8a2f54a",
+      "pos": {
+        "x": 182,
+        "y": -151
+      },
+      "size": 2,
+      "offset": 2.178977378247459,
+      "brightness": 173,
+      "twinkleSpeed": 0.013222394479411332,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "1da08b94-2de5-4d40-b3be-cd4a65ba7ddf",
+      "pos": {
+        "x": 480,
+        "y": 165
+      },
+      "size": 3,
+      "offset": 3.3202777952203535,
+      "brightness": 188,
+      "twinkleSpeed": 0.01390996499414211,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "9ccaa120-4cca-4626-9c77-bcb5c9ef4272",
+      "pos": {
+        "x": -157,
+        "y": -259
+      },
+      "size": 2,
+      "offset": 2.7718993262251717,
+      "brightness": 204,
+      "twinkleSpeed": 0.006045073219525498,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "1fca7939-0d98-4f99-b63c-8a846933a0dc",
+      "pos": {
+        "x": 28,
+        "y": 188
+      },
+      "size": 2,
+      "offset": 1.1329101930403194,
+      "brightness": 164,
+      "twinkleSpeed": 0.009665519331741333,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "2aceb36a-b3a0-4a6d-9443-e39687d5e77d",
+      "pos": {
+        "x": 283,
+        "y": -15
+      },
+      "size": 2,
+      "offset": 2.6337389366639066,
+      "brightness": 206,
+      "twinkleSpeed": 0.013958097545395867,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "c7231920-5dd5-46d3-b622-f73e3916a103",
+      "pos": {
+        "x": -521,
+        "y": -287
+      },
+      "size": 3,
+      "offset": 2.8138998087611378,
+      "brightness": 227,
+      "twinkleSpeed": 0.009757320994744533,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "abd0cd22-7cc7-439f-a35e-ddba28f8fe09",
+      "pos": {
+        "x": -235,
+        "y": -72
+      },
+      "size": 1,
+      "offset": 2.298597958301232,
+      "brightness": 197,
+      "twinkleSpeed": 0.012403768312494649,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "7422297e-7026-44cb-ad8b-328ffbc93cc1",
+      "pos": {
+        "x": -237,
+        "y": 147
+      },
+      "size": 2,
+      "offset": 2.790615429144736,
+      "brightness": 141,
+      "twinkleSpeed": 0.012110120672570291,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "bf5c1965-0f76-4941-b4bb-51962c5fbede",
+      "pos": {
+        "x": 523,
+        "y": -326
+      },
+      "size": 1,
+      "offset": 3.323092469518899,
+      "brightness": 202,
+      "twinkleSpeed": 0.014071568493385651,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "33699124-1dda-4f26-8cd8-7adaa7180585",
+      "pos": {
+        "x": -105,
+        "y": 234
+      },
+      "size": 1,
+      "offset": 3.711103990747175,
+      "brightness": 252,
+      "twinkleSpeed": 0.007219841587081508,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "4c258e4d-7727-424b-8470-9397d57cd629",
+      "pos": {
+        "x": -301,
+        "y": -305
+      },
+      "size": 2,
+      "offset": 5.919116056259171,
+      "brightness": 115,
+      "twinkleSpeed": 0.007778100244317149,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "6213a61c-d9e4-4494-bd78-a0b25881635c",
+      "pos": {
+        "x": 80,
+        "y": -19
+      },
+      "size": 2,
+      "offset": 4.9306759683624035,
+      "brightness": 205,
+      "twinkleSpeed": 0.013371047769029195,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "f54a4e03-5f3f-49b2-a76c-43f3aaea0354",
+      "pos": {
+        "x": -395,
+        "y": 300
+      },
+      "size": 2,
+      "offset": 4.265166464563691,
+      "brightness": 117,
+      "twinkleSpeed": 0.012417167469761844,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "55c5a22a-0044-4cd1-a10d-7a9f8482389c",
+      "pos": {
+        "x": 404,
+        "y": -93
+      },
+      "size": 3,
+      "offset": 3.989270866411711,
+      "brightness": 168,
+      "twinkleSpeed": 0.01431068992283745,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "562e31b0-229b-42cd-8760-3f17b7db67e9",
+      "pos": {
+        "x": -272,
+        "y": -124
+      },
+      "size": 1,
+      "offset": 1.1896487091993482,
+      "brightness": 212,
+      "twinkleSpeed": 0.014377144186631458,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "06e71aad-cf65-400a-a63b-d146678439bb",
+      "pos": {
+        "x": -312,
+        "y": -37
+      },
+      "size": 2,
+      "offset": 2.9173809149064187,
+      "brightness": 112,
+      "twinkleSpeed": 0.007205510442874142,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "269fb909-9d24-4eee-a6c6-d1470d5ab8aa",
+      "pos": {
+        "x": -227,
+        "y": -175
+      },
+      "size": 2,
+      "offset": 4.4156607406794555,
+      "brightness": 168,
+      "twinkleSpeed": 0.010800884633990523,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "fc436f69-3b3a-40c7-83f2-68fe0aa9d086",
+      "pos": {
+        "x": 267,
+        "y": 82
+      },
+      "size": 2,
+      "offset": 5.200772371923374,
+      "brightness": 140,
+      "twinkleSpeed": 0.006077269447156048,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "e53fba50-2b7b-429b-adcc-e036d60b7bc6",
+      "pos": {
+        "x": 94,
+        "y": -205
+      },
+      "size": 2,
+      "offset": 3.5659349183493223,
+      "brightness": 116,
+      "twinkleSpeed": 0.014045524071831069,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "c6b85e30-5ea3-472b-bc9e-66ca287df5e8",
+      "pos": {
+        "x": -451,
+        "y": 308
+      },
+      "size": 2,
+      "offset": 2.605003204291306,
+      "brightness": 195,
+      "twinkleSpeed": 0.008718878823243504,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "fb823885-59b2-494c-a23f-8e5eddd4749f",
+      "pos": {
+        "x": 307,
+        "y": 273
+      },
+      "size": 1,
+      "offset": 4.649204542298955,
+      "brightness": 159,
+      "twinkleSpeed": 0.006834364280290703,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "62d03341-03b1-497d-85a9-4470d7e9409b",
+      "pos": {
+        "x": -231,
+        "y": -292
+      },
+      "size": 2,
+      "offset": 3.098456161622511,
+      "brightness": 111,
+      "twinkleSpeed": 0.007287418210166333,
+      "particles": [
+        {
+          "pos": {
+            "x": -230.01551338298327,
+            "y": -290.8682817926201
+          },
+          "vel": {
+            "x": 0.6563244113444833,
+            "y": 0.7544788049198715
+          },
+          "size": 1.4580000000000002,
+          "color": {
+            "h": 229,
+            "s": 96,
+            "b": 92
+          }
+        },
+        {
+          "pos": {
+            "x": -229.8287336187171,
+            "y": -292.9370886105788
+          },
+          "vel": {
+            "x": 0.780844254188598,
+            "y": -0.6247257403858528
+          },
+          "size": 1.4580000000000002,
+          "color": {
+            "h": 284,
+            "s": 92,
+            "b": 86
+          }
+        },
+        {
+          "pos": {
+            "x": -232.3076936629954,
+            "y": -292.7348042486007
+          },
+          "vel": {
+            "x": -0.8717957753302702,
+            "y": -0.4898694990671424
+          },
+          "size": 1.4580000000000002,
+          "color": {
+            "h": 209.00000000000003,
+            "s": 85,
+            "b": 90
+          }
+        },
+        {
+          "pos": {
+            "x": -231.76965785898895,
+            "y": -293.2874885553264
+          },
+          "vel": {
+            "x": -0.5131052393259917,
+            "y": -0.8583257035509404
+          },
+          "size": 1.4580000000000002,
+          "color": {
+            "h": 305,
+            "s": 86,
+            "b": 92
+          }
+        },
+        {
+          "pos": {
+            "x": -231.66567248321385,
+            "y": -293.34420241968684
+          },
+          "vel": {
+            "x": -0.4437816554759281,
+            "y": -0.8961349464578673
+          },
+          "size": 1.4580000000000002,
+          "color": {
+            "h": 333.00000000000006,
+            "s": 97,
+            "b": 80
+          }
+        }
+      ],
+      "numParticles": 5,
+      "stage": "exploading"
+    },
+    {
+      "id": "760377ce-bc3f-48b0-a003-800096f18884",
+      "pos": {
+        "x": 375,
+        "y": 297
+      },
+      "size": 2,
+      "offset": 6.063354725476982,
+      "brightness": 233,
+      "twinkleSpeed": 0.006157936411647448,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "04d99bce-f74a-467b-9d70-3ff178f0980d",
+      "pos": {
+        "x": -20,
+        "y": -284
+      },
+      "size": 3,
+      "offset": 0.9611179890849046,
+      "brightness": 179,
+      "twinkleSpeed": 0.007516665731180472,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "4601142d-bfde-414c-bdfd-eb84c8adca7a",
+      "pos": {
+        "x": -479,
+        "y": 123
+      },
+      "size": 3,
+      "offset": 6.21186670074203,
+      "brightness": 130,
+      "twinkleSpeed": 0.007034651409568557,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "26e24cfd-f876-4561-ae24-a8348d410a2f",
+      "pos": {
+        "x": 113,
+        "y": -186
+      },
+      "size": 2,
+      "offset": 3.8627765136931864,
+      "brightness": 136,
+      "twinkleSpeed": 0.012648773617033898,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    }
+  ],
+  "numStars": 100,
+  "starsToAdd": [
+    {
+      "id": "a5812689-7558-4d98-a3a3-9aa42e429d4d",
+      "pos": {
+        "x": 369,
+        "y": -36
+      },
+      "size": 2,
+      "offset": 5.284713227708694,
+      "brightness": 156,
+      "twinkleSpeed": 0.013649656950908588,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "421d416d-6274-4b0a-9c71-e64db6e8735c",
+      "pos": {
+        "x": 126,
+        "y": -225
+      },
+      "size": 1,
+      "offset": 4.585554527588305,
+      "brightness": 149,
+      "twinkleSpeed": 0.011185447751258204,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "8f2aa91c-9fd8-4b5a-9bb4-31c2bc9d9b97",
+      "pos": {
+        "x": -523,
+        "y": -152
+      },
+      "size": 3,
+      "offset": 3.6811974992272085,
+      "brightness": 234,
+      "twinkleSpeed": 0.009084462659813053,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "b5c4fcfe-72ca-4328-9c96-57410409b838",
+      "pos": {
+        "x": -92,
+        "y": 24
+      },
+      "size": 3,
+      "offset": 3.842129751053167,
+      "brightness": 128,
+      "twinkleSpeed": 0.008633486653972722,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "311bfd40-9adf-4a58-80ae-1ad30d0da22a",
+      "pos": {
+        "x": -300,
+        "y": 274
+      },
+      "size": 2,
+      "offset": 2.899697897850385,
+      "brightness": 231,
+      "twinkleSpeed": 0.006222175581655277,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "fd7ece0e-6f2a-4fd9-803b-81c31bc27f78",
+      "pos": {
+        "x": 55,
+        "y": 16
+      },
+      "size": 3,
+      "offset": 1.181011891567198,
+      "brightness": 192,
+      "twinkleSpeed": 0.008602650744571116,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "42294df1-cf77-4466-a1d0-a9cf10b9941b",
+      "pos": {
+        "x": 271,
+        "y": 124
+      },
+      "size": 3,
+      "offset": 4.7901019442391775,
+      "brightness": 114,
+      "twinkleSpeed": 0.014659924553624498,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "4f43fc8e-e23a-41e9-917a-b7265bd46d31",
+      "pos": {
+        "x": 230,
+        "y": 105
+      },
+      "size": 2,
+      "offset": 0.5164642538646127,
+      "brightness": 173,
+      "twinkleSpeed": 0.008929580293026965,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "5c7c04f7-aa4f-49ed-b832-23a2343d35fd",
+      "pos": {
+        "x": -215,
+        "y": -50
+      },
+      "size": 1,
+      "offset": 5.869390141226797,
+      "brightness": 244,
+      "twinkleSpeed": 0.014041894554007048,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "87248234-b9e2-433d-a437-2099b811524d",
+      "pos": {
+        "x": -274,
+        "y": 100
+      },
+      "size": 2,
+      "offset": 3.542463552387324,
+      "brightness": 195,
+      "twinkleSpeed": 0.00503372746509119,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "06f5baa4-3855-4d19-92dd-42e3df2f4421",
+      "pos": {
+        "x": 512,
+        "y": 76
+      },
+      "size": 1,
+      "offset": 1.8979924968571957,
+      "brightness": 147,
+      "twinkleSpeed": 0.006780171557329389,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "862f9100-59fb-446a-9c95-410bb79359b4",
+      "pos": {
+        "x": 443,
+        "y": 76
+      },
+      "size": 3,
+      "offset": 3.868041327795787,
+      "brightness": 182,
+      "twinkleSpeed": 0.012755809978392738,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "10e424cc-1633-4f8d-9bf1-81cfa8adabe7",
+      "pos": {
+        "x": -433,
+        "y": 128
+      },
+      "size": 3,
+      "offset": 0.3816147597154085,
+      "brightness": 181,
+      "twinkleSpeed": 0.009582442295227346,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "aa62a19b-f645-4588-8e5c-6f1d3995cf3e",
+      "pos": {
+        "x": -508,
+        "y": 318
+      },
+      "size": 3,
+      "offset": 5.692182422162167,
+      "brightness": 178,
+      "twinkleSpeed": 0.010358144344044817,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "21b3fa5f-feb4-4b3c-bf48-c52d97d90aa1",
+      "pos": {
+        "x": -449,
+        "y": -312
+      },
+      "size": 1,
+      "offset": 6.137734703348909,
+      "brightness": 128,
+      "twinkleSpeed": 0.007047853960594158,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "42e22011-c9d9-40de-ae5f-1fb734d460f4",
+      "pos": {
+        "x": 183,
+        "y": -311
+      },
+      "size": 2,
+      "offset": 0.772903796705869,
+      "brightness": 219,
+      "twinkleSpeed": 0.010966333193551166,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "79ded11c-cf52-4890-a012-b1e4452893c0",
+      "pos": {
+        "x": 353,
+        "y": 278
+      },
+      "size": 3,
+      "offset": 2.5336771517811325,
+      "brightness": 191,
+      "twinkleSpeed": 0.008031696839439906,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "a649940b-2af2-4819-81a0-8723c73afb80",
+      "pos": {
+        "x": -298,
+        "y": -15
+      },
+      "size": 3,
+      "offset": 2.419791152494338,
+      "brightness": 190,
+      "twinkleSpeed": 0.0149727410812861,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "2623b1a5-68ff-45b2-886a-d3de81937e1a",
+      "pos": {
+        "x": 469,
+        "y": -266
+      },
+      "size": 3,
+      "offset": 4.025180430904029,
+      "brightness": 103,
+      "twinkleSpeed": 0.00791405772275632,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "043709af-ca13-4956-a5fb-ad41d82bbfee",
+      "pos": {
+        "x": 450,
+        "y": -194
+      },
+      "size": 2,
+      "offset": 3.774982588645223,
+      "brightness": 173,
+      "twinkleSpeed": 0.006637867837151218,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "d750ea0c-c466-4e99-ba48-a539c100a655",
+      "pos": {
+        "x": 126,
+        "y": 61
+      },
+      "size": 1,
+      "offset": 2.6659126886964617,
+      "brightness": 164,
+      "twinkleSpeed": 0.007476211921866249,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "5d3c7e58-de98-4069-8261-63db4cb69f42",
+      "pos": {
+        "x": 508,
+        "y": 211
+      },
+      "size": 2,
+      "offset": 5.087060691680389,
+      "brightness": 251,
+      "twinkleSpeed": 0.00612922995169815,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "e34ad1a0-dc87-4956-9485-5e9caf23cfc1",
+      "pos": {
+        "x": -440,
+        "y": -226
+      },
+      "size": 1,
+      "offset": 5.29089258327473,
+      "brightness": 196,
+      "twinkleSpeed": 0.009012529288439574,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "b02f3ab4-3b0c-40ba-8d7b-cefabf5458dd",
+      "pos": {
+        "x": 70,
+        "y": 110
+      },
+      "size": 1,
+      "offset": 0.8720127234209737,
+      "brightness": 230,
+      "twinkleSpeed": 0.01375846287995136,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "1b31126a-1e72-48ab-a9d8-9a1cdaa693ca",
+      "pos": {
+        "x": 256,
+        "y": 135
+      },
+      "size": 2,
+      "offset": 5.170168226168446,
+      "brightness": 156,
+      "twinkleSpeed": 0.011776989268940956,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "c1839245-cf04-49b4-b88a-ac719f19f964",
+      "pos": {
+        "x": 363,
+        "y": 57
+      },
+      "size": 1,
+      "offset": 0.31345380139230977,
+      "brightness": 225,
+      "twinkleSpeed": 0.00573402821623807,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    },
+    {
+      "id": "46b410ea-9d15-49e2-b9f5-337413b79b3b",
+      "pos": {
+        "x": -22,
+        "y": -98
+      },
+      "size": 2,
+      "offset": 0.2278509491692565,
+      "brightness": 160,
+      "twinkleSpeed": 0.009813535464081032,
+      "particles": [],
+      "numParticles": 5,
+      "stage": "twinkle"
+    }
+  ],
+  "starChangeInterval": 3083,
+  "lastStarChangeTime": 395419,
+  "nebulas": [],
+  "numNebulas": 3,
+  "nebulasFullyChanged": 3,
+  "nebulaChangeInterval": 1069,
+  "lastNebulaChangeTime": 345254,
+  "bounceNumber": 1,
+  "times": {
+    "bigBangStage": "2026-05-11T14:22:08.751Z",
+    "allNubulasAdded": "2026-05-11T14:22:48.266Z",
+    "allStarsAdded": null,
+    "sunStage": "2026-05-11T14:22:48.266Z",
+    "allPlanetsAdded": "2026-05-11T14:23:03.099Z",
+    "planetRemoved": [
+      "2026-05-11T14:23:38.402Z",
+      "2026-05-11T14:23:38.698Z",
+      "2026-05-11T14:24:17.798Z",
+      "2026-05-11T14:26:05.881Z",
+      "2026-05-11T14:26:53.464Z"
+    ],
+    "blackHoleStage": "2026-05-11T14:26:53.464Z",
+    "allNebulasGone": "2026-05-11T14:27:53.996Z",
+    "allStarsGone": null
+  }
+}

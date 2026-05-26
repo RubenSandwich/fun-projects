@@ -5,7 +5,39 @@ import { simpleUniverseCreator } from "./simpleUniverse";
 
 import CONSTANTS from "./constants";
 import { parseErrorMessage } from "./utlilites";
-import { universeTestingStates } from "./universeTestingStates";
+
+type SavedStateLoader = {
+	name: string;
+	load: () => Promise<any>;
+};
+
+type UniverseInstance = P5 & {
+	loadUniverseState: (state: unknown) => Promise<void> | void;
+	getUniverseState: () => unknown;
+};
+
+const savedStateLoaders: SavedStateLoader[] = [
+	{
+		name: "Fully Formed",
+		load: () => import("./save_states/fully-formed.json"),
+	},
+	{
+		name: "Almost Black Hole",
+		load: () => import("./save_states/almost-black-hole.json"),
+	},
+	{
+		name: "Mid Black Hole",
+		load: () => import("./save_states/mid-black-hole.json"),
+	},
+	{
+		name: "Late Black Hole",
+		load: () => import("./save_states/late-black-hole.json"),
+	},
+	{
+		name: "Second Big Bang",
+		load: () => import("./save_states/second-big-bang.json"),
+	},
+];
 
 // TODO:
 //    1. start at the big bang
@@ -21,7 +53,7 @@ import { universeTestingStates } from "./universeTestingStates";
 //    8. The "black hole" stage should also supernova
 //        a. which means that a small dense core will be left behind that turns into the black hole
 //    9. the black hole should slowly grow
-//    10. once the universe is empty the black hole should collapse and expload into a big bang
+//    10. once the universe is empty the black hole should collapse and explode into a big bang
 //        a. this isn't really what happens as black holes slowly evaporate
 //
 //    Questions:
@@ -41,7 +73,27 @@ let simpleUniverse = {
 	fading: false,
 };
 
-let universe;
+let universe: UniverseInstance | null = null;
+
+function getCurrentStateTextarea(): HTMLTextAreaElement {
+	return document.getElementById("currentState") as HTMLTextAreaElement;
+}
+
+function closeStatePopover(): void {
+	const modal = document.getElementById("statePopover") as HTMLDialogElement;
+	modal.close();
+}
+
+async function loadUniverseState(state: unknown): Promise<void> {
+	if (!universe) {
+		return;
+	}
+
+	await universe.loadUniverseState(state);
+	getCurrentStateTextarea().value = JSON.stringify(state, null, 2);
+	console.log("Loaded universe state:", state);
+	closeStatePopover();
+}
 
 function displayError(div: HTMLElement | null, message: string): void {
 	if (!div) {
@@ -76,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	errorDiv = document.getElementById("errors") as HTMLElement;
 
 	const startButtonEle = document.getElementById(
-		"startButton"
+		"startButton",
 	)! as HTMLButtonElement;
 
 	startButtonEle.addEventListener("click", () => {
@@ -104,17 +156,33 @@ document.ontouchmove = function (event: TouchEvent) {
 document.addEventListener("DOMContentLoaded", function () {
 	const popover = document.getElementById("statePopover") as HTMLDialogElement;
 	const closePopoverBtn = document.getElementById(
-		"closePopoverBtn"
+		"closePopoverBtn",
 	) as HTMLButtonElement;
+	const savedStatesList = document.getElementById(
+		"saved-states",
+	) as HTMLUListElement;
 	const loadStateBtn = document.getElementById(
-		"loadStateBtn"
+		"loadStateBtn",
 	) as HTMLButtonElement;
 	const saveStateBtn = document.getElementById(
-		"saveStateBtn"
+		"saveStateBtn",
 	) as HTMLButtonElement;
 
+	savedStatesList.innerHTML = "";
+	savedStateLoaders.forEach((savedState) => {
+		const listItem = document.createElement("li");
+		listItem.className = "load-saved-state";
+		listItem.setAttribute("data-slot-name", savedState.name);
+		listItem.tabIndex = 0;
+		listItem.textContent = savedState.name;
+		savedStatesList.appendChild(listItem);
+	});
 
 	popover.addEventListener("toggle", (event) => {
+		if (!universe) {
+			return;
+		}
+
 		if (event.newState === "open") {
 			if (universe.isLooping()) {
 				universe.noLoop();
@@ -126,32 +194,45 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 	});
 
-	popover.addEventListener("beforetoggle", (event) => {
-		if (event.newState === "open") {
-			const savedStateButtons = document.querySelectorAll(".load-saved-state");
+	savedStatesList.addEventListener("click", async (event: MouseEvent) => {
+		const target = event.target as HTMLElement;
+		const listItem = target.closest(".load-saved-state") as HTMLElement | null;
+		const slotName = listItem?.getAttribute("data-slot-name");
 
-			savedStateButtons.forEach((button) => {
-				button.addEventListener("click", (event) => {
-					const target = event.target as HTMLButtonElement;
-					const slotName = target.getAttribute("data-slot-name");
-
-					if (slotName && slotName in universeTestingStates) {
-						const stateData =
-							universeTestingStates[
-								slotName as keyof typeof universeTestingStates
-							];
-
-						// Update the textarea with the loaded state
-						const currentStateTextarea = document.getElementById(
-							"currentState"
-						) as HTMLTextAreaElement;
-						currentStateTextarea.value = JSON.stringify(stateData, null, 2);
-					} else {
-						console.error(`Invalid slot name: ${slotName}`);
-					}
-				});
-			});
+		if (!slotName) {
+			return;
 		}
+
+		const loader = savedStateLoaders.find(
+			(savedState) => savedState.name === slotName,
+		);
+		if (!loader) {
+			console.error(`Invalid slot name: ${slotName}`);
+			return;
+		}
+
+		try {
+			const stateModule = await loader.load();
+			const newUniverseState = stateModule.default ?? stateModule;
+			await loadUniverseState(newUniverseState);
+		} catch (error) {
+			console.error("Failed to load saved state:", error);
+			alert("Failed to load saved state");
+		}
+	});
+
+	savedStatesList.addEventListener("keydown", async (event: KeyboardEvent) => {
+		if (event.key !== "Enter" && event.key !== " ") {
+			return;
+		}
+
+		const target = event.target as HTMLElement;
+		if (!target.classList.contains("load-saved-state")) {
+			return;
+		}
+
+		event.preventDefault();
+		target.click();
 	});
 
 	// Show and hide the modal on spacebar press
@@ -161,14 +242,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 			if (universe && CONSTANTS.debug) {
 				const modal = document.getElementById(
-					"statePopover"
+					"statePopover",
 				) as HTMLDialogElement;
 
 				if (!modal.open) {
 					modal.showModal();
 
 					const currentStateTextarea = document.getElementById(
-						"currentState"
+						"currentState",
 					) as HTMLTextAreaElement;
 
 					const universeState = universe.getUniverseState();
@@ -223,18 +304,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					const fileContent = e.target?.result as string;
 					try {
 						const newUniverseState = JSON.parse(fileContent);
-
-						if (universe) {
-							await universe.loadUniverseState(newUniverseState);
-						}
-
-						console.log("Loaded universe state:", newUniverseState);
-
-						// close the modal
-						const modal = document.getElementById(
-							"statePopover"
-						) as HTMLDialogElement;
-						modal.close();
+						await loadUniverseState(newUniverseState);
 					} catch (error) {
 						console.error("Failed to parse JSON:", error);
 						alert("Invalid JSON file");
@@ -260,7 +330,7 @@ try {
 		}
 
 		startScreen.style.display = "none"; // Hide the start screen
-		universe = new P5(bigBounceUniverse);
+		universe = new P5(bigBounceUniverse) as UniverseInstance;
 	};
 
 	if (window.location.href.includes("?mode=webapp") || CONSTANTS.debug) {
@@ -273,7 +343,7 @@ try {
 			}
 
 			const { beginFade, fading, SimpleUniverse } = simpleUniverseCreator(
-				startBigBounceUniverse
+				startBigBounceUniverse,
 			);
 
 			simpleUniverse = {
@@ -286,5 +356,6 @@ try {
 	}
 } catch (e) {
 	console.log(e);
-	displayError(errorDiv, parseErrorMessage(e));
+	const error = e as { filename?: string; lineno?: number; message?: string };
+	displayError(errorDiv, parseErrorMessage(error));
 }
