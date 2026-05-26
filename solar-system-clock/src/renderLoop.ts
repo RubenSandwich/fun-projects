@@ -40,16 +40,12 @@ const savedStateLoaders: SavedStateLoader[] = [
 ];
 
 // TODO:
-//    1. start at the big bang
 //    2. the sun should only grow when it "eats" a planet
 //    3. create a comet class that randomly flys by
 //        a. If it hits the sun and make it grow
-//    4. have nebulas fade in and out as the universe age
-//        a. should they have stars in them?
 //    5. have plants and moons fly in as comets
 //    6. after a big bang it should create nebulas with a special nebula in
 //          the center that turns into the sun
-//    7. have stars fade in and out as the universe age
 //    8. The "black hole" stage should also supernova
 //        a. which means that a small dense core will be left behind that turns into the black hole
 //    9. the black hole should slowly grow
