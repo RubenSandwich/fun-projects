@@ -88,6 +88,7 @@ body.rotation90 {
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
+  overflow: hidden;
   color: white;
 }
 
@@ -96,13 +97,21 @@ body.rotation90 {
 }
 
 .popover-content {
-  padding: 30px;
+  padding: 20px;
   position: relative;
+  overflow: hidden;
+}
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .popover-content h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 .popover-content h3 {
@@ -160,6 +169,8 @@ body.rotation90 {
   list-style: none;
   padding: 0;
   margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
 }
 
 .load-saved-state {
@@ -184,13 +195,10 @@ body.rotation90 {
 }
 
 .close-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   background: none;
   border: none;
   color: white;
-  font-size: 32px;
+  font-size: 28px;
   cursor: pointer;
   line-height: 1;
   padding: 0;
@@ -199,6 +207,7 @@ body.rotation90 {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: opacity 0.2s;
 }
 
