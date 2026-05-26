@@ -351,7 +351,13 @@ export const bigBounceUniverse = (p5: P5) => {
 		p5.frameRate(targetFrameRate);
 		p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
-		universeState.sun = new Sun(p5, getChangeInterval());
+		universeState.sun = new Sun(
+			p5,
+			{
+				growthInterval: getChangeInterval(),
+				mass: getRandomInt(30, 45),
+			}
+		);
 
 		setupNewUniverse();
 	};
@@ -386,7 +392,7 @@ export const bigBounceUniverse = (p5: P5) => {
 		const planetsMade: Planet[] = [];
 		const moonsMade: Moon[] = [];
 		for (let i = 0; i < universeState.numPlanets; i++) {
-			const planetMass = getRandomInt(10, 30);
+			const planetMass = getRandomInt(10, universeState.sun.mass / 2.5);
 			const planetColor = p5.color(
 				getRandomInt(360),
 				getRandomInt(80, 100),
@@ -407,7 +413,7 @@ export const bigBounceUniverse = (p5: P5) => {
 
 			// Randomly add a moon to some planets
 			if (getRandomFloat(1) < 0.5) {
-				const moonMass = getRandomInt(3, 6);
+				const moonMass = getRandomInt(3, Math.min(6, planetMass / 2));
 				const moonColor = p5.color(
 					getRandomInt(360),
 					getRandomInt(80, 100),

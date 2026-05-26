@@ -34,15 +34,22 @@ class Sun {
 	}[];
 	numParticles: number;
 
-	constructor(p5: P5, growthInterval: number, options = { simple: false }) {
+	constructor(
+		p5: P5,
+		options: { growthInterval?: number; simple?: boolean; mass?: number } = {
+			growthInterval: 0,
+			simple: false,
+			mass: 0,
+		},
+	) {
 		this.p5 = p5;
 		this.id = generateUUID();
-		this.mass = getRandomInt(20, 35);
+		this.mass = options.mass || getRandomInt(30, 45);
 		this.pos = this.p5.createVector(0, 0);
 		this.vel = this.p5.createVector(0, 0);
 		this.growing = !options.simple;
 		this.lastGrowthTime = 0;
-		this.growthInterval = growthInterval;
+		this.growthInterval = options.growthInterval || 0;
 		this.growthAmount = getRandomInt(1, 5); // Amount to increase the sun's mass by
 		this.d = this.mass * 2;
 		this.colorsByMass = {
@@ -181,7 +188,7 @@ class Sun {
 			});
 		}
 
-		this.mass = getRandomInt(5, 10);
+		this.mass = getRandomInt(30, 45);
 		this.pos = this.p5.createVector(0, 0);
 		this.vel = this.p5.createVector(0, 0);
 		this.lastGrowthTime = 0;

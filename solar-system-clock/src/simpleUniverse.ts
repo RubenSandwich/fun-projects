@@ -63,7 +63,13 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
       p5.frameRate(20);
       p5.colorMode(p5.HSB, 360, 100, 100, 1);
 
-      simpleUniverseState.sun = new Sun(p5, 0, { simple: true });
+      simpleUniverseState.sun = new Sun(
+        p5,
+        {
+          simple: true,
+          mass: getRandomInt(30, 45),
+        }
+      );
 
       let previousRadius = simpleUniverseState.sun.d * 1.5;
       for (let i = 0; i < simpleUniverseState.numPlanets; i++) {
@@ -77,7 +83,7 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
       const planetsMade: Planet[] = [];
       const moonsMade: Moon[] = [];
       for (let i = 0; i < simpleUniverseState.numPlanets; i++) {
-        const planetMass = getRandomInt(10, 30);
+        const planetMass = getRandomInt(10, simpleUniverseState.sun.mass / 2.5);
         const planetColor = p5.color(
           getRandomInt(360),
           getRandomInt(80, 100),
@@ -99,7 +105,7 @@ const simpleUniverseCreator = (finishedFading: () => void) => {
 
         // Randomly add a moon to some planets
         if (getRandomFloat(1) < 0.5) {
-          const moonMass = getRandomInt(3, 6);
+          const moonMass = getRandomInt(3, Math.min(6, planetMass / 2));
           const moonColor = p5.color(
             getRandomInt(360),
             getRandomInt(80, 100),
