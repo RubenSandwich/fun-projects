@@ -75,8 +75,8 @@
 /* ---------- Playfield ---------- */
 .playfield {
   position: relative;
-  height: 62vh;
-  min-height: 380px;
+  height: 66vh;
+  min-height: 420px;
   padding: 10px;
   background: repeating-linear-gradient(
       180deg,
@@ -167,14 +167,15 @@
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%) rotate(var(--tilt, -2deg));
-  width: 62px;
-  height: 76%;
-  max-height: 66px;
+  width: 80px;
+  height: 90%;
+  max-height: 78px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 2px;
+  padding: 1px 2px;
   border: 4px solid var(--ink);
   border-radius: 13px 15px 12px 16px / 16px 12px 15px 13px;
   box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
@@ -185,26 +186,40 @@
   --tilt: 2deg;
 }
 
-.note-letter {
+.note-name {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   line-height: 1;
   color: var(--ink);
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
 }
-.note-arrow {
-  font-size: 0.8rem;
-  line-height: 1;
-  color: var(--ink);
-}
-.note-tag {
+
+/* Big, high-contrast push/pull indicator on every note (matches the ribbon). */
+.note-dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 800;
+  font-size: 0.66rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 2px 7px 1px;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
   color: var(--ink);
-  opacity: 0.75;
+}
+.note-dir__arrow {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.note-dir--push {
+  background: var(--push-fill);
+}
+.note-dir--pull {
+  background: var(--pull-fill);
 }
 
 /* PUSH: solid, filled "sticker" (bellows squeezed in). */
@@ -339,35 +354,6 @@
 }
 
 /* ---------- Current-direction indicator in the HUD ---------- */
-.mode-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 118px;
-  padding: 6px 16px;
-  border: 4px solid var(--ink);
-  border-radius: 16px 20px 14px 20px / 20px 14px 20px 16px;
-  box-shadow: var(--shadow);
-  line-height: 1.05;
-  transition: background 0.2s ease;
-}
-.mode-indicator__dir {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 800;
-  font-size: 1.45rem;
-}
-.mode-indicator__hint {
-  font-weight: 600;
-  font-size: 0.72rem;
-}
-.mode-indicator--push {
-  background: var(--orange);
-}
-.mode-indicator--pull {
-  background: var(--sky);
-}
-
 .speed-tag {
   display: inline-block;
   margin-left: 8px;
@@ -411,14 +397,10 @@
   overflow: hidden;
 }
 .section-block--push {
-  background: color-mix(in srgb, var(--orange) 55%, #fff);
+  background: var(--push-fill);
 }
 .section-block--pull {
-  background: repeating-linear-gradient(
-    -45deg,
-    color-mix(in srgb, var(--sky) 62%, #fff) 0 9px,
-    color-mix(in srgb, var(--sky) 34%, #fff) 9px 18px
-  );
+  background: var(--pull-fill);
 }
 .section-ribbon__marker {
   position: absolute;
@@ -441,29 +423,53 @@
   border-left-color: color-mix(in srgb, var(--sky) 75%, var(--ink));
 }
 
-/* ---------- Controls hint bar ---------- */
-.controls-hint {
+/* ---------- Pause overlay ---------- */
+.pause-overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
   justify-content: center;
-  font-weight: 600;
+  z-index: 7;
+  background: rgba(58, 42, 32, 0.2);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
 }
-.controls-hint__keys {
+.pause-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 44px;
+  transform: rotate(-1.5deg);
+}
+.pause-card__title {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 800;
-  letter-spacing: 0.18em;
-  padding: 4px 14px;
-  background: var(--paper);
-  border: 3px solid var(--ink);
-  border-radius: 20px;
-  box-shadow: 2px 3px 0 rgba(58, 42, 32, 0.22);
+  font-size: 2.4rem;
+  color: var(--red);
+}
+.pause-card__hint {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.pause-card__hint b {
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 0 7px;
 }
 
 @media (max-width: 640px) {
   .note {
-    width: 48px;
+    width: 66px;
+  }
+  .note-name {
+    font-size: 1.35rem;
+  }
+  .note-dir {
+    font-size: 0.58rem;
+    padding: 1px 5px;
   }
   .key-target {
     width: 44px;

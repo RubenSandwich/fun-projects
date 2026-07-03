@@ -3,25 +3,37 @@
 A "Guitar Hero" style rhythm game for **toy accordions**, built with React + Vite
 and dressed up in a bright, cut-from-paper **Paper Mario / paper-mache** style.
 
-Notes fly in from the **right** across **7 lanes** on the home row —
-**A · S · D · F · G · H · J** — and you play them as they cross the dashed hit line
-on the left.
+Notes fly in from the **right** across **7 lanes** — the seven accordion buttons,
+played with the number keys **1 · 2 · 3 · 4 · 5 · 6 · 7** — and you play them as
+they cross the dashed hit line on the left.
 
-## Push vs. Pull sections
+## Push vs. Pull
 
-A real toy accordion makes different notes depending on whether you squeeze the
-bellows in (**push**) or draw them out (**pull**). Each song is split into whole
-**push** and **pull** sections — a scrolling ribbon up top and the banner in the
-HUD tell you which one you're in:
+A real toy accordion is *bisonoric*: each button sounds a different note
+depending on whether you squeeze the bellows in (**push**) or draw them out
+(**pull**). Each note tells you which way to go:
 
-| Section | Notes show | What to press |
-| ------- | ---------- | ------------- |
-| ▼ **PUSH** | lowercase `a` | just tap the key |
-| ▲ **PULL** | UPPERCASE `A` | hold **⇧ Shift** + the key |
+| Direction | What to press | Bellows |
+| --------- | ------------- | ------- |
+| ▼ **PUSH** | just tap the button's number key | squeeze in |
+| ▲ **PULL** | hold **⇧ Shift** + the number key | draw out |
 
-Push notes are solid paper stickers; pull notes are striped. Match the section's
-direction *and* the timing to score Perfect / Good / Ok. Miss it, or use the
-wrong direction, and your combo resets.
+Push notes are solid paper stickers; pull notes are striped. Each moving card
+shows the **note name** to play; the lane tells you the button. A look-ahead
+ribbon and HUD banner preview the upcoming push/pull direction. Match the
+direction *and* the timing to score Perfect / Good / Ok.
+
+### Button → note map
+
+| Button | Push | Pull |
+| ------ | ---- | ---- |
+| 1 | C (middle) | D |
+| 2 | E | F |
+| 3 | G | A |
+| 4 | C (high) | B |
+| 5 | E (high) | D (high) |
+| 6 | G (high) | F (high) |
+| 7 | B (high) | A (high) |
 
 ## Practice speed
 
@@ -47,8 +59,8 @@ src/
   index.css               global styles + start/results screens (paper theme)
   game.css                playfield, lanes, notes, feedback
   audio/sound.js          tiny Web Audio "toy accordion" synth
-  data/constants.js       lanes, colors, timing windows, positioning
-  data/songs.js           the charts (a mini push/pull note language)
+  data/constants.js       lanes, button/note map, timing windows, positioning
+  data/songs.js           the charts (the +N / -N push/pull number notation)
   hooks/useGameEngine.js  animation loop, keyboard input, scoring
   components/
     StartScreen.jsx
@@ -58,10 +70,25 @@ src/
 
 ## Add your own song
 
-Songs live in [`src/data/songs.js`](src/data/songs.js). Each is a list of
-**sections**, and every section is either `dir: 'push'` or `dir: 'pull'`. Inside
-a section's `pattern`, each step is a lane letter (`'a'`..`'j'`), an array like
-`['a','j']` for a chord, or `null` for a rest — the section's direction decides
-whether its notes are push or pull. Copy an existing `buildSong({ ... })` block,
-tweak the `bpm`, `subdivision`, and `sections`, and it shows up on the menu
-automatically.
+Songs live in [`src/data/songs.js`](src/data/songs.js). Each has a `chart`
+string written in a simple tab-style notation:
+
+- a token is `+N` (push button *N*) or `-N` (pull button *N*), where *N* is 1–7;
+  a bare number defaults to push.
+- every token is one beat; a line break adds a short breath between phrases.
+
+For example, "Row, Row, Row Your Boat":
+
+```
++3 +3 +3 -3 -4
+-4 -3 -4 +4 -5
++6 +6 +6
+-5 -5 -5
+-4 -4 -4
++3
+-5 +4 -4 -3 +3
+```
+
+Copy an existing `buildSong({ ... })` block, tweak the `bpm` and `chart`, and it
+shows up on the menu automatically. (Consecutive same-direction notes are grouped
+into the look-ahead ribbon for you.)

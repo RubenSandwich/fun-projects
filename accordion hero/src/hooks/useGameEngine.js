@@ -21,11 +21,14 @@ export function useGameEngine(song, speed, onFinish) {
   // `elapsed` is milliseconds relative to song start. It is negative during the
   // countdown and drives every re-render (once per animation frame).
   const [elapsed, setElapsed] = useState(-COUNTDOWN_MS)
+  const [paused, setPaused] = useState(false)
 
   const startRef = useRef(0)
   const hiddenAtRef = useRef(0)
   const rafRef = useRef(0)
   const countdownRef = useRef(Math.ceil(COUNTDOWN_MS / 1000))
+  const pausedRef = useRef(false)
+  const pausedAtRef = useRef(0)
   const notesRef = useRef([])
   const scoreRef = useRef(0)
   const comboRef = useRef(0)
@@ -56,9 +59,12 @@ export function useGameEngine(song, speed, onFinish) {
     activeKeysRef.current = {}
     shiftRef.current = false
     finishedRef.current = false
+    pausedRef.current = false
+    pausedAtRef.current = 0
     startRef.current = performance.now() + COUNTDOWN_MS
     hiddenAtRef.current = 0
     setElapsed(-COUNTDOWN_MS)
+    setPaused(false)
 
     const setFeedback = (text, rating) => {
       feedbackIdRef.current += 1
@@ -118,12 +124,32 @@ export function useGameEngine(song, speed, onFinish) {
       setFeedback(rating.toUpperCase() + '!', rating)
     }
 
+    // Space toggles pause. Pausing freezes the game clock; resuming shifts the
+    // start time forward by however long we were paused so nothing is missed.
+    const togglePause = () => {
+      if (finishedRef.current) return
+      if (pausedRef.current) {
+        startRef.current += performance.now() - pausedAtRef.current
+        pausedRef.current = false
+        setPaused(false)
+      } else {
+        pausedRef.current = true
+        pausedAtRef.current = performance.now()
+        setPaused(true)
+      }
+    }
+
     const onKeyDown = (e) => {
       if (e.key === 'Shift') {
         shiftRef.current = true
         return
       }
-      if (e.repeat) return
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (!e.repeat) togglePause()
+        return
+      }
+      if (e.repeat || pausedRef.current) return
       const lane = KEY_CODES[e.code]
       if (lane === undefined) return
       e.preventDefault()
@@ -150,6 +176,7 @@ export function useGameEngine(song, speed, onFinish) {
     // Pause the game clock while the tab is hidden so alt-tabbing (or a
     // throttled background tab) doesn't dump a wall of "miss" notes at once.
     const onVisibility = () => {
+      if (pausedRef.current) return
       if (document.hidden) {
         hiddenAtRef.current = performance.now()
       } else if (hiddenAtRef.current) {
@@ -160,6 +187,10 @@ export function useGameEngine(song, speed, onFinish) {
     document.addEventListener('visibilitychange', onVisibility)
 
     const loop = () => {
+      if (pausedRef.current) {
+        rafRef.current = requestAnimationFrame(loop)
+        return
+      }
       const now = gameTime()
 
       // Real-time 3-2-1 countdown (unaffected by playback speed).
@@ -208,6 +239,7 @@ export function useGameEngine(song, speed, onFinish) {
   return {
     elapsed,
     countdown: countdownRef.current,
+    paused,
     notes: notesRef.current,
     score: scoreRef.current,
     combo: comboRef.current,

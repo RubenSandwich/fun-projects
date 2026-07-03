@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KEYS, LANE_COLORS } from '../data/constants'
+import { LANE_LABELS, LANE_COLORS, LANE_NOTES } from '../data/constants'
 import { resumeAudio } from '../audio/sound'
 
 const DIFF_CLASS = {
@@ -35,34 +35,52 @@ export default function StartScreen({ songs, onStart }) {
         <h2 className="howto__heading">How to play</h2>
 
         <div className="howto__keys">
-          {KEYS.map((k, i) => (
+          {LANE_LABELS.map((label, i) => (
             <span
-              key={k}
+              key={label}
               className="key-cap"
               style={{ '--lane': LANE_COLORS[i] }}
             >
-              {k}
+              {label}
             </span>
           ))}
         </div>
 
         <div className="howto__row">
-          <span className="badge badge--push">▼ PUSH section</span>
+          <span className="badge badge--push">▼ PUSH</span>
           <span>
-            Notes show <strong>lowercase</strong> letters — just tap the key.
+            Squeeze the bellows in — just <strong>tap</strong> the button's number
+            key.
           </span>
         </div>
         <div className="howto__row">
-          <span className="badge badge--pull">▲ PULL section</span>
+          <span className="badge badge--pull">▲ PULL</span>
           <span>
-            Notes show <strong>UPPERCASE</strong> letters — hold{' '}
-            <span className="key-cap key-cap--shift">⇧ Shift</span> + the key.
+            Draw the bellows out — hold{' '}
+            <span className="key-cap key-cap--shift">⇧ Shift</span> + the number
+            key.
           </span>
         </div>
         <p className="howto__hint">
-          Each song is split into push and pull <strong>sections</strong>. Watch
-          the banner up top and switch bellows direction when it changes!
+          Every button plays a different note on push vs pull. The moving cards
+          show the note — squeeze the matching button the right way!
         </p>
+
+        <div className="note-map">
+          {LANE_NOTES.map((n, i) => (
+            <div
+              key={i}
+              className="note-map__btn"
+              style={{ '--lane': LANE_COLORS[i] }}
+            >
+              <span className="note-map__num">{i + 1}</span>
+              <span className="note-map__notes">
+                <span className="nm nm--push">▼ {n.push.name}</span>
+                <span className="nm nm--pull">▲ {n.pull.name}</span>
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="song-list">

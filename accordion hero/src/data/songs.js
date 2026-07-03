@@ -1,45 +1,56 @@
-import { KEYS, LEAD_IN } from './constants'
+import { LEAD_IN } from './constants'
 
-// A tiny "chart" language, organised into push/pull *sections*:
-//   - a song is a list of sections; each section is a stretch that is either
-//     entirely PUSH or entirely PULL.
-//   - inside a section every step is a lane letter ('a'..'j'), an array of
-//     letters for a chord, or null for a rest. The *section's* direction decides
-//     whether the notes in it are push or pull — individual notes don't choose.
+// Chart format: a whitespace / line separated list of tokens like "+3" or "-4".
+//   - the number (1-7) is the accordion button to press.
+//   - "+" means PUSH (squeeze the bellows in); "-" means PULL (draw them out).
+//     A bare number (e.g. "3") defaults to push.
+//   - every token is one beat; a line break adds a short breath between phrases.
 //
-// PUSH = squeeze the bellows in -> tap the key on its own (shown lowercase).
-// PULL = draw the bellows out   -> hold Shift + the key   (shown UPPERCASE).
+// Example ("Row, Row, Row Your Boat"):  +3 +3 +3 -3 -4  ...
 
-function buildSong({ id, name, blurb, bpm, subdivision, color, difficulty, sections }) {
-  const step = 60000 / bpm / subdivision // ms between steps
+function parseChart(chart, { bpm, subdivision = 1, breath = true }) {
+  const step = 60000 / bpm / subdivision // ms between beats
   const notes = []
-  const sectionSpans = []
   let noteId = 0
-  let cursor = 0 // running step index across every section
+  let cursor = 0
+  const lines = chart.trim().split('\n')
 
-  sections.forEach((section) => {
-    const startStep = cursor
-    section.pattern.forEach((cell) => {
-      if (cell != null) {
-        const tokens = Array.isArray(cell) ? cell : [cell]
-        const time = Math.round(cursor * step)
-        tokens.forEach((token) => {
-          const lane = KEYS.indexOf(String(token).toUpperCase())
-          if (lane !== -1) notes.push({ id: noteId++, lane, time, type: section.dir })
-        })
-      }
+  lines.forEach((line, li) => {
+    const tokens = line.trim().split(/\s+/).filter(Boolean)
+    tokens.forEach((tok) => {
+      const m = /^([+-]?)([1-7])$/.exec(tok)
+      if (!m) return
+      const type = m[1] === '-' ? 'pull' : 'push'
+      const lane = Number(m[2]) - 1
+      notes.push({ id: noteId++, lane, time: Math.round(cursor * step), type })
       cursor += 1
     })
-    sectionSpans.push({
-      id: sectionSpans.length,
-      dir: section.dir,
-      start: Math.round(startStep * step),
-      end: Math.round(cursor * step),
-    })
+    if (breath && tokens.length && li < lines.length - 1) cursor += 1
   })
 
-  const duration = Math.round(cursor * step)
-  return { id, name, blurb, bpm, color, difficulty, notes, sections: sectionSpans, duration }
+  return { notes, duration: Math.round(cursor * step) }
+}
+
+// Group consecutive same-direction notes into push/pull runs. These drive the
+// look-ahead ribbon and the current-direction banner.
+function deriveSections(notes, duration) {
+  const runs = []
+  notes.forEach((n) => {
+    const last = runs[runs.length - 1]
+    if (!last || last.dir !== n.type) runs.push({ dir: n.type, start: n.time })
+  })
+  return runs.map((r, i) => ({
+    id: i,
+    dir: r.dir,
+    start: r.start,
+    end: i < runs.length - 1 ? runs[i + 1].start : duration,
+  }))
+}
+
+function buildSong({ id, name, blurb, bpm, subdivision = 1, color, difficulty, chart }) {
+  const { notes, duration } = parseChart(chart, { bpm, subdivision })
+  const sections = deriveSections(notes, duration)
+  return { id, name, blurb, bpm, color, difficulty, notes, sections, duration }
 }
 
 // Shift a song so the first note only appears *after* the countdown ends: every
@@ -60,76 +71,50 @@ export function withLeadIn(song) {
 
 export const SONGS = [
   buildSong({
-    id: 'polka-picnic',
-    name: 'Polka Picnic',
-    blurb: 'Gentle strolls, one direction at a time.',
-    bpm: 96,
-    subdivision: 1, // quarter notes
+    id: 'twinkle',
+    name: 'Twinkle, Twinkle',
+    blurb: 'The classic. Mostly gentle push/pull pairs.',
+    bpm: 100,
     color: '#8ac926',
     difficulty: 'Easy',
-    sections: [
-      { dir: 'push', pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', null] },
-      { dir: 'pull', pattern: ['j', 'h', 'g', 'f', 'd', 's', 'a', null] },
-      { dir: 'push', pattern: ['a', 'a', 's', 's', 'd', null, 'd', null] },
-      { dir: 'pull', pattern: ['g', 'g', 'h', 'h', 'j', null, 'j', null] },
-      { dir: 'push', pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', null] },
-      { dir: 'pull', pattern: ['j', 'h', 'g', 'f', 'd', 's', 'a', null] },
-    ],
+    chart: `
+      +1 +1 +3 +3 -3 -3 +3
+      -2 -2 +2 +2 -1 -1 +1
+      +3 +3 -2 -2 +2 +2 -1
+      +3 +3 -2 -2 +2 +2 -1
+      +1 +1 +3 +3 -3 -3 +3
+      -2 -2 +2 +2 -1 -1 +1
+    `,
   }),
   buildSong({
-    id: 'bellows-boogie',
-    name: 'Bellows Boogie',
-    blurb: 'Longer push and pull runs with a few chords.',
+    id: 'row-your-boat',
+    name: 'Row, Row, Row Your Boat',
+    blurb: 'Reaches the high buttons with quick direction flips.',
     bpm: 112,
-    subdivision: 2, // eighth notes
     color: '#4cc9f0',
     difficulty: 'Medium',
-    sections: [
-      {
-        dir: 'push',
-        pattern: ['a', null, 's', null, 'd', null, 'f', null, 'g', null, 'f', null, 'd', null, 's', null],
-      },
-      {
-        dir: 'pull',
-        pattern: ['j', null, 'h', null, 'g', null, 'f', null, 'd', null, 's', null, 'a', null, 'a', null],
-      },
-      {
-        dir: 'push',
-        pattern: ['a', 'a', 's', 's', 'd', 'd', 'f', 'f', ['a', 'd'], null, ['s', 'f'], null, ['d', 'g'], null, 'f', null],
-      },
-      {
-        dir: 'pull',
-        pattern: ['j', 'h', 'g', 'f', 'g', 'h', 'j', null, ['g', 'j'], null, 'h', null, 'g', null, 'f', null],
-      },
-      {
-        dir: 'push',
-        pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', null, 'a', 's', 'd', 'f', 'g', 'h', 'j', null],
-      },
-      {
-        dir: 'pull',
-        pattern: ['j', 'h', 'g', 'f', 'd', 's', 'a', null, 'j', 'h', 'g', 'f', 'd', 's', 'a', null],
-      },
-    ],
+    chart: `
+      +3 +3 +3 -3 -4
+      -4 -3 -4 +4 -5
+      +6 +6 +6
+      -5 -5 -5
+      -4 -4 -4
+      +3
+      -5 +4 -4 -3 +3
+    `,
   }),
   buildSong({
-    id: 'squeezebox-stampede',
-    name: 'Squeezebox Stampede',
-    blurb: 'Short sections that flip push/pull fast. Hold on!',
-    bpm: 132,
-    subdivision: 2, // eighth notes
+    id: 'ode-to-joy',
+    name: 'Ode to Joy',
+    blurb: 'Beethoven at a brisk pace — mind the push/pull switches.',
+    bpm: 124,
     color: '#ff5d5d',
     difficulty: 'Hard',
-    sections: [
-      { dir: 'push', pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'h'] },
-      { dir: 'pull', pattern: ['g', 'f', 'd', 's', 'a', 's', 'd', 'f'] },
-      { dir: 'push', pattern: ['g', 'h', 'j', 'h', 'g', 'f', 'd', 's'] },
-      { dir: 'pull', pattern: ['a', 'a', 's', 's', 'd', 'd', 'f', 'f'] },
-      { dir: 'push', pattern: [['a', 'g'], 's', ['d', 'j'], 'f', ['a', 'h'], 's', ['d', 'g'], 'f'] },
-      { dir: 'pull', pattern: ['j', 'h', 'g', 'f', 'd', 's', 'a', null] },
-      { dir: 'push', pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', null] },
-      { dir: 'pull', pattern: ['j', 'j', 'h', 'h', 'g', 'g', 'f', null] },
-      { dir: 'push', pattern: ['a', 's', 'd', 'f', 'g', 'h', 'j', null] },
-      { dir: 'pull', pattern: [['a', 'j'], ['s', 'h'], ['d', 'g'], 'f', 'g', 'h', 'j', null] },
-    ],
+    chart: `
+      +2 +2 -2 +3 +3 -2 +2 -1
+      +1 +1 -1 +2 +2 -1 -1
+      +2 +2 -2 +3 +3 -2 +2 -1
+      +1 +1 -1 +2 -1 +1 +1
+    `,
   }),
 ]

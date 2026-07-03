@@ -1,5 +1,7 @@
 // Lightweight Web Audio "toy accordion" synth. No external assets needed.
 
+import { LANE_NOTES } from '../data/constants'
+
 let ctx = null
 
 function getCtx() {
@@ -18,25 +20,14 @@ export function resumeAudio() {
   if (c && c.state === 'suspended') c.resume()
 }
 
-// A cheerful major-ish scale, one base note per lane.
-const SCALE = [
-  261.63, // C4  (A lane)
-  293.66, // D4  (S lane)
-  329.63, // E4  (D lane)
-  349.23, // F4  (F lane)
-  392.0, // G4   (G lane)
-  440.0, // A4   (H lane)
-  493.88, // B4  (J lane)
-]
-
-// Play a short reedy accordion note. Pull notes ring a fifth higher than push
-// notes on the same button, echoing how a bisonoric accordion works.
+// Play a short reedy accordion note. Each button sounds a different pitch on
+// push vs pull, taken straight from the button/note map in constants.
 export function playNote(lane, type) {
   const c = getCtx()
   if (!c) return
   const now = c.currentTime
-  let freq = SCALE[lane] ?? 440
-  if (type === 'pull') freq *= 1.5 // up a perfect fifth
+  const note = LANE_NOTES[lane]?.[type]
+  const freq = note ? note.freq : 440
 
   const master = c.createGain()
   master.gain.setValueAtTime(0.0001, now)

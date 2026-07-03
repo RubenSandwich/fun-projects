@@ -1,19 +1,43 @@
 // Shared game constants and helpers.
 
-// The seven playable lanes, left-to-right on the keyboard home row.
-export const KEYS = ['A', 'S', 'D', 'F', 'G', 'H', 'J']
+// Seven lanes = the seven toy-accordion buttons, played with the number keys 1-7.
+export const LANE_LABELS = ['1', '2', '3', '4', '5', '6', '7']
 
 // Map physical key codes to lane indices. Using `event.code` means the lane is
 // the same whether or not Shift is held (Shift is what distinguishes push/pull).
+// Both the number row and the numpad work.
 export const KEY_CODES = {
-  KeyA: 0,
-  KeyS: 1,
-  KeyD: 2,
-  KeyF: 3,
-  KeyG: 4,
-  KeyH: 5,
-  KeyJ: 6,
+  Digit1: 0,
+  Digit2: 1,
+  Digit3: 2,
+  Digit4: 3,
+  Digit5: 4,
+  Digit6: 5,
+  Digit7: 6,
+  Numpad1: 0,
+  Numpad2: 1,
+  Numpad3: 2,
+  Numpad4: 3,
+  Numpad5: 4,
+  Numpad6: 5,
+  Numpad7: 6,
 }
+
+// Each button is bisonoric: it sounds a different note when you push (squeeze in)
+// vs pull (draw out), exactly like a real diatonic accordion.
+//   button 1: C (middle C) / D      button 5: E (high) / D (high)
+//   button 2: E / F                  button 6: G (high) / F (high)
+//   button 3: G / A                  button 7: B (high) / A (high)
+//   button 4: C (high) / B
+export const LANE_NOTES = [
+  { push: { name: 'C', freq: 261.63 }, pull: { name: 'D', freq: 293.66 } },
+  { push: { name: 'E', freq: 329.63 }, pull: { name: 'F', freq: 349.23 } },
+  { push: { name: 'G', freq: 392.0 }, pull: { name: 'A', freq: 440.0 } },
+  { push: { name: 'C', freq: 523.25 }, pull: { name: 'B', freq: 493.88 } },
+  { push: { name: 'E', freq: 659.25 }, pull: { name: 'D', freq: 587.33 } },
+  { push: { name: 'G', freq: 783.99 }, pull: { name: 'F', freq: 698.46 } },
+  { push: { name: 'B', freq: 987.77 }, pull: { name: 'A', freq: 880.0 } },
+]
 
 // Bright, saturated "cut paper" colors for each lane.
 export const LANE_COLORS = [
