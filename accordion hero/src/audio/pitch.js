@@ -13,10 +13,6 @@ let buf = null
 // How far off a played note may be (in cents) and still count as a button note.
 export const TOLERANCE_CENTS = 60
 
-export function isMicActive() {
-  return !!analyser
-}
-
 // Ask for the mic and wire it into an analyser on the shared audio graph. Must
 // be called from a user gesture (e.g. a button click).
 export async function startMic() {

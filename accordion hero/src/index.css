@@ -11,8 +11,14 @@
   --green: #8ac926;
   --teal: #2ec4b6;
   --sky: #4cc9f0;
-  --purple: #b892ff;
+  --purple: #7b3fb5; /* darkened so it clears 4.5:1 as a label color */
   --pink: #ff8fce;
+
+  /* Darker, text-safe variants of the accent hues (>=4.5:1 on the light
+     paper/gradient) — used only for colored label text. */
+  --teal-ink: #0c655c;
+  --green-ink: #477310;
+  --red-ink: #b71c1c;
 
   /* Shared push / pull fills — used identically by the ribbon, the HUD banner
      and the per-note indicator so all three read the same way. */
@@ -25,10 +31,52 @@
 
   --shadow: 5px 6px 0 rgba(58, 42, 32, 0.22);
   --shadow-lg: 8px 10px 0 rgba(58, 42, 32, 0.2);
+  --shadow-sm: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  --shadow-xs: 2px 3px 0 rgba(58, 42, 32, 0.22);
 
   --paper-radius: 16px 20px 15px 22px / 22px 15px 20px 16px;
 
-  font-family: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
+  --muted: #6a5a4c; /* secondary text (darkened for >=4.5:1 contrast) */
+
+  /* fonts */
+  --font-body: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
+  --font-display: 'Baloo 2', sans-serif;
+
+  /* spacing scale (px) */
+  --sp-2: 2px;
+  --sp-4: 4px;
+  --sp-6: 6px;
+  --sp-8: 8px;
+  --sp-10: 10px;
+  --sp-12: 12px;
+  --sp-14: 14px;
+  --sp-16: 16px;
+  --sp-18: 18px;
+  --sp-20: 20px;
+  --sp-22: 22px;
+  --sp-24: 24px;
+  --sp-28: 28px;
+  --sp-34: 34px;
+  --sp-40: 40px;
+  --sp-44: 44px;
+
+  /* type scale (rem) */
+  --fs-2xs: 0.72rem;
+  --fs-xs: 0.8rem;
+  --fs-sm: 0.9rem;
+  --fs-md: 0.95rem;
+  --fs-base: 1.05rem;
+  --fs-lg: 1.15rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.4rem;
+  --fs-3xl: 1.5rem;
+  --fs-4xl: 1.7rem;
+  --fs-5xl: 1.9rem;
+  --fs-6xl: 2.4rem;
+  --fs-7xl: 4.5rem;
+  --fs-8xl: 9rem;
+
+  font-family: var(--font-body);
   color: var(--ink);
 }
 
@@ -65,12 +113,12 @@ body {
 
 .app {
   position: relative;
-  min-height: 100%;
+  height: 100%;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -113,12 +161,12 @@ body {
 .btn {
   font-family: inherit;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   color: var(--ink);
   background: var(--paper);
   border: 4px solid var(--ink);
   border-radius: 14px 18px 14px 18px / 18px 14px 18px 14px;
-  padding: 12px 22px;
+  padding: var(--sp-12) var(--sp-22);
   cursor: pointer;
   box-shadow: var(--shadow);
   transition: transform 0.08s ease, box-shadow 0.08s ease;
@@ -138,17 +186,17 @@ body {
   background: var(--paper);
 }
 .btn--big {
-  font-size: 1.35rem;
-  padding: 14px 34px;
+  font-size: var(--fs-2xl);
+  padding: var(--sp-14) var(--sp-34);
 }
 
 /* ---------- Titles ---------- */
 .title {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
   font-size: clamp(2.6rem, 7vw, 4.6rem);
   line-height: 1;
-  margin: 0 0 6px;
+  margin: 0 0 var(--sp-6);
   color: var(--red);
   text-shadow: 3px 0 var(--ink), -3px 0 var(--ink), 0 3px var(--ink),
     0 -3px var(--ink), 3px 3px var(--ink), 6px 8px 0 rgba(58, 42, 32, 0.25);
@@ -157,20 +205,20 @@ body {
 }
 .title__accordion {
   display: inline-block;
-  margin-right: 8px;
+  margin-right: var(--sp-8);
   transform: rotate(4deg);
   -webkit-text-fill-color: initial;
   text-shadow: none;
 }
 .title--small {
   font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--teal);
+  color: var(--teal-ink);
 }
 .subtitle {
   text-align: center;
-  font-size: 1.15rem;
+  font-size: var(--fs-lg);
   font-weight: 600;
-  margin: 0 0 22px;
+  margin: 0 0 var(--sp-22);
   color: var(--ink);
 }
 
@@ -179,105 +227,158 @@ body {
   position: relative;
   z-index: 1;
   width: min(760px, 96vw);
-  max-height: 96vh;
+  height: 100%;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 28px;
+  padding: var(--sp-24) var(--sp-28) var(--sp-44);
 }
 
-.howto {
+/* Collapsible "accordion" card — shared by How to play and Practice settings. */
+.accordion {
   width: 100%;
-  padding: 16px 22px;
-  margin-bottom: 20px;
-  transform: rotate(-0.6deg);
+  padding: var(--sp-16) var(--sp-22);
+  margin-bottom: var(--sp-20);
 }
-.howto__toggle {
+.accordion__toggle {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--sp-12);
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
 }
-.howto__heading {
+.accordion__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
   margin: 0;
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-3xl);
   color: var(--purple);
 }
-.howto__chevron {
-  font-family: 'Baloo 2', sans-serif;
+.accordion__chevron {
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.8rem;
+  font-size: var(--fs-5xl);
   line-height: 1;
   color: var(--purple);
+  transition: transform 0.3s ease;
 }
-.howto__body {
-  margin-top: 14px;
+.accordion__toggle[aria-expanded='true'] .accordion__chevron {
+  transform: rotate(180deg);
+}
+/* Animated collapse/expand wrapper (grid rows 0fr -> 1fr). */
+.accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+.accordion__panel.is-open {
+  grid-template-rows: 1fr;
+}
+.accordion__body {
+  overflow: hidden;
+  min-height: 0;
+  /* Horizontal room so card shadows and selection rings aren't clipped. */
+  padding: 0 var(--sp-16);
+}
+/* Vertical room lives on the inner content's padding (inside the clipped body)
+   so it collapses cleanly to 0 when closed — unlike a margin, which would leak. */
+.accordion__body > :first-child {
+  padding-top: var(--sp-16);
+}
+.accordion__body > :last-child {
+  padding-bottom: var(--sp-16);
+}
+/* Selected-song label shown in the header while the Songs list is collapsed —
+   styled as a mini version of the song card (colored left edge). */
+.accordion__current {
+  padding: var(--sp-2) var(--sp-10);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-left: 6px solid var(--card, var(--yellow));
+  border-radius: 8px 11px 7px 10px;
+  box-shadow: var(--shadow-xs);
+}
+
+/* Per-card paper-cutout tilt. */
+.howto {
+  transform: rotate(-0.6deg);
+}
+.songs {
+  transform: rotate(-0.4deg);
+}
+.settings {
+  transform: rotate(0.4deg);
 }
 .howto__keys {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-10);
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--sp-16);
   flex-wrap: wrap;
 }
 .howto__row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-  font-size: 1.05rem;
+  gap: var(--sp-12);
+  margin-bottom: var(--sp-10);
+  font-size: var(--fs-base);
   font-weight: 500;
 }
 .howto__hint {
-  margin: 12px 0 0;
+  margin: var(--sp-12) 0 0;
   font-weight: 600;
-  color: #7a6a5c;
+  color: var(--muted);
 }
 
 /* Button -> note reference (push note over pull note for each of the 7 buttons). */
 .note-map {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-top: 16px;
+  gap: var(--sp-8);
+  margin-top: var(--sp-16);
 }
 .note-map__btn {
   --lane: var(--yellow);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px 2px;
+  gap: var(--sp-4);
+  padding: var(--sp-6) var(--sp-2);
   background: var(--paper);
   border: 3px solid var(--ink);
   border-top: 8px solid var(--lane);
   border-radius: 10px 12px 9px 12px;
-  box-shadow: 2px 3px 0 rgba(58, 42, 32, 0.2);
+  box-shadow: var(--shadow-xs);
 }
 .note-map__num {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
   line-height: 1;
 }
 .note-map__notes {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--sp-2);
 }
 .nm {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -301,10 +402,10 @@ body {
   justify-content: center;
   min-width: 40px;
   height: 42px;
-  padding: 0 8px;
-  font-family: 'Baloo 2', sans-serif;
+  padding: 0 var(--sp-8);
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: var(--fs-xl);
   color: var(--ink);
   background: var(--lane);
   border: 3px solid var(--ink);
@@ -313,21 +414,21 @@ body {
 }
 .key-cap--shift {
   min-width: auto;
-  font-size: 0.95rem;
+  font-size: var(--fs-md);
   background: var(--sky);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: 'Baloo 2', sans-serif;
+  gap: var(--sp-6);
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.95rem;
-  padding: 5px 12px;
+  font-size: var(--fs-md);
+  padding: 5px var(--sp-12);
   border: 3px solid var(--ink);
   border-radius: 20px;
-  box-shadow: 2px 3px 0 rgba(58, 42, 32, 0.22);
+  box-shadow: var(--shadow-xs);
   white-space: nowrap;
 }
 .badge--push {
@@ -341,19 +442,18 @@ body {
 .song-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
+  gap: var(--sp-16);
   width: 100%;
-  margin-bottom: 24px;
 }
 .song-card {
   --card: var(--yellow);
   font-family: inherit;
   text-align: left;
   cursor: pointer;
-  padding: 16px 18px;
+  padding: var(--sp-16) var(--sp-18);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--sp-6);
   border-left: 14px solid var(--card);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
@@ -373,31 +473,31 @@ body {
     var(--shadow-lg);
 }
 .song-card__name {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: var(--fs-2xl);
 }
 .song-card__blurb {
-  font-size: 0.92rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: #7a6a5c;
+  color: var(--muted);
 }
 .song-card__meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: var(--sp-10);
+  margin-top: var(--sp-4);
 }
 .song-card__bpm {
   font-weight: 600;
-  font-size: 0.85rem;
-  color: #7a6a5c;
+  font-size: var(--fs-sm);
+  color: var(--muted);
 }
 .diff {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 0.8rem;
-  padding: 3px 10px;
+  font-size: var(--fs-xs);
+  padding: 3px var(--sp-10);
   border: 2px solid var(--ink);
   border-radius: 20px;
 }
@@ -411,57 +511,45 @@ body {
   background: var(--red);
 }
 
-/* ---------- Section labels ---------- */
-.section-label {
-  align-self: flex-start;
-  margin: 2px 0 10px 6px;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 800;
-  font-size: 1.3rem;
-  color: var(--purple);
-  transform: rotate(-1deg);
-}
-
 /* ---------- Practice settings ---------- */
-.practice-settings {
-  width: 100%;
-  margin-bottom: 22px;
-  padding: 4px 18px 12px;
-  transform: rotate(0.4deg);
-}
 .practice-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sp-16);
   flex-wrap: wrap;
-  padding: 14px 0;
+  padding: var(--sp-14) 0;
 }
 .practice-row--divider {
   border-top: 3px dashed rgba(58, 42, 32, 0.25);
 }
 .practice-row__label {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.1rem;
-  color: var(--teal);
+  font-size: var(--fs-lg);
+  color: var(--teal-ink);
 }
-.practice-row--wait {
+.practice-row--wait,
+.mic-row {
   flex-wrap: nowrap;
 }
 .practice-row--wait .practice-row__label {
   flex: 1;
   min-width: 0;
-  color: var(--green);
+  color: var(--green-ink);
+}
+.mic-row .mic-toggle__info {
+  flex: 1;
+  min-width: 0;
 }
 .practice-row__desc {
-  font-family: 'Fredoka', 'Baloo 2', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
-  font-size: 0.85rem;
-  color: #7a6a5c;
+  font-size: var(--fs-sm);
+  color: var(--muted);
 }
 .speed-select__options {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-10);
   flex-wrap: wrap;
   margin-left: auto;
 }
@@ -472,21 +560,21 @@ body {
   flex-direction: column;
   align-items: center;
   min-width: 78px;
-  padding: 6px 12px;
+  padding: var(--sp-6) var(--sp-12);
   background: var(--paper);
   border: 3px solid var(--ink);
   border-radius: 12px 14px 11px 14px;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  box-shadow: var(--shadow-sm);
   transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
 }
 .speed-chip strong {
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 1.2rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
 }
 .speed-chip span {
-  font-size: 0.72rem;
+  font-size: var(--fs-2xs);
   font-weight: 600;
-  color: #7a6a5c;
+  color: var(--muted);
 }
 .speed-chip:hover {
   transform: translate(-1px, -2px);
@@ -497,92 +585,31 @@ body {
   box-shadow: 0 0 0 3px var(--yellow), 4px 5px 0 rgba(58, 42, 32, 0.24);
 }
 
-/* ---------- Microphone toggle ---------- */
-.mic-toggle {
-  width: 100%;
-  padding: 14px 18px;
-  margin-bottom: 22px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transform: rotate(-0.5deg);
-}
-.mic-toggle.is-on {
-  box-shadow: 0 0 0 3px var(--teal), var(--shadow);
-}
+/* ---------- Microphone toggle (a row inside Practice settings) ---------- */
 .mic-toggle__info {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
 .mic-toggle__label {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.15rem;
-  color: var(--teal);
+  font-size: var(--fs-lg);
+  color: var(--teal-ink);
 }
 .mic-toggle__desc {
-  font-size: 0.88rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: #7a6a5c;
+  color: var(--muted);
 }
 .mic-toggle__err {
-  margin-top: 2px;
+  margin-top: var(--sp-2);
   font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--red);
-}
-.mic-switch {
-  position: relative;
-  flex: 0 0 auto;
-  margin-left: auto;
-  width: 92px;
-  height: 44px;
-  background: var(--paper);
-  border: 4px solid var(--ink);
-  border-radius: 999px;
-  cursor: pointer;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
-  transition: background 0.15s ease;
-}
-.mic-switch:disabled {
-  cursor: default;
-  opacity: 0.7;
-}
-.mic-switch.is-on {
-  background: var(--teal);
-}
-.mic-switch__knob {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--ink);
-  transition: left 0.15s ease;
-}
-.mic-switch.is-on .mic-switch__knob {
-  left: 51px;
-}
-.mic-switch__text {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 13px;
-  display: flex;
-  align-items: center;
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 800;
-  font-size: 0.78rem;
-  color: var(--ink);
-}
-.mic-switch.is-on .mic-switch__text {
-  right: auto;
-  left: 13px;
+  font-size: var(--fs-sm);
+  color: var(--red-ink);
 }
 
-/* ---------- Checkbox (used in practice settings) ---------- */
+/* ---------- Checkbox (shared by wait-for-note and mic mode) ---------- */
 .checkbox {
   flex: 0 0 auto;
   margin-left: auto;
@@ -595,16 +622,20 @@ body {
   border: 4px solid var(--ink);
   border-radius: 12px 14px 11px 14px;
   cursor: pointer;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  box-shadow: var(--shadow-sm);
   transition: background 0.12s ease;
+}
+.checkbox:disabled {
+  cursor: default;
+  opacity: 0.7;
 }
 .checkbox.is-checked {
   background: var(--green);
 }
 .checkbox__mark {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.7rem;
+  font-size: var(--fs-4xl);
   line-height: 1;
   color: var(--ink);
   opacity: 0;
@@ -629,19 +660,19 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 14px 40px;
-  margin: 8px 0 20px;
+  padding: var(--sp-14) var(--sp-40);
+  margin: var(--sp-8) 0 var(--sp-20);
   transform: rotate(-2deg);
 }
 .rank {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 4.5rem;
+  font-size: var(--fs-7xl);
   line-height: 1;
 }
 .rank__label {
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: var(--fs-lg);
 }
 .rank--s {
   background: var(--yellow);
@@ -661,20 +692,20 @@ body {
 
 .results__panel {
   width: 100%;
-  padding: 20px;
-  margin-bottom: 22px;
+  padding: var(--sp-20);
+  margin-bottom: var(--sp-22);
 }
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: var(--sp-12);
+  margin-bottom: var(--sp-18);
 }
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px;
+  padding: var(--sp-10);
   background: var(--cream);
   border: 3px solid var(--ink);
   border-radius: 12px;
@@ -684,33 +715,33 @@ body {
 }
 .stat__label {
   font-weight: 600;
-  font-size: 0.85rem;
-  color: #7a6a5c;
+  font-size: var(--fs-sm);
+  color: var(--muted);
 }
 .stat__value {
-  font-family: 'Baloo 2', sans-serif;
+  font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1.8rem;
+  font-size: var(--fs-5xl);
 }
 .judge-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: var(--sp-10);
 }
 .judge {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 4px;
+  gap: var(--sp-2);
+  padding: var(--sp-8) var(--sp-4);
   border: 3px solid var(--ink);
   border-radius: 10px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 .judge strong {
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
 }
 .judge--perfect {
   background: var(--green);
@@ -726,7 +757,7 @@ body {
 }
 .results__actions {
   display: flex;
-  gap: 16px;
+  gap: var(--sp-16);
   flex-wrap: wrap;
   justify-content: center;
 }

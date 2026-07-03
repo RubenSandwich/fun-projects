@@ -44,7 +44,6 @@ export function useGameEngine(
   const feedbackRef = useRef(null)
   const feedbackIdRef = useRef(0)
   const activeKeysRef = useRef({}) // lane index -> 'push' | 'pull' while held
-  const shiftRef = useRef(false)
   const micNoteRef = useRef(null)
   const micLastKeyRef = useRef(null)
   const micCandRef = useRef({ key: null, frames: 0 })
@@ -69,7 +68,6 @@ export function useGameEngine(
     countsRef.current = { perfect: 0, good: 0, ok: 0, miss: 0 }
     feedbackRef.current = null
     activeKeysRef.current = {}
-    shiftRef.current = false
     micNoteRef.current = null
     micLastKeyRef.current = null
     micCandRef.current = { key: null, frames: 0 }
@@ -160,10 +158,6 @@ export function useGameEngine(
     }
 
     const onKeyDown = (e) => {
-      if (e.key === 'Shift') {
-        shiftRef.current = true
-        return
-      }
       if (e.code === 'Space') {
         e.preventDefault()
         if (!e.repeat) togglePause()
@@ -181,10 +175,6 @@ export function useGameEngine(
     }
 
     const onKeyUp = (e) => {
-      if (e.key === 'Shift') {
-        shiftRef.current = false
-        return
-      }
       const lane = KEY_CODES[e.code]
       if (lane === undefined) return
       delete activeKeysRef.current[lane]
@@ -335,6 +325,5 @@ export function useGameEngine(
     counts: countsRef.current,
     feedback: feedbackRef.current,
     activeKeys: activeKeysRef.current,
-    shiftHeld: shiftRef.current,
   }
 }

@@ -39,15 +39,15 @@ export const LANE_NOTES = [
   { push: { name: 'B', freq: 987.77 }, pull: { name: 'A', freq: 880.0 } },
 ]
 
-// Bright, saturated "cut paper" colors for each lane.
+// Bright, saturated "cut paper" color per button (1-7).
 export const LANE_COLORS = [
-  '#ff5d5d', // A - coral red
-  '#ff924c', // S - orange
-  '#ffd23f', // D - sunshine yellow
-  '#8ac926', // F - leaf green
-  '#2ec4b6', // G - teal
-  '#4cc9f0', // H - sky blue
-  '#b892ff', // J - grape purple
+  '#ff5d5d', // 1 - coral red
+  '#ff924c', // 2 - orange
+  '#ffd23f', // 3 - sunshine yellow
+  '#8ac926', // 4 - leaf green
+  '#2ec4b6', // 5 - teal
+  '#4cc9f0', // 6 - sky blue
+  '#b892ff', // 7 - grape purple
 ]
 
 // How long (ms) a note is visible before it must be hit.

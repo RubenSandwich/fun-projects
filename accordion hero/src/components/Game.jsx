@@ -8,18 +8,14 @@ import '../game.css'
 // not its center.
 const NOTE_WIDTH_PX = 80
 
-// Decide whether a note should currently be on screen, and where.
-function renderInfo(note, elapsed) {
+// The note's on-screen x-position (percent), or null when it shouldn't render.
+function noteScreenX(note, elapsed) {
   if (note.state === 'active') {
     const x = noteX(note.time - elapsed)
-    if (x < -14 || x > 112) return null
-    return { x, judged: false }
+    return x < -14 || x > 112 ? null : x
   }
-  // Recently hit/missed: keep it briefly for a pop-out animation.
-  if (elapsed - note.judgeElapsed < 340) {
-    return { x: note.judgeX, judged: true }
-  }
-  return null
+  // Recently hit/missed: freeze it briefly at its judged spot for the pop-out.
+  return elapsed - note.judgeElapsed < 340 ? note.judgeX : null
 }
 
 // Which direction the song wants right now (drives the mode UI).
@@ -161,8 +157,8 @@ export default function Game({
             const laneNotes = []
             for (const n of g.notes) {
               if (n.lane !== i) continue
-              const info = renderInfo(n, g.elapsed)
-              if (info) laneNotes.push({ n, x: info.x })
+              const x = noteScreenX(n, g.elapsed)
+              if (x != null) laneNotes.push({ n, x })
             }
             return (
               <div className="lane" key={label} style={{ '--lane': LANE_COLORS[i] }}>

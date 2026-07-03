@@ -18,6 +18,8 @@ const SPEEDS = [
 export default function StartScreen({ songs, onStart, micEnabled, onMicChange }) {
   const [selected, setSelected] = useState(0)
   const [showHowTo, setShowHowTo] = useState(false)
+  const [showSongs, setShowSongs] = useState(true)
+  const [showSettings, setShowSettings] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [waitForNote, setWaitForNote] = useState(false)
   const [micBusy, setMicBusy] = useState(false)
@@ -55,18 +57,18 @@ export default function StartScreen({ songs, onStart, micEnabled, onMicChange })
       </h1>
       <p className="subtitle">A squeezebox rhythm game — notes fly in from the right!</p>
 
-      <div className="paper howto">
+      <div className="paper accordion howto">
         <button
-          className="howto__toggle"
+          className="accordion__toggle"
           onClick={() => setShowHowTo((v) => !v)}
           aria-expanded={showHowTo}
         >
-          <span className="howto__heading">How to play</span>
-          <span className="howto__chevron">{showHowTo ? '▲' : '▼'}</span>
+          <span className="accordion__heading">How to play</span>
+          <span className="accordion__chevron">▼</span>
         </button>
 
-        {showHowTo && (
-          <div className="howto__body">
+        <div className={'accordion__panel' + (showHowTo ? ' is-open' : '')}>
+          <div className="accordion__body">
             <div className="howto__keys">
               {LANE_LABELS.map((label, i) => (
                 <span
@@ -115,90 +117,118 @@ export default function StartScreen({ songs, onStart, micEnabled, onMicChange })
               ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      <h2 className="section-label">Songs</h2>
-
-      <div className="song-list">
-        {songs.map((song, i) => (
-          <button
-            key={song.id}
-            className={'paper song-card' + (i === selected ? ' is-selected' : '')}
-            style={{ '--card': song.color }}
-            onClick={() => setSelected(i)}
-          >
-            <span className="song-card__name">{song.name}</span>
-            <span className="song-card__blurb">{song.blurb}</span>
-            <span className="song-card__meta">
-              <span className={'diff ' + DIFF_CLASS[song.difficulty]}>
-                {song.difficulty}
-              </span>
-              <span className="song-card__bpm">{song.bpm} BPM</span>
+      <div className="paper accordion songs">
+        <button
+          className="accordion__toggle"
+          onClick={() => setShowSongs((v) => !v)}
+          aria-expanded={showSongs}
+        >
+          <span className="accordion__heading">
+            Song
+            <span
+              className="accordion__current"
+              style={{ '--card': songs[selected].color }}
+            >
+              {songs[selected].name}
             </span>
-          </button>
-        ))}
-      </div>
+          </span>
+          <span className="accordion__chevron">▼</span>
+        </button>
 
-      <h2 className="section-label">Practice settings</h2>
-
-      <div className="paper practice-settings">
-        <div className="practice-row">
-          <span className="practice-row__label">Speed</span>
-          <div className="speed-select__options">
-            {SPEEDS.map((s) => (
-              <button
-                key={s.value}
-                className={'speed-chip' + (s.value === speed ? ' is-selected' : '')}
-                onClick={() => setSpeed(s.value)}
-              >
-                <strong>{s.label}</strong>
-                <span>{s.note}</span>
-              </button>
-            ))}
+        <div className={'accordion__panel' + (showSongs ? ' is-open' : '')}>
+          <div className="accordion__body">
+            <div className="song-list">
+              {songs.map((song, i) => (
+                <button
+                  key={song.id}
+                  className={'paper song-card' + (i === selected ? ' is-selected' : '')}
+                  style={{ '--card': song.color }}
+                  onClick={() => setSelected(i)}
+                >
+                  <span className="song-card__name">{song.name}</span>
+                  <span className="song-card__blurb">{song.blurb}</span>
+                  <span className="song-card__meta">
+                    <span className={'diff ' + DIFF_CLASS[song.difficulty]}>
+                      {song.difficulty}
+                    </span>
+                    <span className="song-card__bpm">{song.bpm} BPM</span>
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="practice-row practice-row--divider practice-row--wait">
-          <span className="practice-row__label">
-            🐢 Wait for correct note
-            <span className="practice-row__desc">
-              {' '}— pauses on each note until you play it right
-            </span>
-          </span>
-          <button
-            className={'checkbox' + (waitForNote ? ' is-checked' : '')}
-            onClick={() => setWaitForNote((v) => !v)}
-            role="checkbox"
-            aria-checked={waitForNote}
-          >
-            <span className="checkbox__mark">✓</span>
-          </button>
-        </div>
       </div>
 
-      <div className={'paper mic-toggle' + (micEnabled ? ' is-on' : '')}>
-        <div className="mic-toggle__info">
-          <span className="mic-toggle__label">🎤 Microphone mode</span>
-          <span className="mic-toggle__desc">
-            Play a real toy accordion (or sing/whistle) into the mic and Accordion
-            Hero listens for the note — it counts as the button press. The keyboard
-            still works too.
-          </span>
-          {micError && <span className="mic-toggle__err">{micError}</span>}
-        </div>
+      <div className="paper accordion settings">
         <button
-          className={'mic-switch' + (micEnabled ? ' is-on' : '')}
-          onClick={toggleMic}
-          disabled={micBusy}
-          role="switch"
-          aria-checked={micEnabled}
+          className="accordion__toggle"
+          onClick={() => setShowSettings((v) => !v)}
+          aria-expanded={showSettings}
         >
-          <span className="mic-switch__knob" />
-          <span className="mic-switch__text">
-            {micBusy ? '…' : micEnabled ? 'ON' : 'OFF'}
-          </span>
+          <span className="accordion__heading">Settings</span>
+          <span className="accordion__chevron">▼</span>
         </button>
+
+        <div className={'accordion__panel' + (showSettings ? ' is-open' : '')}>
+          <div className="accordion__body">
+            <div className="practice-row">
+              <span className="practice-row__label">Speed</span>
+              <div className="speed-select__options">
+                {SPEEDS.map((s) => (
+                  <button
+                    key={s.value}
+                    className={'speed-chip' + (s.value === speed ? ' is-selected' : '')}
+                    onClick={() => setSpeed(s.value)}
+                  >
+                    <strong>{s.label}</strong>
+                    <span>{s.note}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="practice-row practice-row--divider practice-row--wait">
+              <span className="practice-row__label">
+                🐢 Wait for correct note
+                <span className="practice-row__desc">
+                  {' '}— pauses on each note until you play it right
+                </span>
+              </span>
+              <button
+                className={'checkbox' + (waitForNote ? ' is-checked' : '')}
+                onClick={() => setWaitForNote((v) => !v)}
+                role="checkbox"
+                aria-checked={waitForNote}
+              >
+                <span className="checkbox__mark">✓</span>
+              </button>
+            </div>
+
+            <div className="practice-row practice-row--divider mic-row">
+              <div className="mic-toggle__info">
+                <span className="mic-toggle__label">🎤 Microphone mode</span>
+                <span className="mic-toggle__desc">
+                  Play a note into the mic and it counts as the button press. The
+                  keyboard still works too.
+                </span>
+                {micError && <span className="mic-toggle__err">{micError}</span>}
+              </div>
+              <button
+                className={'checkbox' + (micEnabled ? ' is-checked' : '')}
+                onClick={toggleMic}
+                disabled={micBusy}
+                role="checkbox"
+                aria-checked={micEnabled}
+              >
+                <span className="checkbox__mark">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <button className="btn btn--primary btn--big" onClick={handleStart}>
