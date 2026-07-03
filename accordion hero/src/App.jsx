@@ -8,6 +8,8 @@ export default function App() {
   const [screen, setScreen] = useState('start') // 'start' | 'game' | 'results'
   const [songIndex, setSongIndex] = useState(0)
   const [speed, setSpeed] = useState(1) // practice playback multiplier
+  const [waitForNote, setWaitForNote] = useState(false) // hold on each note
+  const [micEnabled, setMicEnabled] = useState(false) // play via microphone
   const [result, setResult] = useState(null)
   const [runId, setRunId] = useState(0) // bump to force a fresh Game mount
 
@@ -15,9 +17,10 @@ export default function App() {
   // countdown ends. Stable within a run (only changes when the song changes).
   const song = useMemo(() => withLeadIn(SONGS[songIndex]), [songIndex])
 
-  const startGame = (index, spd = speed) => {
+  const startGame = (index, spd = speed, wait = waitForNote) => {
     setSongIndex(index)
     setSpeed(spd)
+    setWaitForNote(wait)
     setRunId((n) => n + 1)
     setResult(null)
     setScreen('game')
@@ -33,7 +36,12 @@ export default function App() {
       <div className="app-bg" aria-hidden="true" />
 
       {screen === 'start' && (
-        <StartScreen songs={SONGS} onStart={startGame} />
+        <StartScreen
+          songs={SONGS}
+          onStart={startGame}
+          micEnabled={micEnabled}
+          onMicChange={setMicEnabled}
+        />
       )}
 
       {screen === 'game' && (
@@ -41,6 +49,8 @@ export default function App() {
           key={runId}
           song={song}
           speed={speed}
+          micEnabled={micEnabled}
+          waitForNote={waitForNote}
           onFinish={handleFinish}
           onQuit={() => setScreen('start')}
         />

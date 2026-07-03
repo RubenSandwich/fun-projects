@@ -8,6 +8,7 @@ import {
   noteX,
 } from '../data/constants'
 import { playNote, playMiss, resumeAudio } from '../audio/sound'
+import { detectNote } from '../audio/pitch'
 
 const COUNTDOWN_MS = 3000 // "3, 2, 1" before the song starts
 const END_BUFFER = 1800 // grace time after the last note before results
@@ -15,9 +16,15 @@ const END_BUFFER = 1800 // grace time after the last note before results
 const POINTS = { perfect: 100, good: 60, ok: 30 }
 
 // Owns the whole run: the animation loop, keyboard input, scoring and phases.
-// `speed` is a playback multiplier (1 = full speed, 0.5 = half-speed practice);
-// it slows the game clock so both the note motion and the gaps stretch out.
-export function useGameEngine(song, speed, onFinish) {
+// Options:
+//   speed       - playback multiplier (1 = full speed, 0.5 = half-speed practice)
+//   micEnabled  - also listen to the mic and treat a played note as a press
+//   waitForNote - hold the song on each note until the correct one is played
+//   onFinish    - called with the result when the song ends
+export function useGameEngine(
+  song,
+  { speed = 1, micEnabled = false, waitForNote = false, onFinish } = {}
+) {
   // `elapsed` is milliseconds relative to song start. It is negative during the
   // countdown and drives every re-render (once per animation frame).
   const [elapsed, setElapsed] = useState(-COUNTDOWN_MS)
@@ -38,6 +45,11 @@ export function useGameEngine(song, speed, onFinish) {
   const feedbackIdRef = useRef(0)
   const activeKeysRef = useRef({}) // lane index -> 'push' | 'pull' while held
   const shiftRef = useRef(false)
+  const micNoteRef = useRef(null)
+  const micLastKeyRef = useRef(null)
+  const micCandRef = useRef({ key: null, frames: 0 })
+  const micSilentRef = useRef(0)
+  const micDebugAtRef = useRef(0)
   const finishedRef = useRef(false)
   const onFinishRef = useRef(onFinish)
   onFinishRef.current = onFinish
@@ -58,6 +70,11 @@ export function useGameEngine(song, speed, onFinish) {
     feedbackRef.current = null
     activeKeysRef.current = {}
     shiftRef.current = false
+    micNoteRef.current = null
+    micLastKeyRef.current = null
+    micCandRef.current = { key: null, frames: 0 }
+    micSilentRef.current = 0
+    micDebugAtRef.current = 0
     finishedRef.current = false
     pausedRef.current = false
     pausedAtRef.current = 0
@@ -102,12 +119,15 @@ export function useGameEngine(song, speed, onFinish) {
 
       const wantType = wantPull ? 'pull' : 'push'
       if (best.type !== wantType) {
-        // Right button, wrong bellows direction.
-        judge(best, now, 'miss')
-        comboRef.current = 0
-        countsRef.current.miss += 1
+        // Wrong bellows direction. In wait-for-note mode the note stays put so
+        // you can try again; otherwise it counts as a miss.
         setFeedback('Wrong Way!', 'miss')
         playMiss()
+        if (!waitForNote) {
+          judge(best, now, 'miss')
+          comboRef.current = 0
+          countsRef.current.miss += 1
+        }
         return
       }
 
@@ -191,25 +211,92 @@ export function useGameEngine(song, speed, onFinish) {
         rafRef.current = requestAnimationFrame(loop)
         return
       }
-      const now = gameTime()
+      let clock = gameTime()
 
       // Real-time 3-2-1 countdown (unaffected by playback speed).
       const realRemaining = startRef.current - performance.now()
       countdownRef.current = realRemaining > 0 ? Math.ceil(realRemaining / 1000) : 0
 
+      // Wait-for-note: hold the clock at the earliest un-hit note so the song
+      // doesn't advance past it until it's played correctly.
+      if (waitForNote) {
+        let barrier = Infinity
+        for (const n of notesRef.current) {
+          if (n.state === 'active' && n.time < barrier) barrier = n.time
+        }
+        if (barrier !== Infinity && clock > barrier) {
+          startRef.current += (clock - barrier) / speed
+          clock = barrier
+        }
+      }
+
       // Auto-miss notes that swept past the hit line untouched.
       for (const n of notesRef.current) {
-        if (n.state === 'active' && now > n.time + MISS_WINDOW) {
-          judge(n, now, 'miss')
+        if (n.state === 'active' && clock > n.time + MISS_WINDOW) {
+          judge(n, clock, 'miss')
           comboRef.current = 0
           countsRef.current.miss += 1
           setFeedback('Miss', 'miss')
         }
       }
 
-      setElapsed(now)
+      // Microphone: detect the played note and treat its onset as a press.
+      if (micEnabled) {
+        const det = detectNote()
 
-      if (!finishedRef.current && now > song.duration + END_BUFFER) {
+        // Throttled debug readout (~5x/sec) to help calibrate a real instrument.
+        const rt = performance.now()
+        if (det && rt - micDebugAtRef.current > 200) {
+          micDebugAtRef.current = rt
+          const cents = `${det.cents >= 0 ? '+' : ''}${det.cents.toFixed(0)}\u00a2`
+          if (det.matched) {
+            console.log(
+              `[mic] ${det.freq.toFixed(1)} Hz \u2192 ${det.name} ${det.type} (button ${
+                det.lane + 1
+              }) ${cents}`
+            )
+          } else {
+            console.log(
+              `[mic] ${det.freq.toFixed(1)} Hz \u2192 no match (closest ${
+                det.name ?? '?'
+              } ${cents})`
+            )
+          }
+        }
+
+        if (det && det.lane >= 0) {
+          micSilentRef.current = 0
+          const { lane, type } = det
+          micNoteRef.current = { lane, type, name: det.name }
+          const key = lane + ':' + type
+          if (key !== micLastKeyRef.current) {
+            const cand = micCandRef.current
+            if (cand.key === key) cand.frames += 1
+            else {
+              cand.key = key
+              cand.frames = 1
+            }
+            // Hold the note for a couple frames before it counts (debounce).
+            if (cand.frames >= 2) {
+              micLastKeyRef.current = key
+              cand.key = null
+              cand.frames = 0
+              registerPress(lane, type === 'pull')
+              console.log(`[mic] \u2713 hit ${det.name} ${type} (button ${lane + 1})`)
+            }
+          }
+        } else {
+          micSilentRef.current += 1
+          if (micSilentRef.current > 3) {
+            micLastKeyRef.current = null
+            micNoteRef.current = null
+          }
+        }
+      }
+
+      setElapsed(clock)
+
+      if (!finishedRef.current && clock > song.duration + END_BUFFER) {
         finishedRef.current = true
         const total = song.notes.length
         const c = countsRef.current
@@ -234,12 +321,13 @@ export function useGameEngine(song, speed, onFinish) {
       window.removeEventListener('keyup', onKeyUp)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [song, speed])
+  }, [song, speed, micEnabled, waitForNote])
 
   return {
     elapsed,
     countdown: countdownRef.current,
     paused,
+    micNote: micNoteRef.current,
     notes: notesRef.current,
     score: scoreRef.current,
     combo: comboRef.current,

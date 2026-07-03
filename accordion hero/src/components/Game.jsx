@@ -47,8 +47,15 @@ function Note({ note, x }) {
   )
 }
 
-export default function Game({ song, speed = 1, onFinish, onQuit }) {
-  const g = useGameEngine(song, speed, onFinish)
+export default function Game({
+  song,
+  speed = 1,
+  micEnabled = false,
+  waitForNote = false,
+  onFinish,
+  onQuit,
+}) {
+  const g = useGameEngine(song, { speed, micEnabled, waitForNote, onFinish })
 
   // Measure the ribbon so we can express half a note's width as a percent and
   // shift the section bands to line up with the note-card edges.
@@ -84,8 +91,16 @@ export default function Game({ song, speed = 1, onFinish, onQuit }) {
           <span className="hud__song-name">
             {song.name}
             {speed < 1 && <span className="speed-tag">{speed}× slow</span>}
+            {waitForNote && <span className="speed-tag speed-tag--wait">wait mode</span>}
           </span>
         </div>
+
+        {micEnabled && (
+          <div className="mic-chip">
+            <span className="mic-chip__dot" />
+            <span className="mic-chip__note">{g.micNote ? g.micNote.name : '…'}</span>
+          </div>
+        )}
 
         <div className="hud__stats">
           <div className="hud__block">
@@ -142,6 +157,7 @@ export default function Game({ song, speed = 1, onFinish, onQuit }) {
 
           {LANE_LABELS.map((label, i) => {
             const activeType = g.activeKeys[i]
+            const micHere = g.micNote && g.micNote.lane === i
             const laneNotes = []
             for (const n of g.notes) {
               if (n.lane !== i) continue
@@ -158,7 +174,7 @@ export default function Game({ song, speed = 1, onFinish, onQuit }) {
                 <div
                   className={
                     'key-target' +
-                    (activeType ? ' is-active' : '') +
+                    (activeType || micHere ? ' is-active' : '') +
                     (mode === 'pull' ? ' is-pull' : '')
                   }
                   style={{ left: HIT_LINE_PCT + '%' }}

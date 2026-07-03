@@ -1,6 +1,6 @@
 // Lightweight Web Audio "toy accordion" synth. No external assets needed.
 
-import { LANE_NOTES } from '../data/constants'
+import { LANE_NOTES } from '../data/constants.js'
 
 let ctx = null
 
@@ -18,6 +18,12 @@ function getCtx() {
 export function resumeAudio() {
   const c = getCtx()
   if (c && c.state === 'suspended') c.resume()
+}
+
+// Expose the shared AudioContext so the mic pitch detector can hang an analyser
+// off the same graph.
+export function getAudioContext() {
+  return getCtx()
 }
 
 // Play a short reedy accordion note. Each button sounds a different pitch on

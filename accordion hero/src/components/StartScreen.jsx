@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { LANE_LABELS, LANE_COLORS, LANE_NOTES } from '../data/constants'
 import { resumeAudio } from '../audio/sound'
+import { startMic, stopMic } from '../audio/pitch'
 
 const DIFF_CLASS = {
   Easy: 'diff--easy',
@@ -14,13 +15,36 @@ const SPEEDS = [
   { label: '1×', value: 1, note: 'Full speed' },
 ]
 
-export default function StartScreen({ songs, onStart }) {
+export default function StartScreen({ songs, onStart, micEnabled, onMicChange }) {
   const [selected, setSelected] = useState(0)
+  const [showHowTo, setShowHowTo] = useState(false)
   const [speed, setSpeed] = useState(1)
+  const [waitForNote, setWaitForNote] = useState(false)
+  const [micBusy, setMicBusy] = useState(false)
+  const [micError, setMicError] = useState('')
 
   const handleStart = () => {
     resumeAudio() // unlock audio on this user gesture
-    onStart(selected, speed)
+    onStart(selected, speed, waitForNote)
+  }
+
+  const toggleMic = async () => {
+    if (micEnabled) {
+      stopMic()
+      onMicChange(false)
+      return
+    }
+    setMicBusy(true)
+    setMicError('')
+    try {
+      await startMic()
+      onMicChange(true)
+    } catch {
+      setMicError('Could not access the microphone. Check browser permissions.')
+      onMicChange(false)
+    } finally {
+      setMicBusy(false)
+    }
   }
 
   return (
@@ -32,56 +56,69 @@ export default function StartScreen({ songs, onStart }) {
       <p className="subtitle">A squeezebox rhythm game — notes fly in from the right!</p>
 
       <div className="paper howto">
-        <h2 className="howto__heading">How to play</h2>
+        <button
+          className="howto__toggle"
+          onClick={() => setShowHowTo((v) => !v)}
+          aria-expanded={showHowTo}
+        >
+          <span className="howto__heading">How to play</span>
+          <span className="howto__chevron">{showHowTo ? '▲' : '▼'}</span>
+        </button>
 
-        <div className="howto__keys">
-          {LANE_LABELS.map((label, i) => (
-            <span
-              key={label}
-              className="key-cap"
-              style={{ '--lane': LANE_COLORS[i] }}
-            >
-              {label}
-            </span>
-          ))}
-        </div>
+        {showHowTo && (
+          <div className="howto__body">
+            <div className="howto__keys">
+              {LANE_LABELS.map((label, i) => (
+                <span
+                  key={label}
+                  className="key-cap"
+                  style={{ '--lane': LANE_COLORS[i] }}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
 
-        <div className="howto__row">
-          <span className="badge badge--push">▼ PUSH</span>
-          <span>
-            Squeeze the bellows in — just <strong>tap</strong> the button's number
-            key.
-          </span>
-        </div>
-        <div className="howto__row">
-          <span className="badge badge--pull">▲ PULL</span>
-          <span>
-            Draw the bellows out — hold{' '}
-            <span className="key-cap key-cap--shift">⇧ Shift</span> + the number
-            key.
-          </span>
-        </div>
-        <p className="howto__hint">
-          Every button plays a different note on push vs pull. The moving cards
-          show the note — squeeze the matching button the right way!
-        </p>
-
-        <div className="note-map">
-          {LANE_NOTES.map((n, i) => (
-            <div
-              key={i}
-              className="note-map__btn"
-              style={{ '--lane': LANE_COLORS[i] }}
-            >
-              <span className="note-map__num">{i + 1}</span>
-              <span className="note-map__notes">
-                <span className="nm nm--push">▼ {n.push.name}</span>
-                <span className="nm nm--pull">▲ {n.pull.name}</span>
+            <div className="howto__row">
+              <span className="badge badge--push">▼ PUSH</span>
+              <span>
+                Squeeze the bellows in — just <strong>tap</strong> the button's
+                number key.
               </span>
             </div>
-          ))}
-        </div>
+            <div className="howto__row">
+              <span className="badge badge--pull">▲ PULL</span>
+              <span>
+                Draw the bellows out — hold{' '}
+                <span className="key-cap key-cap--shift">⇧ Shift</span> + the
+                number key.
+              </span>
+            </div>
+            <p className="howto__hint">
+              Every button plays a different note on push vs pull. The moving
+              cards show the note — squeeze the matching button the right way!
+            </p>
+
+            <div className="note-map">
+              {LANE_NOTES.map((n, i) => (
+                <div
+                  key={i}
+                  className="note-map__btn"
+                  style={{ '--lane': LANE_COLORS[i] }}
+                >
+                  <span className="note-map__num">{i + 1}</span>
+                  <span className="note-map__notes">
+                    <span className="nm nm--push">▼ {n.push.name}</span>
+                    <span className="nm nm--pull">▲ {n.pull.name}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+
+      <h2 className="section-label">Songs</h2>
 
       <div className="song-list">
         {songs.map((song, i) => (
@@ -103,24 +140,69 @@ export default function StartScreen({ songs, onStart }) {
         ))}
       </div>
 
-      <div className="paper speed-select">
-        <span className="speed-select__label">Practice speed</span>
-        <div className="speed-select__options">
-          {SPEEDS.map((s) => (
-            <button
-              key={s.value}
-              className={'speed-chip' + (s.value === speed ? ' is-selected' : '')}
-              onClick={() => setSpeed(s.value)}
-            >
-              <strong>{s.label}</strong>
-              <span>{s.note}</span>
-            </button>
-          ))}
+      <h2 className="section-label">Practice settings</h2>
+
+      <div className="paper practice-settings">
+        <div className="practice-row">
+          <span className="practice-row__label">Speed</span>
+          <div className="speed-select__options">
+            {SPEEDS.map((s) => (
+              <button
+                key={s.value}
+                className={'speed-chip' + (s.value === speed ? ' is-selected' : '')}
+                onClick={() => setSpeed(s.value)}
+              >
+                <strong>{s.label}</strong>
+                <span>{s.note}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="practice-row practice-row--divider practice-row--wait">
+          <span className="practice-row__label">
+            🐢 Wait for correct note
+            <span className="practice-row__desc">
+              {' '}— pauses on each note until you play it right
+            </span>
+          </span>
+          <button
+            className={'checkbox' + (waitForNote ? ' is-checked' : '')}
+            onClick={() => setWaitForNote((v) => !v)}
+            role="checkbox"
+            aria-checked={waitForNote}
+          >
+            <span className="checkbox__mark">✓</span>
+          </button>
         </div>
       </div>
 
+      <div className={'paper mic-toggle' + (micEnabled ? ' is-on' : '')}>
+        <div className="mic-toggle__info">
+          <span className="mic-toggle__label">🎤 Microphone mode</span>
+          <span className="mic-toggle__desc">
+            Play a real toy accordion (or sing/whistle) into the mic and Accordion
+            Hero listens for the note — it counts as the button press. The keyboard
+            still works too.
+          </span>
+          {micError && <span className="mic-toggle__err">{micError}</span>}
+        </div>
+        <button
+          className={'mic-switch' + (micEnabled ? ' is-on' : '')}
+          onClick={toggleMic}
+          disabled={micBusy}
+          role="switch"
+          aria-checked={micEnabled}
+        >
+          <span className="mic-switch__knob" />
+          <span className="mic-switch__text">
+            {micBusy ? '…' : micEnabled ? 'ON' : 'OFF'}
+          </span>
+        </button>
+      </div>
+
       <button className="btn btn--primary btn--big" onClick={handleStart}>
-        ▶ Play
+        ▶ Play {songs[selected].name}
       </button>
     </div>
   )

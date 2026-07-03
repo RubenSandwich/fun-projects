@@ -11,10 +11,15 @@ npm install        # install dependencies
 npm run dev        # start the Vite dev server (http://localhost:5173/)
 npm run build      # production build (use this to verify changes compile)
 npm run preview    # preview the production build
+npm test           # run the pitch-detection unit tests (Node's built-in runner)
 ```
 
-There is no test suite or linter configured. **Verify every change with
-`npm run build`** — it must complete with no errors.
+There is a small unit-test suite for the mic pitch detector
+(`src/audio/pitch.test.js`); no linter is configured. **Verify changes with
+`npm run build` (must pass with no errors) and, for audio/detection work,
+`npm test`.** Note: source files in the pitch/sound/constants dependency graph
+use explicit `.js` import extensions so Node's native ESM test runner can
+resolve them.
 
 ## Tech stack
 
@@ -33,7 +38,8 @@ src/
   data/constants.js       lanes, KEY_CODES, LANE_NOTES (button->note map), timing, noteX()
   data/songs.js           chart parser + the songs
   audio/sound.js          Web Audio "toy accordion" synth (reads LANE_NOTES)
-  hooks/useGameEngine.js  the game loop: rAF, keyboard input, scoring, pause, phases
+  audio/pitch.js          mic pitch detection (autocorrelation) -> button note
+  hooks/useGameEngine.js  the game loop: rAF, keyboard + mic input, scoring, pause, phases
   components/
     StartScreen.jsx       song list, practice-speed picker, how-to + button/note map
     Game.jsx              HUD, section ribbon, lanes, notes, countdown, pause overlay
@@ -56,6 +62,14 @@ src/
   x-position percent. `LEAD_TIME` is travel time; `LEAD_IN` delays the first
   note until after the 3-2-1 countdown. Practice **speed** scales the game clock
   in `useGameEngine` (lower = slower motion and spacing). **Space** pauses.
+- **Microphone mode** (`audio/pitch.js`): an optional input where the mic
+  listens, autocorrelation estimates the pitch, and it's matched to the closest
+  `LANE_NOTES` frequency (within ~60 cents) to fire a button press. The played
+  note inherently encodes push vs pull, since each button sounds a different
+  note per direction. The engine polls `detectNote()` each frame and debounces
+  note onsets; it never plays the synth for mic hits (the real instrument does).
+  While mic mode is on the engine `console.log`s a throttled `[mic]` readout
+  (frequency, matched note, cents) to help calibrate a real instrument.
 
 ## Conventions & gotchas
 

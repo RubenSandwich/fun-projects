@@ -184,20 +184,42 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
+  padding: 14px 28px;
 }
 
 .howto {
   width: 100%;
-  padding: 18px 22px;
+  padding: 16px 22px;
   margin-bottom: 20px;
   transform: rotate(-0.6deg);
 }
+.howto__toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
 .howto__heading {
-  margin: 0 0 12px;
+  margin: 0;
   font-family: 'Baloo 2', sans-serif;
   font-size: 1.5rem;
   color: var(--purple);
+}
+.howto__chevron {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--purple);
+}
+.howto__body {
+  margin-top: 14px;
 }
 .howto__keys {
   display: flex;
@@ -346,8 +368,9 @@ body {
   box-shadow: var(--shadow-lg);
 }
 .song-card.is-selected {
-  transform: translate(-2px, -3px) scale(1.02);
-  box-shadow: 0 0 0 4px var(--card), var(--shadow-lg);
+  transform: translate(-2px, -4px) rotate(0deg);
+  box-shadow: 0 0 0 4px var(--card), 0 0 0 8px #fff, 0 0 0 11px var(--ink),
+    var(--shadow-lg);
 }
 .song-card__name {
   font-family: 'Baloo 2', sans-serif;
@@ -388,22 +411,53 @@ body {
   background: var(--red);
 }
 
-/* ---------- Practice-speed selector ---------- */
-.speed-select {
+/* ---------- Section labels ---------- */
+.section-label {
+  align-self: flex-start;
+  margin: 2px 0 10px 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--purple);
+  transform: rotate(-1deg);
+}
+
+/* ---------- Practice settings ---------- */
+.practice-settings {
   width: 100%;
-  padding: 14px 18px;
   margin-bottom: 22px;
+  padding: 4px 18px 12px;
+  transform: rotate(0.4deg);
+}
+.practice-row {
   display: flex;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  transform: rotate(0.5deg);
+  padding: 14px 0;
 }
-.speed-select__label {
+.practice-row--divider {
+  border-top: 3px dashed rgba(58, 42, 32, 0.25);
+}
+.practice-row__label {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 800;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--teal);
+}
+.practice-row--wait {
+  flex-wrap: nowrap;
+}
+.practice-row--wait .practice-row__label {
+  flex: 1;
+  min-width: 0;
+  color: var(--green);
+}
+.practice-row__desc {
+  font-family: 'Fredoka', 'Baloo 2', sans-serif;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: #7a6a5c;
 }
 .speed-select__options {
   display: flex;
@@ -441,6 +495,125 @@ body {
   background: var(--yellow);
   transform: translate(-1px, -2px);
   box-shadow: 0 0 0 3px var(--yellow), 4px 5px 0 rgba(58, 42, 32, 0.24);
+}
+
+/* ---------- Microphone toggle ---------- */
+.mic-toggle {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transform: rotate(-0.5deg);
+}
+.mic-toggle.is-on {
+  box-shadow: 0 0 0 3px var(--teal), var(--shadow);
+}
+.mic-toggle__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.mic-toggle__label {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--teal);
+}
+.mic-toggle__desc {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #7a6a5c;
+}
+.mic-toggle__err {
+  margin-top: 2px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--red);
+}
+.mic-switch {
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 92px;
+  height: 44px;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  transition: background 0.15s ease;
+}
+.mic-switch:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.mic-switch.is-on {
+  background: var(--teal);
+}
+.mic-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: left 0.15s ease;
+}
+.mic-switch.is-on .mic-switch__knob {
+  left: 51px;
+}
+.mic-switch__text {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 13px;
+  display: flex;
+  align-items: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+.mic-switch.is-on .mic-switch__text {
+  right: auto;
+  left: 13px;
+}
+
+/* ---------- Checkbox (used in practice settings) ---------- */
+.checkbox {
+  flex: 0 0 auto;
+  margin-left: auto;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 12px 14px 11px 14px;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  transition: background 0.12s ease;
+}
+.checkbox.is-checked {
+  background: var(--green);
+}
+.checkbox__mark {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0;
+  transform: scale(0.4) rotate(-12deg);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.checkbox.is-checked .checkbox__mark {
+  opacity: 1;
+  transform: scale(1) rotate(-6deg);
 }
 
 /* ---------- Results screen ---------- */
