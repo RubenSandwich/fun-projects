@@ -1,0 +1,498 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@500;600;700&display=swap');
+
+:root {
+  --ink: #3a2a20; /* dark brown "marker outline" */
+  --paper: #fffbef; /* base paper */
+  --cream: #fff3d0;
+
+  --red: #ff5d5d;
+  --orange: #ff924c;
+  --yellow: #ffd23f;
+  --green: #8ac926;
+  --teal: #2ec4b6;
+  --sky: #4cc9f0;
+  --purple: #b892ff;
+  --pink: #ff8fce;
+
+  --shadow: 5px 6px 0 rgba(58, 42, 32, 0.22);
+  --shadow-lg: 8px 10px 0 rgba(58, 42, 32, 0.2);
+
+  --paper-radius: 16px 20px 15px 22px / 22px 15px 20px 16px;
+
+  font-family: 'Fredoka', 'Baloo 2', system-ui, sans-serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: linear-gradient(180deg, #a7e5ff 0%, #cdefff 26%, #ffe9b0 72%, #ffd7a1 100%);
+  overflow: hidden;
+}
+
+/* Subtle paper grain overlay applied to big surfaces. */
+.paper-grain {
+  position: relative;
+}
+.paper-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  z-index: 999;
+}
+
+.app {
+  position: relative;
+  min-height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* Floating paper confetti in the background. */
+.app-bg::before,
+.app-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 40% 60% 55% 45% / 55% 45% 55% 45%;
+  border: 4px solid var(--ink);
+  opacity: 0.5;
+  z-index: 0;
+}
+.app-bg::before {
+  width: 190px;
+  height: 190px;
+  background: var(--pink);
+  top: -60px;
+  left: -50px;
+  transform: rotate(-12deg);
+}
+.app-bg::after {
+  width: 150px;
+  height: 150px;
+  background: var(--yellow);
+  bottom: -50px;
+  right: -40px;
+  transform: rotate(18deg);
+}
+
+/* ---------- Reusable "cut paper" card ---------- */
+.paper {
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: var(--paper-radius);
+  box-shadow: var(--shadow);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 14px 18px 14px 18px / 18px 14px 18px 14px;
+  padding: 12px 22px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.btn:hover {
+  transform: translate(-2px, -2px) rotate(-1deg);
+  box-shadow: 7px 9px 0 rgba(58, 42, 32, 0.24);
+}
+.btn:active {
+  transform: translate(3px, 4px);
+  box-shadow: 2px 2px 0 rgba(58, 42, 32, 0.24);
+}
+.btn--primary {
+  background: var(--yellow);
+}
+.btn--ghost {
+  background: var(--paper);
+}
+.btn--big {
+  font-size: 1.35rem;
+  padding: 14px 34px;
+}
+
+/* ---------- Titles ---------- */
+.title {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 1;
+  margin: 0 0 6px;
+  color: var(--red);
+  text-shadow: 3px 0 var(--ink), -3px 0 var(--ink), 0 3px var(--ink),
+    0 -3px var(--ink), 3px 3px var(--ink), 6px 8px 0 rgba(58, 42, 32, 0.25);
+  transform: rotate(-2deg);
+  text-align: center;
+}
+.title__accordion {
+  display: inline-block;
+  margin-right: 8px;
+  transform: rotate(4deg);
+  -webkit-text-fill-color: initial;
+  text-shadow: none;
+}
+.title--small {
+  font-size: clamp(2rem, 5vw, 3rem);
+  color: var(--teal);
+}
+.subtitle {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 22px;
+  color: var(--ink);
+}
+
+/* ---------- Start screen ---------- */
+.start-screen {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 96vw);
+  max-height: 96vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+}
+
+.howto {
+  width: 100%;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  transform: rotate(-0.6deg);
+}
+.howto__heading {
+  margin: 0 0 12px;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.5rem;
+  color: var(--purple);
+}
+.howto__keys {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.howto__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+.howto__hint {
+  margin: 12px 0 0;
+  font-weight: 600;
+  color: #7a6a5c;
+}
+
+.key-cap {
+  --lane: var(--yellow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 42px;
+  padding: 0 8px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--ink);
+  background: var(--lane);
+  border: 3px solid var(--ink);
+  border-radius: 10px 12px 9px 12px;
+  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.25);
+}
+.key-cap--shift {
+  min-width: auto;
+  font-size: 0.95rem;
+  background: var(--sky);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  padding: 5px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 2px 3px 0 rgba(58, 42, 32, 0.22);
+  white-space: nowrap;
+}
+.badge--push {
+  background: var(--orange);
+}
+.badge--pull {
+  background: var(--sky);
+}
+
+/* ---------- Song list ---------- */
+.song-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+.song-card {
+  --card: var(--yellow);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 14px solid var(--card);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.song-card:nth-child(odd) {
+  transform: rotate(-1deg);
+}
+.song-card:nth-child(even) {
+  transform: rotate(1deg);
+}
+.song-card:hover {
+  transform: translate(-2px, -3px) rotate(0deg);
+  box-shadow: var(--shadow-lg);
+}
+.song-card.is-selected {
+  transform: translate(-2px, -3px) scale(1.02);
+  box-shadow: 0 0 0 4px var(--card), var(--shadow-lg);
+}
+.song-card__name {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+.song-card__blurb {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #7a6a5c;
+}
+.song-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.song-card__bpm {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #7a6a5c;
+}
+.diff {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+}
+.diff--easy {
+  background: var(--green);
+}
+.diff--med {
+  background: var(--yellow);
+}
+.diff--hard {
+  background: var(--red);
+}
+
+/* ---------- Practice-speed selector ---------- */
+.speed-select {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  transform: rotate(0.5deg);
+}
+.speed-select__label {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--teal);
+}
+.speed-select__options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.speed-chip {
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 78px;
+  padding: 6px 12px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 12px 14px 11px 14px;
+  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.22);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease;
+}
+.speed-chip strong {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.2rem;
+}
+.speed-chip span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7a6a5c;
+}
+.speed-chip:hover {
+  transform: translate(-1px, -2px);
+}
+.speed-chip.is-selected {
+  background: var(--yellow);
+  transform: translate(-1px, -2px);
+  box-shadow: 0 0 0 3px var(--yellow), 4px 5px 0 rgba(58, 42, 32, 0.24);
+}
+
+/* ---------- Results screen ---------- */
+.results {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 96vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.results__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 40px;
+  margin: 8px 0 20px;
+  transform: rotate(-2deg);
+}
+.rank {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 4.5rem;
+  line-height: 1;
+}
+.rank__label {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+.rank--s {
+  background: var(--yellow);
+}
+.rank--a {
+  background: var(--green);
+}
+.rank--b {
+  background: var(--sky);
+}
+.rank--c {
+  background: var(--orange);
+}
+.rank--d {
+  background: var(--paper);
+}
+
+.results__panel {
+  width: 100%;
+  padding: 20px;
+  margin-bottom: 22px;
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+}
+.stat--score {
+  background: var(--yellow);
+}
+.stat__label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #7a6a5c;
+}
+.stat__value {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+}
+.judge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.judge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.judge strong {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.3rem;
+}
+.judge--perfect {
+  background: var(--green);
+}
+.judge--good {
+  background: var(--sky);
+}
+.judge--ok {
+  background: var(--yellow);
+}
+.judge--miss {
+  background: var(--red);
+}
+.results__actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
