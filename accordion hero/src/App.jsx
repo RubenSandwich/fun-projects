@@ -19,6 +19,7 @@ function transition(direction, update) {
 
 export default function App() {
   const [screen, setScreen] = useState('start') // 'start' | 'game' | 'results'
+  const [songs, setSongs] = useState(SONGS) // built-in songs plus uploaded ones
   const [songIndex, setSongIndex] = useState(0)
   const [speed, setSpeed] = useState(1) // practice playback multiplier
   const [waitForNote, setWaitForNote] = useState(false) // hold on each note
@@ -28,7 +29,10 @@ export default function App() {
 
   // The run-ready song: notes/sections shifted so nothing appears until the
   // countdown ends. Stable within a run (only changes when the song changes).
-  const song = useMemo(() => withLeadIn(SONGS[songIndex]), [songIndex])
+  const song = useMemo(() => withLeadIn(songs[songIndex]), [songs, songIndex])
+
+  // Append an uploaded song to the list so it can be selected and played.
+  const addSong = (s) => setSongs((list) => [...list, s])
 
   const startGame = (index, spd = speed, wait = waitForNote, direction = 'forward') => {
     transition(direction, () => {
@@ -57,8 +61,9 @@ export default function App() {
       <div className="screen-stage">
         {screen === 'start' && (
           <StartScreen
-            songs={SONGS}
+            songs={songs}
             onStart={startGame}
+            onAddSong={addSong}
             micEnabled={micEnabled}
             onMicChange={setMicEnabled}
           />

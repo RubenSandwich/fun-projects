@@ -1,0 +1,8 @@
+{
+  "name": "My Custom Jam",
+  "blurb": "A test upload.",
+  "bpm": 120,
+  "color": "#2ec4b6",
+  "difficulty": "Medium",
+  "chart": "+1 +2 +3\n-3 -2 -1\n+4 -5 +6 -7"
+}

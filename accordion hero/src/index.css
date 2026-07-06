@@ -552,6 +552,54 @@ html[data-transition='backward']::view-transition-old(screen) {
   font-size: var(--fs-sm);
   color: var(--muted);
 }
+
+/* Drop zone for uploading a custom song JSON (a dashed "add" tile in the grid). */
+.song-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-6);
+  min-height: 120px;
+  padding: var(--sp-16);
+  text-align: center;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--paper) 65%, transparent);
+  border: 3px dashed var(--ink);
+  border-radius: 14px 18px 13px 17px / 18px 13px 17px 14px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
+}
+.song-upload:hover,
+.song-upload:focus-visible {
+  transform: translate(-2px, -3px);
+  background: var(--cream);
+  outline: none;
+}
+.song-upload.is-drag {
+  background: var(--cream);
+  border-style: solid;
+  box-shadow: 0 0 0 3px var(--teal);
+}
+.song-upload__icon {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-4xl);
+  line-height: 1;
+  color: var(--ink);
+}
+.song-upload__text {
+  font-weight: 600;
+  font-size: var(--fs-sm);
+}
+.song-upload__text b {
+  color: var(--ink);
+}
+.song-upload__err {
+  font-weight: 700;
+  font-size: var(--fs-xs);
+  color: var(--red-ink);
+}
 .diff {
   font-family: var(--font-display);
   font-weight: 800;
@@ -568,6 +616,9 @@ html[data-transition='backward']::view-transition-old(screen) {
 }
 .diff--hard {
   background: var(--red);
+}
+.diff--custom {
+  background: #c9b0ff;
 }
 
 /* ---------- Practice settings ---------- */

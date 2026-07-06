@@ -53,6 +53,87 @@ function buildSong({ id, name, blurb, bpm, subdivision = 1, color, difficulty, c
   return { id, name, blurb, bpm, color, difficulty, notes, sections, duration }
 }
 
+// WCAG relative luminance of an [r, g, b] colour.
+function luminance(r, g, b) {
+  const f = (c) => {
+    c /= 255
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+}
+
+const PAPER_LUM = luminance(255, 251, 239) // the --paper card background
+
+function hslToRgb(h, s, l) {
+  const a = s * Math.min(l, 1 - l)
+  const f = (n) => {
+    const k = (n + h / 30) % 12
+    return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))))
+  }
+  return [f(0), f(8), f(4)]
+}
+
+// A vivid but accessible random accent: keeps at least 3:1 contrast against the
+// paper card so the coloured edge/ring stays clearly visible.
+function randomAccentColor() {
+  const hue = Math.floor(Math.random() * 360)
+  const sat = 0.6 + Math.random() * 0.25
+  // Start bright and darken until the colour clears the 3:1 contrast bar.
+  for (let l = 0.55; l >= 0.2; l -= 0.04) {
+    const rgb = hslToRgb(hue, sat, l)
+    if ((PAPER_LUM + 0.05) / (luminance(...rgb) + 0.05) >= 3) {
+      return '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
+    }
+  }
+  const rgb = hslToRgb(hue, sat, 0.25)
+  return '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
+}
+
+// Build a song from an uploaded JSON object, validating the important fields and
+// filling in sensible defaults. Throws a friendly Error if it can't be used.
+export function songFromJSON(data) {
+  if (!data || typeof data !== 'object') {
+    throw new Error('The file must contain a song object.')
+  }
+  const { name, bpm, chart } = data
+  if (typeof name !== 'string' || !name.trim()) {
+    throw new Error('Song needs a "name".')
+  }
+  if (typeof bpm !== 'number' || !Number.isFinite(bpm) || bpm <= 0) {
+    throw new Error('Song needs a positive "bpm".')
+  }
+  if (typeof chart !== 'string' || !chart.trim()) {
+    throw new Error('Song needs a "chart" string (tokens like +3 or -4).')
+  }
+  const subdivision =
+    typeof data.subdivision === 'number' && data.subdivision > 0 ? data.subdivision : 1
+  const color =
+    typeof data.color === 'string' && /^#[0-9a-f]{3,8}$/i.test(data.color.trim())
+      ? data.color.trim()
+      : randomAccentColor()
+  const difficulty = ['Easy', 'Medium', 'Hard', 'Custom'].includes(data.difficulty)
+    ? data.difficulty
+    : 'Custom'
+
+  const song = buildSong({
+    id: `upload-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: name.trim().slice(0, 60),
+    blurb:
+      typeof data.blurb === 'string' && data.blurb.trim()
+        ? data.blurb.trim().slice(0, 120)
+        : 'Your uploaded song.',
+    bpm,
+    subdivision,
+    color,
+    difficulty,
+    chart,
+  })
+  if (!song.notes.length) {
+    throw new Error('The "chart" has no playable notes (use tokens like +3 or -4).')
+  }
+  return song
+}
+
 // Shift a song so the first note only appears *after* the countdown ends: every
 // note and section starts LEAD_IN ms in, so the playfield stays empty during the
 // 3-2-1.

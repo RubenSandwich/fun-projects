@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LANE_LABELS, LANE_COLORS, LANE_NOTES } from '../data/constants'
+import { songFromJSON } from '../data/songs'
 import { resumeAudio } from '../audio/sound'
 import { startMic, stopMic } from '../audio/pitch'
 
@@ -7,6 +8,7 @@ const DIFF_CLASS = {
   Easy: 'diff--easy',
   Medium: 'diff--med',
   Hard: 'diff--hard',
+  Custom: 'diff--custom',
 }
 
 const SPEEDS = [
@@ -15,7 +17,7 @@ const SPEEDS = [
   { label: '1×', value: 1, note: 'Full speed' },
 ]
 
-export default function StartScreen({ songs, onStart, micEnabled, onMicChange }) {
+export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onMicChange }) {
   const [selected, setSelected] = useState(0)
   const [showHowTo, setShowHowTo] = useState(false)
   const [showSongs, setShowSongs] = useState(true)
@@ -24,6 +26,36 @@ export default function StartScreen({ songs, onStart, micEnabled, onMicChange })
   const [waitForNote, setWaitForNote] = useState(false)
   const [micBusy, setMicBusy] = useState(false)
   const [micError, setMicError] = useState('')
+  const [uploadError, setUploadError] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef(null)
+
+  // Dropping a file anywhere but the drop zone would otherwise make the browser
+  // navigate away to it — swallow those so only the zone handles files.
+  useEffect(() => {
+    const prevent = (e) => e.preventDefault()
+    window.addEventListener('dragover', prevent)
+    window.addEventListener('drop', prevent)
+    return () => {
+      window.removeEventListener('dragover', prevent)
+      window.removeEventListener('drop', prevent)
+    }
+  }, [])
+
+  // Parse an uploaded JSON song, add it, and auto-select it so it's ready to play.
+  const loadSongFile = async (file) => {
+    setUploadError('')
+    if (!file) return
+    try {
+      const data = JSON.parse(await file.text())
+      onAddSong(songFromJSON(data))
+      setSelected(songs.length) // the new song is appended at the end
+    } catch (err) {
+      setUploadError(
+        err instanceof SyntaxError ? "That file isn't valid JSON." : err.message
+      )
+    }
+  }
 
   const handleStart = () => {
     resumeAudio() // unlock audio on this user gesture
@@ -151,13 +183,56 @@ export default function StartScreen({ songs, onStart, micEnabled, onMicChange })
                   <span className="song-card__name">{song.name}</span>
                   <span className="song-card__blurb">{song.blurb}</span>
                   <span className="song-card__meta">
-                    <span className={'diff ' + DIFF_CLASS[song.difficulty]}>
+                    <span className={'diff ' + (DIFF_CLASS[song.difficulty] || 'diff--custom')}>
                       {song.difficulty}
                     </span>
                     <span className="song-card__bpm">{song.bpm} BPM</span>
                   </span>
                 </button>
               ))}
+
+              <div
+                className={'song-upload' + (dragOver ? ' is-drag' : '')}
+                role="button"
+                tabIndex={0}
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    fileInputRef.current?.click()
+                  }
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  setDragOver(true)
+                }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setDragOver(false)
+                  loadSongFile(e.dataTransfer.files[0])
+                }}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  hidden
+                  onChange={(e) => {
+                    loadSongFile(e.target.files[0])
+                    e.target.value = ''
+                  }}
+                />
+                <span className="song-upload__icon" aria-hidden="true">
+                  ↑
+                </span>
+                <span className="song-upload__text">
+                  Drop a song <b>.json</b> here, or click to browse
+                </span>
+                {uploadError && (
+                  <span className="song-upload__err">{uploadError}</span>
+                )}
+              </div>
             </div>
           </div>
         </div>
