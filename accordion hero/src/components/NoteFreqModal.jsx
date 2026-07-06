@@ -8,6 +8,8 @@ import {
 } from '../data/constants'
 import { startMic, stopMic, detectNote } from '../audio/pitch'
 
+const cloneRows = (rows) => rows.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
+
 // A full-page modal for tuning each button's push/pull frequency, either by
 // typing a value or by listening for a note through the microphone. Edits are
 // applied live to the shared note map (so a song plays with them), and can be
@@ -70,7 +72,7 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
           const freq = Math.round(det.freq * 100) / 100
           setNoteFreq(lane, type, freq) // apply live to the shared map
           setRows((prev) => {
-            const next = prev.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
+            const next = cloneRows(prev)
             next[lane][type].freq = freq
             return next
           })
@@ -83,7 +85,7 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
 
   const setFreq = (lane, type, value) => {
     setRows((prev) => {
-      const next = prev.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
+      const next = cloneRows(prev)
       next[lane][type].freq = value
       return next
     })

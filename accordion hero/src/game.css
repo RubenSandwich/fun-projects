@@ -149,7 +149,7 @@
   top: 8px;
   bottom: 8px;
   width: 0;
-  border-left: 5px dashed rgba(58, 42, 32, 0.55);
+  border-left: 5px dashed color-mix(in srgb, var(--ink) 55%, transparent);
   transform: translateX(-50%);
   z-index: 3;
   pointer-events: none;
@@ -163,7 +163,7 @@
   margin: var(--sp-4) 0;
   border-radius: 12px;
   background: color-mix(in srgb, var(--lane) 22%, #fff);
-  border: 3px solid rgba(58, 42, 32, 0.35);
+  border: 3px solid color-mix(in srgb, var(--ink) 35%, transparent);
   overflow: hidden;
 }
 .lane-track {
@@ -184,7 +184,7 @@
   background: color-mix(in srgb, var(--lane) 55%, transparent);
   border: 4px solid var(--ink);
   border-radius: 14px 16px 13px 17px / 17px 13px 16px 14px;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.28);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 28%, transparent);
   z-index: 4;
   transition: transform 0.06s ease, box-shadow 0.06s ease;
 }
@@ -196,11 +196,11 @@
 }
 .key-target.is-active {
   transform: translate(-50%, -50%) scale(0.86);
-  box-shadow: 1px 1px 0 rgba(58, 42, 32, 0.28), 0 0 0 5px rgba(255, 255, 255, 0.7);
+  box-shadow: 1px 1px 0 color-mix(in srgb, var(--ink) 28%, transparent), 0 0 0 5px rgba(255, 255, 255, 0.7);
 }
 .key-target.is-pull {
   border-style: dashed;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.28), 0 0 0 4px var(--sky);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 28%, transparent), 0 0 0 4px var(--sky);
 }
 
 /* ---------- Notes ---------- */
@@ -321,7 +321,7 @@
   font-size: var(--fs-8xl);
   color: var(--yellow);
   text-shadow: 4px 0 var(--ink), -4px 0 var(--ink), 0 4px var(--ink),
-    0 -4px var(--ink), 8px 10px 0 rgba(58, 42, 32, 0.3);
+    0 -4px var(--ink), 8px 10px 0 color-mix(in srgb, var(--ink) 30%, transparent);
   animation: countBounce 1s ease;
 }
 @keyframes countBounce {
@@ -475,7 +475,7 @@
   align-items: center;
   justify-content: center;
   z-index: 7;
-  background: rgba(58, 42, 32, 0.2);
+  background: color-mix(in srgb, var(--ink) 20%, transparent);
   -webkit-backdrop-filter: blur(1px);
   backdrop-filter: blur(1px);
 }

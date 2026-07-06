@@ -73,20 +73,20 @@ function hslToRgb(h, s, l) {
   return [f(0), f(8), f(4)]
 }
 
+const toHex = (rgb) => '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
+
 // A vivid but accessible random accent: keeps at least 3:1 contrast against the
 // paper card so the coloured edge/ring stays clearly visible.
 function randomAccentColor() {
   const hue = Math.floor(Math.random() * 360)
   const sat = 0.6 + Math.random() * 0.25
   // Start bright and darken until the colour clears the 3:1 contrast bar.
+  let rgb
   for (let l = 0.55; l >= 0.2; l -= 0.04) {
-    const rgb = hslToRgb(hue, sat, l)
-    if ((PAPER_LUM + 0.05) / (luminance(...rgb) + 0.05) >= 3) {
-      return '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
-    }
+    rgb = hslToRgb(hue, sat, l)
+    if ((PAPER_LUM + 0.05) / (luminance(...rgb) + 0.05) >= 3) break
   }
-  const rgb = hslToRgb(hue, sat, 0.25)
-  return '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
+  return toHex(rgb)
 }
 
 // Build a song from an uploaded JSON object, validating the important fields and

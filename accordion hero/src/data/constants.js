@@ -48,10 +48,17 @@ export const LANE_NOTES = DEFAULT_LANE_NOTES.map((n) => ({
   pull: { ...n.pull },
 }))
 
+// A positive numeric frequency, or null if the value isn't usable.
+function validFreq(value) {
+  const f = Number(value)
+  return Number.isFinite(f) && f > 0 ? f : null
+}
+
 // Set one button/direction's frequency (Hz) in place.
 export function setNoteFreq(lane, type, freq) {
   const note = LANE_NOTES[lane]?.[type]
-  if (note && Number.isFinite(freq) && freq > 0) note.freq = freq
+  const f = validFreq(freq)
+  if (note && f) note.freq = f
 }
 
 // Bulk-apply frequencies from a 7-row array of { push: { freq }, pull: { freq } }.
@@ -59,11 +66,9 @@ export function setNoteFreq(lane, type, freq) {
 export function setNoteFrequencies(rows) {
   if (!Array.isArray(rows)) return
   LANE_NOTES.forEach((note, i) => {
-    const row = rows[i]
-    if (!row) return
     for (const type of ['push', 'pull']) {
-      const f = row[type] ? Number(row[type].freq) : NaN
-      if (Number.isFinite(f) && f > 0) note[type].freq = f
+      const f = rows[i]?.[type] ? validFreq(rows[i][type].freq) : null
+      if (f) note[type].freq = f
     }
   })
 }
@@ -81,15 +86,9 @@ export function resetNoteFrequencies() {
 // Validate + apply an uploaded JSON note map. Throws a friendly Error if unusable.
 export function applyNoteFrequenciesJSON(data) {
   const rows = Array.isArray(data) ? data : data?.notes
-  if (!Array.isArray(rows)) {
-    throw new Error('Expected a JSON array of note rows.')
-  }
+  if (!Array.isArray(rows)) throw new Error('Expected a JSON array of note rows.')
   const hasValid = rows.some(
-    (row) =>
-      row &&
-      ['push', 'pull'].some(
-        (t) => row[t] && Number.isFinite(Number(row[t].freq)) && Number(row[t].freq) > 0
-      )
+    (row) => row && ['push', 'pull'].some((t) => row[t] && validFreq(row[t].freq))
   )
   if (!hasValid) throw new Error('No valid note frequencies found in the file.')
   setNoteFrequencies(rows)

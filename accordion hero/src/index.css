@@ -29,10 +29,10 @@
     color-mix(in srgb, var(--sky) 34%, #fff) 9px 18px
   );
 
-  --shadow: 5px 6px 0 rgba(58, 42, 32, 0.22);
-  --shadow-lg: 8px 10px 0 rgba(58, 42, 32, 0.2);
-  --shadow-sm: 3px 4px 0 rgba(58, 42, 32, 0.22);
-  --shadow-xs: 2px 3px 0 rgba(58, 42, 32, 0.22);
+  --shadow: 5px 6px 0 color-mix(in srgb, var(--ink) 22%, transparent);
+  --shadow-lg: 8px 10px 0 color-mix(in srgb, var(--ink) 20%, transparent);
+  --shadow-sm: 3px 4px 0 color-mix(in srgb, var(--ink) 22%, transparent);
+  --shadow-xs: 2px 3px 0 color-mix(in srgb, var(--ink) 22%, transparent);
 
   --paper-radius: 16px 20px 15px 22px / 22px 15px 20px 16px;
 
@@ -232,11 +232,11 @@ html[data-transition='backward']::view-transition-old(screen) {
 }
 .btn:hover {
   transform: translate(-2px, -2px) rotate(-1deg);
-  box-shadow: 7px 9px 0 rgba(58, 42, 32, 0.24);
+  box-shadow: 7px 9px 0 color-mix(in srgb, var(--ink) 24%, transparent);
 }
 .btn:active {
   transform: translate(3px, 4px);
-  box-shadow: 2px 2px 0 rgba(58, 42, 32, 0.24);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--ink) 24%, transparent);
 }
 .btn--primary {
   background: var(--yellow);
@@ -258,7 +258,7 @@ html[data-transition='backward']::view-transition-old(screen) {
   margin: 0 0 var(--sp-6);
   color: var(--red);
   text-shadow: 3px 0 var(--ink), -3px 0 var(--ink), 0 3px var(--ink),
-    0 -3px var(--ink), 3px 3px var(--ink), 6px 8px 0 rgba(58, 42, 32, 0.25);
+    0 -3px var(--ink), 3px 3px var(--ink), 6px 8px 0 color-mix(in srgb, var(--ink) 25%, transparent);
   transform: rotate(-2deg);
   text-align: center;
 }
@@ -469,7 +469,7 @@ html[data-transition='backward']::view-transition-old(screen) {
   background: var(--lane);
   border: 3px solid var(--ink);
   border-radius: 10px 12px 9px 12px;
-  box-shadow: 3px 4px 0 rgba(58, 42, 32, 0.25);
+  box-shadow: 3px 4px 0 color-mix(in srgb, var(--ink) 25%, transparent);
 }
 .key-cap--shift {
   min-width: auto;
@@ -618,7 +618,7 @@ html[data-transition='backward']::view-transition-old(screen) {
   background: var(--red);
 }
 .diff--custom {
-  background: #c9b0ff;
+  background: color-mix(in srgb, var(--purple) 40%, #fff);
 }
 
 /* ---------- Practice settings ---------- */
@@ -630,7 +630,7 @@ html[data-transition='backward']::view-transition-old(screen) {
   padding: var(--sp-14) 0;
 }
 .practice-row--divider {
-  border-top: 3px dashed rgba(58, 42, 32, 0.25);
+  border-top: 3px dashed color-mix(in srgb, var(--ink) 25%, transparent);
 }
 .practice-row__label {
   font-family: var(--font-display);
@@ -692,7 +692,7 @@ html[data-transition='backward']::view-transition-old(screen) {
 .speed-chip.is-selected {
   background: var(--yellow);
   transform: translate(-1px, -2px);
-  box-shadow: 0 0 0 3px var(--yellow), 4px 5px 0 rgba(58, 42, 32, 0.24);
+  box-shadow: 0 0 0 3px var(--yellow), 4px 5px 0 color-mix(in srgb, var(--ink) 24%, transparent);
 }
 
 /* ---------- Microphone toggle (a row inside Practice settings) ---------- */
@@ -929,7 +929,7 @@ html[data-transition='backward']::view-transition-old(screen) {
   align-items: center;
   justify-content: center;
   padding: var(--sp-16);
-  background: rgba(58, 42, 32, 0.5);
+  background: color-mix(in srgb, var(--ink) 50%, transparent);
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
 }

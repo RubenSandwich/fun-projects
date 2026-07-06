@@ -12,6 +12,10 @@ const DIFF_CLASS = {
   Custom: 'diff--custom',
 }
 
+// Friendly message for a failed JSON file read.
+const jsonErrorText = (err) =>
+  err instanceof SyntaxError ? "That file isn't valid JSON." : err.message
+
 const SPEEDS = [
   { label: '0.5×', value: 0.5, note: 'Practice' },
   { label: '0.75×', value: 0.75, note: 'Relaxed' },
@@ -56,9 +60,7 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
       onAddSong(songFromJSON(data))
       setSelected(songs.length) // the new song is appended at the end
     } catch (err) {
-      setUploadError(
-        err instanceof SyntaxError ? "That file isn't valid JSON." : err.message
-      )
+      setUploadError(jsonErrorText(err))
     }
   }
 
@@ -70,9 +72,7 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
       applyNoteFrequenciesJSON(JSON.parse(await file.text()))
       setNoteUploadOk('Loaded — now using your note frequencies.')
     } catch (err) {
-      setNoteUploadError(
-        err instanceof SyntaxError ? "That file isn't valid JSON." : err.message
-      )
+      setNoteUploadError(jsonErrorText(err))
     }
   }
 
