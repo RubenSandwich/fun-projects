@@ -29,7 +29,8 @@ export const KEY_CODES = {
 //   button 2: E / F                  button 6: G (high) / F (high)
 //   button 3: G / A                  button 7: B (high) / A (high)
 //   button 4: C (high) / B
-export const LANE_NOTES = [
+// The default button/note map. Kept aside so a custom tuning can be reset.
+const DEFAULT_LANE_NOTES = [
   { push: { name: 'C', freq: 261.63 }, pull: { name: 'D', freq: 293.66 } },
   { push: { name: 'E', freq: 329.63 }, pull: { name: 'F', freq: 349.23 } },
   { push: { name: 'G', freq: 392.0 }, pull: { name: 'A', freq: 440.0 } },
@@ -38,6 +39,62 @@ export const LANE_NOTES = [
   { push: { name: 'G', freq: 783.99 }, pull: { name: 'F', freq: 698.46 } },
   { push: { name: 'B', freq: 987.77 }, pull: { name: 'A', freq: 880.0 } },
 ]
+
+// The *active* map used by the synth and the mic detector. It's a live-mutated
+// copy of the defaults (same object identity), so recalibrating a button's
+// frequency is picked up immediately everywhere LANE_NOTES is read.
+export const LANE_NOTES = DEFAULT_LANE_NOTES.map((n) => ({
+  push: { ...n.push },
+  pull: { ...n.pull },
+}))
+
+// Set one button/direction's frequency (Hz) in place.
+export function setNoteFreq(lane, type, freq) {
+  const note = LANE_NOTES[lane]?.[type]
+  if (note && Number.isFinite(freq) && freq > 0) note.freq = freq
+}
+
+// Bulk-apply frequencies from a 7-row array of { push: { freq }, pull: { freq } }.
+// Names are left untouched — they describe the instrument's fixed layout.
+export function setNoteFrequencies(rows) {
+  if (!Array.isArray(rows)) return
+  LANE_NOTES.forEach((note, i) => {
+    const row = rows[i]
+    if (!row) return
+    for (const type of ['push', 'pull']) {
+      const f = row[type] ? Number(row[type].freq) : NaN
+      if (Number.isFinite(f) && f > 0) note[type].freq = f
+    }
+  })
+}
+
+// A deep copy of the current note map (for the editor and JSON export).
+export function getNoteFrequencies() {
+  return LANE_NOTES.map((n) => ({ push: { ...n.push }, pull: { ...n.pull } }))
+}
+
+// Restore the built-in default frequencies.
+export function resetNoteFrequencies() {
+  setNoteFrequencies(DEFAULT_LANE_NOTES)
+}
+
+// Validate + apply an uploaded JSON note map. Throws a friendly Error if unusable.
+export function applyNoteFrequenciesJSON(data) {
+  const rows = Array.isArray(data) ? data : data?.notes
+  if (!Array.isArray(rows)) {
+    throw new Error('Expected a JSON array of note rows.')
+  }
+  const hasValid = rows.some(
+    (row) =>
+      row &&
+      ['push', 'pull'].some(
+        (t) => row[t] && Number.isFinite(Number(row[t].freq)) && Number(row[t].freq) > 0
+      )
+  )
+  if (!hasValid) throw new Error('No valid note frequencies found in the file.')
+  setNoteFrequencies(rows)
+  return getNoteFrequencies()
+}
 
 // Bright, saturated "cut paper" color per button (1-7).
 export const LANE_COLORS = [
