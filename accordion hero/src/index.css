@@ -282,10 +282,13 @@ html[data-transition='backward']::view-transition-old(screen) {
 }
 
 /* ---------- Start screen ---------- */
+/* The scroller spans the whole viewport so wheel/trackpad scrolling works
+   anywhere on the screen, not just over the (narrower) content column. The
+   column itself is kept centered by constraining each card's width. */
 .start-screen {
   position: relative;
   z-index: 1;
-  width: min(760px, 96vw);
+  width: 100%;
   height: 100%;
   min-height: 0;
   overflow-y: auto;
@@ -297,7 +300,7 @@ html[data-transition='backward']::view-transition-old(screen) {
 
 /* Collapsible "accordion" card — shared by How to play and Practice settings. */
 .accordion {
-  width: 100%;
+  width: min(760px, 100%);
   padding: var(--sp-16) var(--sp-22);
   margin-bottom: var(--sp-20);
 }
@@ -879,11 +882,29 @@ html[data-transition='backward']::view-transition-old(screen) {
 .note-freq-row .practice-row__label {
   flex: 1 1 200px;
 }
-.note-freq-actions {
-  display: flex;
-  gap: var(--sp-8);
-  flex-wrap: wrap;
+.note-freq-current {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: var(--sp-6) var(--sp-12);
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 10px 12px 9px 12px;
+}
+.note-freq-current__caption {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.note-freq-current__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  color: var(--ink);
 }
 .note-btn {
   font-family: var(--font-display);
@@ -904,20 +925,6 @@ html[data-transition='backward']::view-transition-old(screen) {
 .note-btn:active {
   transform: translate(1px, 2px);
   box-shadow: var(--shadow-xs);
-}
-.note-freq-err {
-  flex-basis: 100%;
-  margin-top: var(--sp-4);
-  font-weight: 700;
-  font-size: var(--fs-xs);
-  color: var(--red-ink);
-}
-.note-freq-ok {
-  flex-basis: 100%;
-  margin-top: var(--sp-4);
-  font-weight: 700;
-  font-size: var(--fs-xs);
-  color: var(--green-ink);
 }
 
 /* ---------- Modal (note-frequency editor) ---------- */
@@ -973,6 +980,27 @@ html[data-transition='backward']::view-transition-old(screen) {
   font-weight: 500;
   font-size: var(--fs-sm);
   color: var(--muted);
+}
+.modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.modal__field-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  color: var(--teal-ink);
+}
+.modal__field-input {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px 12px 9px 12px;
+  padding: var(--sp-8) var(--sp-12);
 }
 .modal__body {
   overflow-y: auto;
@@ -1078,4 +1106,95 @@ html[data-transition='backward']::view-transition-old(screen) {
   flex-wrap: wrap;
   justify-content: flex-end;
   padding-top: var(--sp-8);
+}
+
+/* ---------- Preset picker ---------- */
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-8);
+}
+.preset-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-8);
+}
+.preset-row__select {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
+  text-align: left;
+  padding: var(--sp-10) var(--sp-14);
+  background: var(--cream);
+  border: 3px solid var(--ink);
+  border-radius: 12px 14px 11px 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.preset-row__select:hover {
+  transform: translate(-1px, -2px);
+}
+.preset-row.is-active .preset-row__select {
+  background: var(--paper);
+  box-shadow: 0 0 0 3px var(--teal), var(--shadow-sm);
+}
+.preset-row__radio {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+}
+.preset-row.is-active .preset-row__radio {
+  background: var(--teal);
+  box-shadow: inset 0 0 0 3px var(--paper);
+}
+.preset-row__name {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-md);
+  color: var(--ink);
+}
+.preset-row__tag {
+  flex: 0 0 auto;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  padding: var(--sp-2) var(--sp-8);
+  border: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  border-radius: 999px;
+}
+.preset-row__tag--active {
+  color: var(--teal-ink);
+  border-color: var(--teal);
+}
+.preset-row__actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--sp-6);
+}
+.preset-icon-btn {
+  width: 44px;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px 12px 9px 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+  transition: transform 0.08s ease;
+}
+.preset-icon-btn:hover {
+  transform: translate(-1px, -2px);
+}
+.preset-icon-btn--danger:hover {
+  background: var(--red);
 }

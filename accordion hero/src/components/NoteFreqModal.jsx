@@ -1,23 +1,31 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  LANE_COLORS,
-  getNoteFrequencies,
-  setNoteFreq,
-  resetNoteFrequencies,
-} from '../data/constants'
+import { LANE_COLORS, getDefaultNotes } from '../data/constants'
 import { startMic, stopMic, detectNote } from '../audio/pitch'
 
 const cloneRows = (rows) => rows.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
 
-// A full-page modal for tuning each button's push/pull frequency, either by
-// typing a value or by listening for a note through the microphone. Edits are
-// applied live to the shared note map (so a song plays with them), and can be
-// exported as a JSON file.
-export default function NoteFreqModal({ onClose, micEnabled = false }) {
-  const [rows, setRows] = useState(() => getNoteFrequencies())
+// Turn a preset name into a safe-ish download filename.
+const slug = (name) =>
+  (name || 'preset').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') ||
+  'preset'
+
+// A full-page modal for building or tuning a note-frequency *preset*: give it a
+// name, then set each button's push/pull frequency by typing a value or by
+// clicking 🎤 and playing the note. Nothing is applied until "Save & Close",
+// which hands the finished draft back to the parent via onSave.
+export default function NoteFreqModal({
+  preset = null,
+  onSave,
+  onClose,
+  micEnabled = false,
+  onMicStarted,
+}) {
+  const [name, setName] = useState(() => preset?.name || '')
+  const [rows, setRows] = useState(() => cloneRows(preset?.notes || getDefaultNotes()))
   const [listening, setListening] = useState(null) // { lane, type } | null
   const [micErr, setMicErr] = useState('')
+  const [nameErr, setNameErr] = useState('')
   const rafRef = useRef(0)
   const startedMicRef = useRef(false)
   const lastApplyRef = useRef(0)
@@ -57,6 +65,7 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
     try {
       await startMic()
       startedMicRef.current = true
+      onMicStarted?.()
     } catch {
       setMicErr('Could not access the microphone. Check browser permissions.')
       return
@@ -70,7 +79,6 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
         if (now - lastApplyRef.current > 80) {
           lastApplyRef.current = now
           const freq = Math.round(det.freq * 100) / 100
-          setNoteFreq(lane, type, freq) // apply live to the shared map
           setRows((prev) => {
             const next = cloneRows(prev)
             next[lane][type].freq = freq
@@ -89,27 +97,33 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
       next[lane][type].freq = value
       return next
     })
-    const f = parseFloat(value)
-    if (Number.isFinite(f) && f > 0) setNoteFreq(lane, type, f)
   }
 
   const reset = () => {
     stopListening()
-    resetNoteFrequencies()
-    setRows(getNoteFrequencies())
+    setRows(getDefaultNotes())
   }
 
   const download = () => {
-    const data = getNoteFrequencies() // the live, in-effect map
+    const data = { name: name.trim() || 'Untitled preset', notes: rows }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'accordion-note-frequencies.json'
+    a.download = `accordion-preset-${slug(name)}.json`
     document.body.appendChild(a)
     a.click()
     a.remove()
     URL.revokeObjectURL(url)
+  }
+
+  const save = () => {
+    if (!name.trim()) {
+      setNameErr('Give your preset a name.')
+      return
+    }
+    stopListening()
+    onSave?.({ id: preset?.id, name: name.trim(), notes: rows })
   }
 
   return createPortal(
@@ -119,13 +133,35 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="paper modal" role="dialog" aria-modal="true" aria-label="Note frequencies">
+      <div
+        className="paper modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Note-frequency preset"
+      >
         <div className="modal__head">
-          <h2 className="modal__title">Note frequencies</h2>
+          <h2 className="modal__title">{preset ? 'Edit preset' : 'New preset'}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
+
+        <label className="modal__field">
+          <span className="modal__field-label">Preset name</span>
+          <input
+            className="modal__field-input"
+            type="text"
+            value={name}
+            placeholder="e.g. My toy accordion"
+            maxLength={40}
+            onChange={(e) => {
+              setName(e.target.value)
+              if (nameErr) setNameErr('')
+            }}
+          />
+        </label>
+        {nameErr && <p className="modal__err">{nameErr}</p>}
+
         <p className="modal__hint">
           Tune each button to your instrument — type a frequency, or click 🎤 and play the note.
         </p>
@@ -182,11 +218,11 @@ export default function NoteFreqModal({ onClose, micEnabled = false }) {
           <button className="btn btn--ghost" onClick={reset}>
             Reset
           </button>
-          <button className="btn btn--primary" onClick={download}>
-            Save &amp; download
+          <button className="btn btn--ghost" onClick={download}>
+            Download
           </button>
-          <button className="btn" onClick={onClose}>
-            Done
+          <button className="btn btn--primary" onClick={save}>
+            Save &amp; Close
           </button>
         </div>
       </div>

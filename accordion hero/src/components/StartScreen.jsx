@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { LANE_LABELS, LANE_COLORS, LANE_NOTES, applyNoteFrequenciesJSON } from '../data/constants'
+import { LANE_LABELS, LANE_COLORS, LANE_NOTES, getActivePreset } from '../data/constants'
 import { songFromJSON } from '../data/songs'
-import NoteFreqModal from './NoteFreqModal'
+import PresetPickerModal from './PresetPickerModal'
 import { resumeAudio } from '../audio/sound'
 import { startMic, stopMic } from '../audio/pitch'
 
@@ -34,10 +34,8 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
   const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef(null)
-  const [showNoteModal, setShowNoteModal] = useState(false)
-  const [noteUploadError, setNoteUploadError] = useState('')
-  const [noteUploadOk, setNoteUploadOk] = useState('')
-  const noteFileRef = useRef(null)
+  const [showPresetPicker, setShowPresetPicker] = useState(false)
+  const [activePreset, setActivePreset] = useState(() => getActivePreset())
 
   // Dropping a file anywhere but the drop zone would otherwise make the browser
   // navigate away to it — swallow those so only the zone handles files.
@@ -61,18 +59,6 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
       setSelected(songs.length) // the new song is appended at the end
     } catch (err) {
       setUploadError(jsonErrorText(err))
-    }
-  }
-
-  const loadNoteFile = async (file) => {
-    setNoteUploadError('')
-    setNoteUploadOk('')
-    if (!file) return
-    try {
-      applyNoteFrequenciesJSON(JSON.parse(await file.text()))
-      setNoteUploadOk('Loaded — now using your note frequencies.')
-    } catch (err) {
-      setNoteUploadError(jsonErrorText(err))
     }
   }
 
@@ -329,33 +315,13 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
                   {' '}— tune each button to your instrument
                 </span>
               </span>
-              <div className="note-freq-actions">
-                <button className="note-btn" onClick={() => setShowNoteModal(true)}>
-                  Set note frequencies
-                </button>
-                <button
-                  className="note-btn"
-                  onClick={() => noteFileRef.current?.click()}
-                >
-                  Upload note frequencies
-                </button>
-                <input
-                  ref={noteFileRef}
-                  type="file"
-                  accept="application/json,.json"
-                  hidden
-                  onChange={(e) => {
-                    loadNoteFile(e.target.files[0])
-                    e.target.value = ''
-                  }}
-                />
+              <div className="note-freq-current">
+                <span className="note-freq-current__caption">Preset</span>
+                <span className="note-freq-current__name">{activePreset.name}</span>
               </div>
-              {noteUploadError && (
-                <span className="note-freq-err">{noteUploadError}</span>
-              )}
-              {noteUploadOk && (
-                <span className="note-freq-ok">{noteUploadOk}</span>
-              )}
+              <button className="note-btn" onClick={() => setShowPresetPicker(true)}>
+                Select preset
+              </button>
             </div>
           </div>
         </div>
@@ -365,8 +331,13 @@ export default function StartScreen({ songs, onStart, onAddSong, micEnabled, onM
         ▶ Play {songs[selected].name}
       </button>
 
-      {showNoteModal && (
-        <NoteFreqModal micEnabled={micEnabled} onClose={() => setShowNoteModal(false)} />
+      {showPresetPicker && (
+        <PresetPickerModal
+          micEnabled={micEnabled}
+          onMicStarted={() => setMicError('')}
+          onActiveChange={setActivePreset}
+          onClose={() => setShowPresetPicker(false)}
+        />
       )}
     </div>
   )
