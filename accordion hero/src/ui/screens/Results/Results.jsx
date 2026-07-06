@@ -1,3 +1,5 @@
+import './Results.css'
+
 function rankFor(accuracy) {
   switch (true) {
     case accuracy >= 95:
@@ -13,7 +15,7 @@ function rankFor(accuracy) {
   }
 }
 
-export default function ResultsScreen({ song, result, speed = 1, onReplay, onMenu }) {
+export default function Results({ song, result, speed = 1, onReplay, onMenu }) {
   const rank = rankFor(result.accuracy)
   const { counts } = result
 

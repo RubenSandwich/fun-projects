@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { SONGS, withLeadIn } from './data/songs'
-import StartScreen from './components/StartScreen'
-import Game from './components/Game'
-import ResultsScreen from './components/ResultsScreen'
+import { getSongs, withLeadIn } from '#data/songs'
+import Start from '#screens/Start/Start'
+import Game from '#screens/Game/Game'
+import Results from '#screens/Results/Results'
 
 // Run a screen change inside a directional View Transition. `direction` is
 // 'forward' (new screen slides in from the right) or 'backward' (from the left).
@@ -19,10 +19,11 @@ function transition(direction, update) {
 
 export default function App() {
   const [screen, setScreen] = useState('start') // 'start' | 'game' | 'results'
-  const [songs, setSongs] = useState(SONGS) // built-in songs plus uploaded ones
+  const [songs, setSongs] = useState(() => getSongs()) // built-in + saved songs
   const [songIndex, setSongIndex] = useState(0)
   const [speed, setSpeed] = useState(1) // practice playback multiplier
   const [waitForNote, setWaitForNote] = useState(false) // hold on each note
+  const [hideFeedback, setHideFeedback] = useState(false) // play without the live score
   const [micEnabled, setMicEnabled] = useState(false) // play via microphone
   const [result, setResult] = useState(null)
   const [runId, setRunId] = useState(0) // bump to force a fresh Game mount
@@ -32,13 +33,20 @@ export default function App() {
   const song = useMemo(() => withLeadIn(songs[songIndex]), [songs, songIndex])
 
   // Append an uploaded song to the list so it can be selected and played.
-  const addSong = (s) => setSongs((list) => [...list, s])
+  const refreshSongs = () => setSongs(getSongs())
 
-  const startGame = (index, spd = speed, wait = waitForNote, direction = 'forward') => {
+  const startGame = (
+    index,
+    spd = speed,
+    wait = waitForNote,
+    hide = hideFeedback,
+    direction = 'forward',
+  ) => {
     transition(direction, () => {
       setSongIndex(index)
       setSpeed(spd)
       setWaitForNote(wait)
+      setHideFeedback(hide)
       setRunId((n) => n + 1)
       setResult(null)
       setScreen('game')
@@ -60,10 +68,10 @@ export default function App() {
 
       <div className="screen-stage">
         {screen === 'start' && (
-          <StartScreen
+          <Start
             songs={songs}
             onStart={startGame}
-            onAddSong={addSong}
+            onSongsChange={refreshSongs}
             micEnabled={micEnabled}
             onMicChange={setMicEnabled}
           />
@@ -76,17 +84,18 @@ export default function App() {
             speed={speed}
             micEnabled={micEnabled}
             waitForNote={waitForNote}
+            hideFeedback={hideFeedback}
             onFinish={handleFinish}
             onQuit={goToMenu}
           />
         )}
 
         {screen === 'results' && result && (
-          <ResultsScreen
+          <Results
             song={song}
             result={result}
             speed={speed}
-            onReplay={() => startGame(songIndex, speed, waitForNote, 'backward')}
+            onReplay={() => startGame(songIndex, speed, waitForNote, hideFeedback, 'backward')}
             onMenu={goToMenu}
           />
         )}

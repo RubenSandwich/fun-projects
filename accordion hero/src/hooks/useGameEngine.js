@@ -6,9 +6,9 @@ import {
   GOOD_WINDOW,
   MISS_WINDOW,
   noteX,
-} from '../data/constants'
-import { playNote, playMiss, resumeAudio } from '../audio/sound'
-import { detectNote } from '../audio/pitch'
+} from '#data/constants'
+import { playNote, playMiss, resumeAudio } from '#audio/sound'
+import { detectNote } from '#audio/pitch'
 
 const COUNTDOWN_MS = 3000 // "3, 2, 1" before the song starts
 const END_BUFFER = 1800 // grace time after the last note before results
@@ -23,7 +23,7 @@ const POINTS = { perfect: 100, good: 60, ok: 30 }
 //   onFinish    - called with the result when the song ends
 export function useGameEngine(
   song,
-  { speed = 1, micEnabled = false, waitForNote = false, onFinish } = {}
+  { speed = 1, micEnabled = false, waitForNote = false, onFinish } = {},
 ) {
   // `elapsed` is milliseconds relative to song start. It is negative during the
   // countdown and drives every re-render (once per animation frame).
@@ -243,13 +243,13 @@ export function useGameEngine(
             console.log(
               `[mic] ${det.freq.toFixed(1)} Hz \u2192 ${det.name} ${det.type} (button ${
                 det.lane + 1
-              }) ${cents}`
+              }) ${cents}`,
             )
           } else {
             console.log(
               `[mic] ${det.freq.toFixed(1)} Hz \u2192 no match (closest ${
                 det.name ?? '?'
-              } ${cents})`
+              } ${cents})`,
             )
           }
         }

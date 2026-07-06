@@ -12,38 +12,75 @@ npm run dev        # start the Vite dev server (http://localhost:5173/)
 npm run build      # production build (use this to verify changes compile)
 npm run preview    # preview the production build
 npm test           # run the pitch-detection unit tests (Node's built-in runner)
+npm run format     # format everything with Prettier
+npm run format:check  # verify formatting (CI-style, no writes)
 ```
 
 There is a small unit-test suite for the mic pitch detector
-(`src/audio/pitch.test.js`); no linter is configured. **Verify changes with
-`npm run build` (must pass with no errors) and, for audio/detection work,
-`npm test`.** Note: source files in the pitch/sound/constants dependency graph
-use explicit `.js` import extensions so Node's native ESM test runner can
-resolve them.
+(`src/audio/pitch.test.js`); no linter is configured, but **Prettier** owns
+formatting (config in `.prettierrc.json`: no semicolons, single quotes, width
+100). **Verify changes with `npm run build` (must pass with no errors), run
+`npm run format` before finishing, and, for audio/detection work, `npm test`.**
+Note: source files in the pitch/sound/constants dependency graph use explicit
+`.js` import extensions so Node's native ESM test runner can resolve them.
+
+Imports use Node **subpath import aliases** (the `imports` map in `package.json`,
+resolved by Vite) instead of deep `../../..` paths: `#components/*`, `#modals/*`,
+`#screens/*`, `#hooks/*`, `#data/*`, `#audio/*` → the matching `src/` folders
+(e.g. `import Modal from '#components/Modal/Modal'`). Prefer these aliases when
+adding imports. Two exceptions stay relative: `../utils` (not aliased) and the
+pitch/sound/constants test-graph files (kept on relative `.js` imports so the
+Node runner resolves them without the alias map).
 
 ## Tech stack
 
 - React 19 + Vite 8 (plain JavaScript, `.jsx`, no TypeScript).
-- No CSS framework — hand-written CSS in `src/index.css` (global/screens) and
-  `src/game.css` (gameplay). Web Audio API for sound. No other runtime deps.
+- No CSS framework — hand-written CSS. `src/index.css` holds only the global
+  theme (CSS vars), base/app/view-transition styles, and a few shared primitives
+  (`.paper`, `.btn`, `.title`, `.diff`, the preset list controls). Every screen
+  and modal, like the reusable components in `src/ui/components/`, has a
+  co-located `*.css` it imports (e.g. `Start.jsx` imports `Start.css`,
+  `Modal.jsx` imports `Modal.css`). Web Audio API for sound. No other runtime
+  deps.
 
 ## Architecture
 
 ```
 src/
   main.jsx                entry (createRoot + StrictMode)
-  App.jsx                 screen router: start -> game -> results; owns song/speed state
-  index.css               global theme, start & results screens, shared CSS vars
-  game.css                playfield, lanes, notes, ribbon, pause overlay
-  data/constants.js       lanes, KEY_CODES, LANE_NOTES (button->note map), timing, noteX()
-  data/songs.js           chart parser + the songs
+  App.jsx                 screen router (start -> game -> results) with directional
+                          View Transitions; loads songs from the library
+  index.css               global theme, CSS vars, base/app + view transitions,
+                          and shared primitives (.paper/.btn/.title/.diff/...)
+  data/constants.js       lanes, KEY_CODES, LANE_NOTES, timing, noteX(), and the
+                          note-frequency PRESET store (localStorage)
+  data/songs.js           chart parser, buildSong, built-in songs, and the SONG
+                          LIBRARY store (localStorage)
   audio/sound.js          Web Audio "toy accordion" synth (reads LANE_NOTES)
   audio/pitch.js          mic pitch detection (autocorrelation) -> button note
   hooks/useGameEngine.js  the game loop: rAF, keyboard + mic input, scoring, pause, phases
-  components/
-    StartScreen.jsx       song list, practice-speed picker, how-to + button/note map
-    Game.jsx              HUD, section ribbon, lanes, notes, countdown, pause overlay
-    ResultsScreen.jsx     rank + stats
+  utils.js                shared helpers (jsonErrorText, slug, downloadJSON)
+  ui/                     every component lives in its own folder with a
+                          co-located *.css it imports (Modal/Modal.jsx +
+                          Modal/Modal.css, Start/Start.jsx + Start/Start.css, ...)
+    components/           reusable UI
+      Modal/            shared <dialog>-based modal: focus trap, Escape, backdrop,
+                        focuses its title on open (every screen/modal builds on it)
+      Accordion/        collapsible "paper" card (disclosure); `inert` when collapsed
+      SegmentedControl/ connected single-select buttons (radiogroup + arrow keys)
+      Switch/           OFF/ON toggle (role="switch") styled like the segmented control
+    screens/
+      Start/            full-height scroller: how-to, song list + "Add / edit songs",
+                        settings (speed, wait-for-note, mic, "Select preset")
+      Game/             HUD, section ribbon, lanes, notes, countdown, pause overlay;
+                        Game.css holds the playfield, lanes, notes, ribbon, HUD,
+                        feedback, countdown and pause styles
+      Results/          rank + stats
+    modals/
+      PresetPicker/     list note-frequency presets: select / edit / delete / new / upload
+      NoteFreq/         create/edit a note-frequency preset (name + per-button Hz, mic tuning)
+      SongLibrary/      list songs: edit / delete / new / upload (built-ins locked)
+      SongEditor/       create/edit a song (name, colour, BPM, blurb, difficulty, chart)
 ```
 
 ## Core domain concepts
@@ -51,7 +88,7 @@ src/
 - **7 buttons / lanes**, played with the number keys **1–7** (`KEY_CODES` maps
   `Digit1..7` and `Numpad1..7` to lane indices 0–6).
 - **Push vs Pull** = bellows direction. **Push = tap the key**, **Pull = hold
-  Shift + the key**. Each button is *bisonoric*: it plays a different note on
+  Shift + the key**. Each button is _bisonoric_: it plays a different note on
   push vs pull. The full map lives in `LANE_NOTES` in `data/constants.js`
   (e.g. button 1 = C push / D pull).
 - **Chart format** (`data/songs.js`): a `chart` string of tokens like `+3`
@@ -71,13 +108,41 @@ src/
   While mic mode is on the engine `console.log`s a throttled `[mic]` readout
   (frequency, matched note, cents) to help calibrate a real instrument.
 
+## Presets & the song library (localStorage)
+
+Both note tunings and songs are user-editable and persisted in `localStorage`.
+They follow the same pattern: a built-in default that can't be edited or deleted,
+plus user entries, surfaced through a "picker/library" modal that opens a full
+"editor" modal. All modals are portaled to `document.body` and stack as overlays.
+
+- **Note-frequency presets** (`data/constants.js`; keys `accordion-note-presets`,
+  `accordion-active-preset`): `getPresets`, `getActivePreset`, `setActivePreset`,
+  `savePreset`, `deletePreset`, `importPresetJSON`. The active preset's
+  frequencies are written into the live `LANE_NOTES` on load and whenever it
+  changes. Managed from Settings → "Select preset" (`PresetPicker` →
+  `NoteFreq`).
+- **Song library** (`data/songs.js`; key `accordion-user-songs`): `getSongs`
+  (built-ins first, then user songs), `saveSong`, `deleteSong`, `importSongJSON`,
+  `normalizeSongDef`, `chartNoteCount`. Songs are stored as raw defs and built on
+  demand with `buildSong`; the built song keeps its raw `chart`/`color`/
+  `difficulty` plus a `builtin` flag so it round-trips through the editor.
+  Managed from the Song accordion → "Add / edit songs" (`SongLibrary` →
+  `SongEditor`).
+- **Difficulties** are `Easy | Medium | Hard` (`DIFFICULTIES` in `songs.js`).
+- Uploads use a file picker inside the modals — there is no drag-and-drop.
+- `Start` tracks the selected song by **id** so selection survives songs
+  being added or removed.
+
 ## Conventions & gotchas
 
 - Push/pull colors are unified via the `--push-fill` (solid light orange) and
   `--pull-fill` (blue diagonal stripes) CSS variables in `index.css`. Reuse
   these anywhere push/pull is shown so all indicators stay consistent.
-- `NOTE_WIDTH_PX` in `Game.jsx` must stay in sync with `.note { width }` in
-  `game.css` — it is used to align the ribbon bands to the note-card edges.
+- Co-located component CSS is imported by the component and so loads _before_
+  the global `index.css` in the bundle. When a screen/modal class must override
+  a shared primitive of equal specificity (e.g. `.song-card` over `.paper`),
+  give it a higher-specificity selector (`.paper.song-card`) instead of relying
+  on source order.
 - The game loop keeps mutable state in refs and re-renders once per animation
   frame via `setElapsed`; scoring/combo/feedback live in refs. Don't convert
   these to React state in the hot loop.
@@ -88,6 +153,8 @@ src/
 
 ## Adding a song
 
-Copy an existing `buildSong({ ... })` block in `data/songs.js`, set a `bpm` and
-a `chart` string in the `+N` / `-N` notation, and it appears on the menu
-automatically.
+Easiest: use the in-app **Song library** ("Add / edit songs" on the start
+screen) to write or upload one — it's saved to `localStorage`. To ship a new
+**built-in** song, add a raw def `{ id, name, blurb, bpm, color, difficulty,
+chart }` to `BUILTIN_DEFS` in `data/songs.js` (chart in the `+N` / `-N`
+notation); it appears in the menu and library automatically.

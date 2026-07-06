@@ -9,31 +9,31 @@ they cross the dashed hit line on the left.
 
 ## Push vs. Pull
 
-A real toy accordion is *bisonoric*: each button sounds a different note
+A real toy accordion is _bisonoric_: each button sounds a different note
 depending on whether you squeeze the bellows in (**push**) or draw them out
 (**pull**). Each note tells you which way to go:
 
-| Direction | What to press | Bellows |
-| --------- | ------------- | ------- |
-| ▼ **PUSH** | just tap the button's number key | squeeze in |
-| ▲ **PULL** | hold **⇧ Shift** + the number key | draw out |
+| Direction  | What to press                     | Bellows    |
+| ---------- | --------------------------------- | ---------- |
+| ▼ **PUSH** | just tap the button's number key  | squeeze in |
+| ▲ **PULL** | hold **⇧ Shift** + the number key | draw out   |
 
 Push notes are solid paper stickers; pull notes are striped. Each moving card
 shows the **note name** to play; the lane tells you the button. A look-ahead
 ribbon and HUD banner preview the upcoming push/pull direction. Match the
-direction *and* the timing to score Perfect / Good / Ok.
+direction _and_ the timing to score Perfect / Good / Ok.
 
 ### Button → note map
 
-| Button | Push | Pull |
-| ------ | ---- | ---- |
-| 1 | C (middle) | D |
-| 2 | E | F |
-| 3 | G | A |
-| 4 | C (high) | B |
-| 5 | E (high) | D (high) |
-| 6 | G (high) | F (high) |
-| 7 | B (high) | A (high) |
+| Button | Push       | Pull     |
+| ------ | ---------- | -------- |
+| 1      | C (middle) | D        |
+| 2      | E          | F        |
+| 3      | G          | A        |
+| 4      | C (high)   | B        |
+| 5      | E (high)   | D (high) |
+| 6      | G (high)   | F (high) |
+| 7      | B (high)   | A (high) |
 
 ## Practice speed
 
@@ -59,13 +59,16 @@ src/
   index.css               global styles + start/results screens (paper theme)
   game.css                playfield, lanes, notes, feedback
   audio/sound.js          tiny Web Audio "toy accordion" synth
-  data/constants.js       lanes, button/note map, timing windows, positioning
-  data/songs.js           the charts (the +N / -N push/pull number notation)
-  hooks/useGameEngine.js  animation loop, keyboard input, scoring
-  components/
-    StartScreen.jsx
-    Game.jsx
-    ResultsScreen.jsx
+  audio/pitch.js          mic pitch detection (autocorrelation)
+  data/constants.js       lanes, button/note map, timing, note-frequency presets
+  data/songs.js           chart parser + built-in songs + the song library
+  hooks/useGameEngine.js  animation loop, keyboard + mic input, scoring
+  utils.js                shared helpers (JSON errors, slugs, downloads)
+  ui/
+    components/Modal.jsx  shared <dialog> modal (focus trap, Escape, backdrop)
+    screens/              Start.jsx, Game.jsx, Results.jsx
+    modals/               PresetPicker.jsx / NoteFreq.jsx  (note-frequency presets)
+                          SongLibrary.jsx / SongEditor.jsx (the song library + editor)
 ```
 
 ## Add your own song
@@ -73,7 +76,7 @@ src/
 Songs live in [`src/data/songs.js`](src/data/songs.js). Each has a `chart`
 string written in a simple tab-style notation:
 
-- a token is `+N` (push button *N*) or `-N` (pull button *N*), where *N* is 1–7;
+- a token is `+N` (push button _N_) or `-N` (pull button _N_), where _N_ is 1–7;
   a bare number defaults to push.
 - every token is one beat; a line break adds a short breath between phrases.
 
@@ -89,6 +92,9 @@ For example, "Row, Row, Row Your Boat":
 -5 +4 -4 -3 +3
 ```
 
-Copy an existing `buildSong({ ... })` block, tweak the `bpm` and `chart`, and it
-shows up on the menu automatically. (Consecutive same-direction notes are grouped
-into the look-ahead ribbon for you.)
+The easiest way is right in the app: open **Add / edit songs** on the start
+screen to write, upload, edit, or delete songs — they're saved to your browser's
+`localStorage`. To add a built-in song, drop a new entry into `BUILTIN_DEFS` in
+[`src/data/songs.js`](src/data/songs.js) with a `bpm` and `chart`, and it shows
+up automatically. (Consecutive same-direction notes are grouped into the
+look-ahead ribbon for you.)

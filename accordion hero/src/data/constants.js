@@ -200,7 +200,7 @@ export function importPresetJSON(data) {
   const rows = Array.isArray(data) ? data : data && data.notes
   if (!Array.isArray(rows)) throw new Error('Expected a JSON preset with a "notes" array.')
   const hasValid = rows.some(
-    (row) => row && ['push', 'pull'].some((t) => row[t] && validFreq(row[t].freq))
+    (row) => row && ['push', 'pull'].some((t) => row[t] && validFreq(row[t].freq)),
   )
   if (!hasValid) throw new Error('No valid note frequencies found in the file.')
   const name =

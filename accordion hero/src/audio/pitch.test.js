@@ -69,7 +69,7 @@ test('autoCorrelate recovers the fundamental of sine and sawtooth tones', () => 
       assert.ok(detected > 0, `no pitch detected for ${f} Hz ${type}`)
       assert.ok(
         Math.abs(centsBetween(detected, f)) < 20,
-        `${type} ${f} Hz detected as ${detected.toFixed(1)} Hz`
+        `${type} ${f} Hz detected as ${detected.toFixed(1)} Hz`,
       )
     }
   }
