@@ -271,7 +271,7 @@ html[data-transition='backward']::view-transition-old(screen) {
 }
 .title--small {
   font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--teal-ink);
+  color: var(--teal);
 }
 .subtitle {
   text-align: center;

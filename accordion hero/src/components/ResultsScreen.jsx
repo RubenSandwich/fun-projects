@@ -71,7 +71,7 @@ export default function ResultsScreen({ song, result, speed = 1, onReplay, onMen
           ↻ Play Again
         </button>
         <button className="btn btn--ghost btn--big" onClick={onMenu}>
-          ♪ Song Menu
+          ♪ Main Menu
         </button>
       </div>
     </div>
