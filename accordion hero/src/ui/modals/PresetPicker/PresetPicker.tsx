@@ -12,8 +12,8 @@ import {
 } from '#data/presets'
 import Modal from '#components/Modal/Modal'
 import UploadButton from '#components/UploadButton/UploadButton'
+import ListRow, { type RowTag } from '#components/ListRow/ListRow'
 import NoteFreq, { type PresetDraft } from '#modals/NoteFreq/NoteFreq'
-import './PresetPicker.css'
 
 interface PresetPickerProps {
   onClose: () => void
@@ -76,48 +76,26 @@ export default function PresetPicker({
         </p>
 
         <div className="modal__body">
-          <div className="preset-list">
+          <ul className="list-rows" aria-label="Presets">
             {presets.map((p) => {
               const active = p.id === activeId
               const builtin = p.id === DEFAULT_PRESET_ID
+              const tags: RowTag[] = []
+              if (builtin) tags.push({ label: 'Built-in' })
               return (
-                <div className={'preset-row' + (active ? ' is-active' : '')} key={p.id}>
-                  <button
-                    className="preset-row__select"
-                    onClick={() => select(p.id)}
-                    aria-pressed={active}
-                  >
-                    <span className="preset-row__radio" aria-hidden="true" />
-                    <span className="preset-row__name">{p.name}</span>
-                    {builtin && <span className="preset-row__tag">Built-in</span>}
-                    {active && (
-                      <span className="preset-row__tag preset-row__tag--active">Active</span>
-                    )}
-                  </button>
-                  {!builtin && (
-                    <div className="preset-row__actions">
-                      <button
-                        className="preset-icon-btn"
-                        onClick={() => setEditing({ preset: p })}
-                        title="Edit preset"
-                        aria-label={`Edit ${p.name}`}
-                      >
-                        ✎
-                      </button>
-                      <button
-                        className="preset-icon-btn preset-icon-btn--danger"
-                        onClick={() => remove(p.id)}
-                        title="Delete preset"
-                        aria-label={`Delete ${p.name}`}
-                      >
-                        🗑
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <ListRow
+                  key={p.id}
+                  name={p.name}
+                  noun="preset"
+                  selected={active}
+                  onSelect={() => select(p.id)}
+                  tags={tags}
+                  onEdit={builtin ? undefined : () => setEditing({ preset: p })}
+                  onDelete={builtin ? undefined : () => remove(p.id)}
+                />
               )
             })}
-          </div>
+          </ul>
         </div>
 
         {uploadError && <p className="modal__err">{uploadError}</p>}

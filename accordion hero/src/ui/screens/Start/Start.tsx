@@ -225,7 +225,7 @@ export default function Start({
             <span className="practice-row__desc">Tune each button to your instrument</span>
           </div>
           <div className="note-freq-current">
-            <span className="note-freq-current__caption">Preset</span>
+            <span className="note-freq-current__caption">Current preset</span>
             <span className="note-freq-current__name">{activePreset.name}</span>
           </div>
           <button className="note-btn" onClick={() => setShowPresetPicker(true)}>

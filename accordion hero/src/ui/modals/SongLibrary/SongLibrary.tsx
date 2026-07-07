@@ -3,8 +3,8 @@ import { getSongs, deleteSong, saveSong, importSongJSON } from '#data/songLibrar
 import { DIFF_CLASS, type Song } from '#data/songs'
 import Modal from '#components/Modal/Modal'
 import UploadButton from '#components/UploadButton/UploadButton'
+import ListRow from '#components/ListRow/ListRow'
 import SongEditor, { type SongDraft } from '#modals/SongEditor/SongEditor'
-import './SongLibrary.css'
 
 interface SongLibraryProps {
   onClose: () => void
@@ -54,41 +54,25 @@ export default function SongLibrary({ onClose, onChange, onSelect }: SongLibrary
         </p>
 
         <div className="modal__body">
-          <div className="song-lib-list">
+          <ul className="list-rows" aria-label="Songs">
             {songs.map((s) => (
-              <div className="song-lib-row" key={s.id} style={{ '--card': s.color }}>
-                <div className="song-lib-row__info">
-                  <span className="song-lib-row__name">{s.name}</span>
-                  <span className="song-lib-row__meta">
+              <ListRow
+                key={s.id}
+                name={s.name}
+                color={s.color}
+                noun="song"
+                meta={
+                  <>
                     <span className={'diff ' + DIFF_CLASS[s.difficulty]}>{s.difficulty}</span>
-                    <span className="song-lib-row__bpm">{s.bpm} BPM</span>
-                  </span>
-                </div>
-                {s.builtin ? (
-                  <span className="preset-row__tag">Built-in</span>
-                ) : (
-                  <div className="song-lib-row__actions">
-                    <button
-                      className="preset-icon-btn"
-                      onClick={() => setEditing({ song: s })}
-                      title="Edit song"
-                      aria-label={`Edit ${s.name}`}
-                    >
-                      ✎
-                    </button>
-                    <button
-                      className="preset-icon-btn preset-icon-btn--danger"
-                      onClick={() => remove(s.id)}
-                      title="Delete song"
-                      aria-label={`Delete ${s.name}`}
-                    >
-                      🗑
-                    </button>
-                  </div>
-                )}
-              </div>
+                    <span className="list-row__bpm">{s.bpm} BPM</span>
+                  </>
+                }
+                tags={s.builtin ? [{ label: 'Built-in' }] : undefined}
+                onEdit={s.builtin ? undefined : () => setEditing({ song: s })}
+                onDelete={s.builtin ? undefined : () => remove(s.id)}
+              />
             ))}
-          </div>
+          </ul>
         </div>
 
         {uploadError && <p className="modal__err">{uploadError}</p>}
