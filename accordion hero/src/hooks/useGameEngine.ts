@@ -1,13 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  KEY_CODES,
-  HIT_WINDOW,
-  PERFECT_WINDOW,
-  GOOD_WINDOW,
-  MISS_WINDOW,
-  noteX,
-  type Direction,
-} from '#data/constants'
+import { KEY_CODES, type Direction } from '#data/instrument'
+import { HIT_WINDOW, PERFECT_WINDOW, GOOD_WINDOW, MISS_WINDOW, noteX } from '#data/timing'
 import type { Song, Note } from '#data/songs'
 import { playNote, playMiss, resumeAudio } from '#audio/sound'
 import { detectNote } from '#audio/pitch'

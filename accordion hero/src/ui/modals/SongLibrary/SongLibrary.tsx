@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
-import { getSongs, deleteSong, saveSong, importSongJSON, DIFF_CLASS, type Song } from '#data/songs'
-import { jsonErrorText } from '../../../utils'
+import { useState } from 'react'
+import { getSongs, deleteSong, saveSong, importSongJSON } from '#data/songLibrary'
+import { DIFF_CLASS, type Song } from '#data/songs'
 import Modal from '#components/Modal/Modal'
+import UploadButton from '#components/UploadButton/UploadButton'
 import SongEditor, { type SongDraft } from '#modals/SongEditor/SongEditor'
 import './SongLibrary.css'
 
@@ -20,7 +21,6 @@ export default function SongLibrary({ onClose, onChange, onSelect }: SongLibrary
   const [songs, setSongs] = useState<Song[]>(() => getSongs())
   const [editing, setEditing] = useState<Editing>(null)
   const [uploadError, setUploadError] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
 
   // Re-read the store after any change and tell the parent to refresh too.
   const refresh = () => {
@@ -40,16 +40,10 @@ export default function SongLibrary({ onClose, onChange, onSelect }: SongLibrary
     setEditing(null)
   }
 
-  const upload = async (file: File | undefined) => {
-    setUploadError('')
-    if (!file) return
-    try {
-      const saved = importSongJSON(JSON.parse(await file.text()))
-      refresh()
-      onSelect?.(saved.id)
-    } catch (err) {
-      setUploadError(jsonErrorText(err))
-    }
+  const handleUpload = (data: unknown) => {
+    const saved = importSongJSON(data) // throws on invalid -> shown via onError
+    refresh()
+    onSelect?.(saved.id)
   }
 
   return (
@@ -107,22 +101,12 @@ export default function SongLibrary({ onClose, onChange, onSelect }: SongLibrary
           >
             ＋ New song
           </button>
-          <button className="btn btn--ghost" onClick={() => fileRef.current?.click()}>
+          <UploadButton className="btn btn--ghost" onData={handleUpload} onError={setUploadError}>
             ↑ Upload
-          </button>
+          </UploadButton>
           <button className="btn btn--primary" onClick={onClose}>
             Done
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={(e) => {
-              upload(e.target.files?.[0])
-              e.target.value = ''
-            }}
-          />
         </div>
       </Modal>
 

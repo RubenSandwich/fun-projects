@@ -1,27 +1,7 @@
 import './Results.css'
 import type { Song } from '#data/songs'
+import { rankFor } from '#data/scoring'
 import type { GameResult } from '#hooks/useGameEngine'
-
-interface Rank {
-  grade: string
-  label: string
-  cls: string
-}
-
-function rankFor(accuracy: number): Rank {
-  switch (true) {
-    case accuracy >= 95:
-      return { grade: 'S', label: 'Maestro!', cls: 'rank--s' }
-    case accuracy >= 85:
-      return { grade: 'A', label: 'Bravo!', cls: 'rank--a' }
-    case accuracy >= 70:
-      return { grade: 'B', label: 'Nicely done', cls: 'rank--b' }
-    case accuracy >= 50:
-      return { grade: 'C', label: 'Keep squeezing', cls: 'rank--c' }
-    default:
-      return { grade: 'D', label: 'Needs practice', cls: 'rank--d' }
-  }
-}
 
 interface ResultsProps {
   song: Song

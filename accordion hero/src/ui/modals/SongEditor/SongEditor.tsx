@@ -1,12 +1,6 @@
 import { useState } from 'react'
-import {
-  DIFFICULTIES,
-  DIFF_CLASS,
-  chartNoteCount,
-  randomAccentColor,
-  type Song,
-  type Difficulty,
-} from '#data/songs'
+import { DIFFICULTIES, DIFF_CLASS, chartNoteCount, type Song, type Difficulty } from '#data/songs'
+import { randomAccentColor } from '#data/colors'
 import { slug, downloadJSON } from '../../../utils'
 import Modal from '#components/Modal/Modal'
 import './SongEditor.css'

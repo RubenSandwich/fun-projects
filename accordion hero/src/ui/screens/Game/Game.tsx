@@ -2,15 +2,8 @@ import { useMemo } from 'react'
 import { useGameEngine } from '#hooks/useGameEngine'
 import type { GameNote, GameResult } from '#hooks/useGameEngine'
 import type { Song, Section } from '#data/songs'
-import {
-  LANE_LABELS,
-  LANE_COLORS,
-  LANE_NOTES,
-  HIT_LINE_PCT,
-  LEAD_TIME,
-  noteX,
-  type Direction,
-} from '#data/constants'
+import { LANE_LABELS, LANE_COLORS, LANE_NOTES, type Direction } from '#data/instrument'
+import { HIT_LINE_PCT, LEAD_TIME, noteX } from '#data/timing'
 import './Game.css'
 
 // The note's on-screen x-position (percent), or null when it shouldn't render.

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { LANE_COLORS, getDefaultNotes, type Preset, type Direction } from '#data/constants'
-import { startMic, stopMic, detectNote } from '#audio/pitch'
+import { LANE_COLORS, getDefaultNotes, type Direction } from '#data/instrument'
+import type { Preset } from '#data/presets'
+import { startMic, stopMic, detectNote, MIC_ERROR } from '#audio/pitch'
 import { slug, downloadJSON } from '../../../utils'
 import Modal from '#components/Modal/Modal'
 import './NoteFreq.css'
@@ -86,7 +87,7 @@ export default function NoteFreq({
       startedMicRef.current = true
       onMicStarted?.()
     } catch {
-      setMicErr('Could not access the microphone. Check browser permissions.')
+      setMicErr(MIC_ERROR)
       return
     }
     setListening({ lane, type })

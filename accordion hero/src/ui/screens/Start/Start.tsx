@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { LANE_LABELS, LANE_COLORS, LANE_NOTES, getActivePreset, type Preset } from '#data/constants'
+import { LANE_LABELS, LANE_COLORS, LANE_NOTES } from '#data/instrument'
+import { getActivePreset, type Preset } from '#data/presets'
 import { DIFF_CLASS, type Song } from '#data/songs'
 import Accordion from '#components/Accordion/Accordion'
 import SegmentedControl from '#components/SegmentedControl/SegmentedControl'
@@ -7,7 +8,7 @@ import Switch from '#components/Switch/Switch'
 import PresetPicker from '#modals/PresetPicker/PresetPicker'
 import SongLibrary from '#modals/SongLibrary/SongLibrary'
 import { resumeAudio } from '#audio/sound'
-import { startMic, stopMic } from '#audio/pitch'
+import { startMic, stopMic, MIC_ERROR } from '#audio/pitch'
 import './Start.css'
 
 const SPEEDS = [
@@ -69,7 +70,7 @@ export default function Start({
       await startMic()
       onMicChange(true)
     } catch {
-      setMicError('Could not access the microphone. Check browser permissions.')
+      setMicError(MIC_ERROR)
       onMicChange(false)
     } finally {
       setMicBusy(false)

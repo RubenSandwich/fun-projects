@@ -7,7 +7,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { autoCorrelate, closestNote, analyzeBuffer, TOLERANCE_CENTS } from './pitch.ts'
-import { LANE_NOTES } from '../data/constants.ts'
+import { LANE_NOTES } from '../data/instrument.ts'
 
 const SR = 44100
 const SIZE = 2048

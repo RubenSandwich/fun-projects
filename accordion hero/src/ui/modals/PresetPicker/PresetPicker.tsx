@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import {
   DEFAULT_PRESET_ID,
   getPresets,
@@ -9,9 +9,9 @@ import {
   deletePreset,
   importPresetJSON,
   type Preset,
-} from '#data/constants'
-import { jsonErrorText } from '../../../utils'
+} from '#data/presets'
 import Modal from '#components/Modal/Modal'
+import UploadButton from '#components/UploadButton/UploadButton'
 import NoteFreq, { type PresetDraft } from '#modals/NoteFreq/NoteFreq'
 import './PresetPicker.css'
 
@@ -37,7 +37,6 @@ export default function PresetPicker({
   const [activeId, setActiveId] = useState<string>(() => getActivePresetId())
   const [editing, setEditing] = useState<Editing>(null)
   const [uploadError, setUploadError] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
 
   // Re-read the store after any change and tell the parent what's active now.
   const refresh = () => {
@@ -63,16 +62,10 @@ export default function PresetPicker({
     refresh()
   }
 
-  const upload = async (file: File | undefined) => {
-    setUploadError('')
-    if (!file) return
-    try {
-      const saved = importPresetJSON(JSON.parse(await file.text()))
-      setActivePreset(saved.id)
-      refresh()
-    } catch (err) {
-      setUploadError(jsonErrorText(err))
-    }
+  const handleUpload = (data: unknown) => {
+    const saved = importPresetJSON(data) // throws on invalid -> shown via onError
+    setActivePreset(saved.id)
+    refresh()
   }
 
   return (
@@ -137,22 +130,12 @@ export default function PresetPicker({
           >
             ＋ New preset
           </button>
-          <button className="btn btn--ghost" onClick={() => fileRef.current?.click()}>
+          <UploadButton className="btn btn--ghost" onData={handleUpload} onError={setUploadError}>
             ↑ Upload
-          </button>
+          </UploadButton>
           <button className="btn btn--primary" onClick={onClose}>
             Done
           </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            hidden
-            onChange={(e) => {
-              upload(e.target.files?.[0])
-              e.target.value = ''
-            }}
-          />
         </div>
       </Modal>
 

@@ -61,8 +61,12 @@ src/
   index.css               global theme + shared primitives (paper theme)
   audio/sound.ts          tiny Web Audio "toy accordion" synth
   audio/pitch.ts          mic pitch detection (autocorrelation)
-  data/constants.ts       lanes, button/note map, timing, note-frequency presets
-  data/songs.ts           chart parser + built-in songs + the song library
+  data/instrument.ts      the 7 buttons: labels, colours, keys, the note map
+  data/presets.ts         note-frequency preset store (localStorage)
+  data/timing.ts          playfield clock/geometry (lead time, windows, noteX)
+  data/colors.ts          colour helpers (random accessible accent)
+  data/songs.ts           song model: chart parser + buildSong
+  data/songLibrary.ts     built-in songs + the user song store (localStorage)
   hooks/useGameEngine.ts  animation loop, keyboard + mic input, scoring
   utils.ts                shared helpers (JSON errors, slugs, downloads)
   ui/                     each component in its own folder with a co-located .css
@@ -74,7 +78,8 @@ src/
 
 ## Add your own song
 
-Songs live in [`src/data/songs.ts`](src/data/songs.ts). Each has a `chart`
+Built-in songs live in [`src/data/songLibrary.ts`](src/data/songLibrary.ts) (the
+chart parser is in [`src/data/songs.ts`](src/data/songs.ts)). Each has a `chart`
 string written in a simple tab-style notation:
 
 - a token is `+N` (push button _N_) or `-N` (pull button _N_), where _N_ is 1–7;
@@ -96,6 +101,6 @@ For example, "Row, Row, Row Your Boat":
 The easiest way is right in the app: open **Add / edit songs** on the start
 screen to write, upload, edit, or delete songs — they're saved to your browser's
 `localStorage`. To add a built-in song, drop a new entry into `BUILTIN_DEFS` in
-[`src/data/songs.ts`](src/data/songs.ts) with a `bpm` and `chart`, and it shows
-up automatically. (Consecutive same-direction notes are grouped into the
-look-ahead ribbon for you.)
+[`src/data/songLibrary.ts`](src/data/songLibrary.ts) with a `bpm` and `chart`,
+and it shows up automatically. (Consecutive same-direction notes are grouped into
+the look-ahead ribbon for you.)

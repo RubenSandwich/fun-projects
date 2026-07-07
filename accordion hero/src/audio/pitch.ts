@@ -2,7 +2,7 @@
 // frequency with a (range-limited) autocorrelation, and maps it to one of the
 // accordion's button notes so a played note can count as a button press.
 
-import { LANE_NOTES, type Direction } from '../data/constants.ts'
+import { LANE_NOTES, type Direction } from '../data/instrument.ts'
 import { getAudioContext, resumeAudio } from './sound.ts'
 
 let stream: MediaStream | null = null
@@ -28,6 +28,9 @@ export type Detection =
 
 // How far off a played note may be (in cents) and still count as a button note.
 export const TOLERANCE_CENTS = 60
+
+// User-facing message when mic access fails or is denied.
+export const MIC_ERROR = 'Could not access the microphone. Check browser permissions.'
 
 // Ask for the mic and wire it into an analyser on the shared audio graph. Must
 // be called from a user gesture (e.g. a button click).

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { getSongs, withLeadIn, type Song } from '#data/songs'
+import { getSongs } from '#data/songLibrary'
+import { withLeadIn, type Song } from '#data/songs'
 import type { GameResult } from '#hooks/useGameEngine'
 import Start from '#screens/Start/Start'
 import Game from '#screens/Game/Game'

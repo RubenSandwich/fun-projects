@@ -1,6 +1,6 @@
 // Lightweight Web Audio "toy accordion" synth. No external assets needed.
 
-import { LANE_NOTES, type Direction } from '../data/constants.ts'
+import { LANE_NOTES, type Direction } from '../data/instrument.ts'
 
 let ctx: AudioContext | null = null
 
