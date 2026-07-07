@@ -1,10 +1,10 @@
 // Lightweight Web Audio "toy accordion" synth. No external assets needed.
 
-import { LANE_NOTES } from '../data/constants.js'
+import { LANE_NOTES, type Direction } from '../data/constants.ts'
 
-let ctx = null
+let ctx: AudioContext | null = null
 
-function getCtx() {
+function getCtx(): AudioContext | null {
   if (!ctx) {
     const AudioCtx = window.AudioContext || window.webkitAudioContext
     if (!AudioCtx) return null
@@ -15,20 +15,20 @@ function getCtx() {
 
 // Browsers start the AudioContext suspended until a user gesture. Call this
 // from a click/keydown so sound is allowed to play.
-export function resumeAudio() {
+export function resumeAudio(): void {
   const c = getCtx()
   if (c && c.state === 'suspended') c.resume()
 }
 
 // Expose the shared AudioContext so the mic pitch detector can hang an analyser
 // off the same graph.
-export function getAudioContext() {
+export function getAudioContext(): AudioContext | null {
   return getCtx()
 }
 
 // Play a short reedy accordion note. Each button sounds a different pitch on
 // push vs pull, taken straight from the button/note map in constants.
-export function playNote(lane, type) {
+export function playNote(lane: number, type: Direction): void {
   const c = getCtx()
   if (!c) return
   const now = c.currentTime
@@ -54,7 +54,7 @@ export function playNote(lane, type) {
 }
 
 // A soft paper "thunk" for missed / wrong-direction presses.
-export function playMiss() {
+export function playMiss(): void {
   const c = getCtx()
   if (!c) return
   const now = c.currentTime

@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import './SegmentedControl.css'
 
 // A segmented control: a connected row of options where exactly one is active.
@@ -10,19 +11,37 @@ import './SegmentedControl.css'
 //   value    — the currently selected value
 //   onChange — called with the new value
 //   label    — accessible name for the group
-export default function SegmentedControl({ options, value, onChange, label }) {
-  const ref = useRef(null)
+interface Option<T> {
+  value: T
+  label: string
+  note?: string
+}
 
-  const focusOption = (index) => {
-    ref.current?.querySelectorAll('.segmented__option')[index]?.focus()
+interface SegmentedControlProps<T> {
+  options: Option<T>[]
+  value: T
+  onChange: (value: T) => void
+  label: string
+}
+
+export default function SegmentedControl<T extends string | number>({
+  options,
+  value,
+  onChange,
+  label,
+}: SegmentedControlProps<T>) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  const focusOption = (index: number) => {
+    ref.current?.querySelectorAll<HTMLElement>('.segmented__option')[index]?.focus()
   }
 
-  const select = (index) => {
+  const select = (index: number) => {
     onChange(options[index].value)
     focusOption(index)
   }
 
-  const onKeyDown = (e) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     const index = options.findIndex((o) => o.value === value)
     switch (e.key) {
       case 'ArrowRight':

@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import type { ReactNode } from 'react'
 import './Accordion.css'
 
 // A collapsible "paper" card — a disclosure widget. It owns its open state: the
@@ -6,7 +7,19 @@ import './Accordion.css'
 // panel animates open/closed. When collapsed the panel is `inert`, so its
 // content is pulled out of the tab order and the accessibility tree rather than
 // merely hidden with CSS (which would leave it focusable and readable by AT).
-export default function Accordion({ variant = '', heading, defaultOpen = false, children }) {
+interface AccordionProps {
+  variant?: string
+  heading: ReactNode
+  defaultOpen?: boolean
+  children?: ReactNode
+}
+
+export default function Accordion({
+  variant = '',
+  heading,
+  defaultOpen = false,
+  children,
+}: AccordionProps) {
   const [open, setOpen] = useState(defaultOpen)
   const panelId = useId()
 

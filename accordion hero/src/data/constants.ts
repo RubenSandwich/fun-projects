@@ -1,12 +1,36 @@
 // Shared game constants and helpers.
 
+// Bellows direction: push = squeeze in, pull = draw out.
+export type Direction = 'push' | 'pull'
+
+// A single button/direction sound: its note name and frequency in Hz.
+export interface NoteInfo {
+  name: string
+  freq: number
+}
+
+// One accordion button: the notes it sounds on push vs pull.
+export interface LaneNote {
+  push: NoteInfo
+  pull: NoteInfo
+}
+
+// A saved note-frequency tuning. The built-in "Default" preset is `builtin`.
+export interface Preset {
+  id: string
+  name: string
+  builtin?: boolean
+  notes: LaneNote[]
+}
+
 // Seven lanes = the seven toy-accordion buttons, played with the number keys 1-7.
 export const LANE_LABELS = ['1', '2', '3', '4', '5', '6', '7']
 
 // Map physical key codes to lane indices. Using `event.code` means the lane is
 // the same whether or not Shift is held (Shift is what distinguishes push/pull).
-// Both the number row and the numpad work.
-export const KEY_CODES = {
+// Both the number row and the numpad work. The value is `undefined` for any
+// other key, so callers can ignore presses that aren't a button.
+export const KEY_CODES: Record<string, number | undefined> = {
   Digit1: 0,
   Digit2: 1,
   Digit3: 2,
@@ -30,7 +54,7 @@ export const KEY_CODES = {
 //   button 3: G / A                  button 7: B (high) / A (high)
 //   button 4: C (high) / B
 // The default button/note map. Kept aside so a custom tuning can be reset.
-const DEFAULT_LANE_NOTES = [
+const DEFAULT_LANE_NOTES: LaneNote[] = [
   { push: { name: 'C', freq: 261.63 }, pull: { name: 'D', freq: 293.66 } },
   { push: { name: 'E', freq: 329.63 }, pull: { name: 'F', freq: 349.23 } },
   { push: { name: 'G', freq: 392.0 }, pull: { name: 'A', freq: 440.0 } },
@@ -43,23 +67,25 @@ const DEFAULT_LANE_NOTES = [
 // The *active* map used by the synth and the mic detector. It's a live-mutated
 // copy of the defaults (same object identity), so recalibrating a button's
 // frequency is picked up immediately everywhere LANE_NOTES is read.
-export const LANE_NOTES = DEFAULT_LANE_NOTES.map((n) => ({
+export const LANE_NOTES: LaneNote[] = DEFAULT_LANE_NOTES.map((n) => ({
   push: { ...n.push },
   pull: { ...n.pull },
 }))
 
+const DIRECTIONS = ['push', 'pull'] as const
+
 // A positive numeric frequency, or null if the value isn't usable.
-function validFreq(value) {
+function validFreq(value: unknown): number | null {
   const f = Number(value)
   return Number.isFinite(f) && f > 0 ? f : null
 }
 
 // Bulk-apply frequencies from a 7-row array of { push: { freq }, pull: { freq } }.
 // Names are left untouched — they describe the instrument's fixed layout.
-export function setNoteFrequencies(rows) {
+export function setNoteFrequencies(rows: unknown): void {
   if (!Array.isArray(rows)) return
   LANE_NOTES.forEach((note, i) => {
-    for (const type of ['push', 'pull']) {
+    for (const type of DIRECTIONS) {
       const f = rows[i]?.[type] ? validFreq(rows[i][type].freq) : null
       if (f) note[type].freq = f
     }
@@ -78,27 +104,27 @@ const ACTIVE_PRESET_KEY = 'accordion-active-preset'
 export const DEFAULT_PRESET_ID = 'default'
 
 // A short, collision-resistant id for a new user preset.
-function makePresetId() {
+function makePresetId(): string {
   return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 }
 
 // A deep copy of the built-in default note map — the starting point for a new
 // preset and the target of the editor's "Reset".
-export function getDefaultNotes() {
+export function getDefaultNotes(): LaneNote[] {
   return DEFAULT_LANE_NOTES.map((n) => ({ push: { ...n.push }, pull: { ...n.pull } }))
 }
 
 // A fresh copy of the built-in default preset.
-function makeDefaultPreset() {
+function makeDefaultPreset(): Preset {
   return { id: DEFAULT_PRESET_ID, name: 'Default', builtin: true, notes: getDefaultNotes() }
 }
 
 // Coerce arbitrary rows into a full, valid 7-row map. Missing or bad values
 // fall back to the defaults so every preset is always playable.
-function normalizeNotes(rows) {
+function normalizeNotes(rows: unknown): LaneNote[] {
   return DEFAULT_LANE_NOTES.map((def, i) => {
     const row = Array.isArray(rows) ? rows[i] : null
-    const pick = (type) => {
+    const pick = (type: Direction): NoteInfo => {
       const src = (row && row[type]) || {}
       const f = validFreq(src.freq)
       return {
@@ -111,7 +137,7 @@ function normalizeNotes(rows) {
 }
 
 // User presets from localStorage (the built-in default is not stored here).
-function readUserPresets() {
+function readUserPresets(): Preset[] {
   try {
     const arr = JSON.parse(localStorage.getItem(PRESETS_KEY) || '[]')
     if (!Array.isArray(arr)) return []
@@ -127,7 +153,7 @@ function readUserPresets() {
   }
 }
 
-function writeUserPresets(presets) {
+function writeUserPresets(presets: Preset[]): void {
   try {
     localStorage.setItem(PRESETS_KEY, JSON.stringify(presets))
   } catch {
@@ -136,17 +162,17 @@ function writeUserPresets(presets) {
 }
 
 // Every preset, built-in default first.
-export function getPresets() {
+export function getPresets(): Preset[] {
   return [makeDefaultPreset(), ...readUserPresets()]
 }
 
 // Look up a single preset by id (null if it doesn't exist).
-export function getPreset(id) {
+export function getPreset(id: string): Preset | null {
   return getPresets().find((p) => p.id === id) || null
 }
 
 // The id of the preset currently in effect.
-export function getActivePresetId() {
+export function getActivePresetId(): string {
   try {
     return localStorage.getItem(ACTIVE_PRESET_KEY) || DEFAULT_PRESET_ID
   } catch {
@@ -155,12 +181,12 @@ export function getActivePresetId() {
 }
 
 // The preset currently in effect (falls back to the default).
-export function getActivePreset() {
+export function getActivePreset(): Preset {
   return getPreset(getActivePresetId()) || makeDefaultPreset()
 }
 
 // Make a preset active and push its frequencies into the live note map.
-export function setActivePreset(id) {
+export function setActivePreset(id: string): Preset {
   const preset = getPreset(id) || makeDefaultPreset()
   try {
     localStorage.setItem(ACTIVE_PRESET_KEY, preset.id)
@@ -172,8 +198,16 @@ export function setActivePreset(id) {
 }
 
 // Create or update a user preset. Returns the stored preset (with its id).
-export function savePreset({ id, name, notes }) {
-  const preset = {
+export function savePreset({
+  id,
+  name,
+  notes,
+}: {
+  id?: string
+  name?: string
+  notes?: unknown
+}): Preset {
+  const preset: Preset = {
     id: id && id !== DEFAULT_PRESET_ID ? id : makePresetId(),
     name: (name || '').trim() || 'Untitled preset',
     notes: normalizeNotes(notes),
@@ -188,7 +222,7 @@ export function savePreset({ id, name, notes }) {
 
 // Delete a user preset (the built-in default can't be removed). If it was the
 // active preset, fall back to the default.
-export function deletePreset(id) {
+export function deletePreset(id: string): void {
   if (id === DEFAULT_PRESET_ID) return
   writeUserPresets(readUserPresets().filter((p) => p.id !== id))
   if (getActivePresetId() === id) setActivePreset(DEFAULT_PRESET_ID)
@@ -196,17 +230,16 @@ export function deletePreset(id) {
 
 // Validate an uploaded preset JSON and store it as a new preset. Throws a
 // friendly Error if the file isn't usable.
-export function importPresetJSON(data) {
-  const rows = Array.isArray(data) ? data : data && data.notes
+export function importPresetJSON(data: unknown): Preset {
+  const obj = data && typeof data === 'object' ? (data as Record<string, unknown>) : null
+  const rows = Array.isArray(data) ? data : obj?.notes
   if (!Array.isArray(rows)) throw new Error('Expected a JSON preset with a "notes" array.')
   const hasValid = rows.some(
-    (row) => row && ['push', 'pull'].some((t) => row[t] && validFreq(row[t].freq)),
+    (row) => row && DIRECTIONS.some((t) => row[t] && validFreq(row[t].freq)),
   )
   if (!hasValid) throw new Error('No valid note frequencies found in the file.')
   const name =
-    !Array.isArray(data) && typeof data.name === 'string' && data.name.trim()
-      ? data.name.trim()
-      : 'Uploaded preset'
+    obj && typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'Uploaded preset'
   return savePreset({ name, notes: rows })
 }
 
@@ -245,6 +278,6 @@ export const MISS_WINDOW = 185 // after this the note is auto-missed
 // delta === LEAD_TIME  -> just entering from the right edge (~100%)
 // delta === 0          -> exactly on the hit line
 // delta < 0            -> already swept past the hit line (moving off left)
-export function noteX(delta) {
+export function noteX(delta: number): number {
   return HIT_LINE_PCT + (delta / LEAD_TIME) * (100 - HIT_LINE_PCT)
 }

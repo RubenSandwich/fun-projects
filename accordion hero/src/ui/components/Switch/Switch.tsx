@@ -5,6 +5,15 @@ import './Switch.css'
 // so Space/Enter toggle it for free. Give it an accessible name via
 // `labelledBy` (id of the visible label) or `label`, and optionally point
 // `describedBy` at a description element.
+interface SwitchProps {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  labelledBy?: string
+  describedBy?: string
+  label?: string
+}
+
 export default function Switch({
   checked,
   onChange,
@@ -12,7 +21,7 @@ export default function Switch({
   labelledBy,
   describedBy,
   label,
-}) {
+}: SwitchProps) {
   return (
     <button
       type="button"

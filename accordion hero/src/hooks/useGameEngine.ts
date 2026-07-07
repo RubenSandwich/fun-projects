@@ -6,14 +6,63 @@ import {
   GOOD_WINDOW,
   MISS_WINDOW,
   noteX,
+  type Direction,
 } from '#data/constants'
+import type { Song, Note } from '#data/songs'
 import { playNote, playMiss, resumeAudio } from '#audio/sound'
 import { detectNote } from '#audio/pitch'
 
 const COUNTDOWN_MS = 3000 // "3, 2, 1" before the song starts
 const END_BUFFER = 1800 // grace time after the last note before results
 
-const POINTS = { perfect: 100, good: 60, ok: 30 }
+// The three hit ratings that score; a whiffed note is a 'miss'.
+type Rating = 'perfect' | 'good' | 'ok'
+type Judgement = Rating | 'miss'
+
+const POINTS: Record<Rating, number> = { perfect: 100, good: 60, ok: 30 }
+
+// A chart note plus the mutable per-run play state the loop tracks.
+export interface GameNote extends Note {
+  state: 'active' | 'hit' | 'miss'
+  rating: Judgement | null
+  judgeElapsed: number
+  judgeX: number
+}
+
+interface Counts {
+  perfect: number
+  good: number
+  ok: number
+  miss: number
+}
+
+interface Feedback {
+  text: string
+  rating: Judgement
+  id: number
+}
+
+interface MicNote {
+  lane: number
+  type: Direction
+  name: string
+}
+
+// The payload handed to onFinish (and rendered on the Results screen).
+export interface GameResult {
+  score: number
+  maxCombo: number
+  counts: Counts
+  total: number
+  accuracy: number
+}
+
+interface GameOptions {
+  speed?: number
+  micEnabled?: boolean
+  waitForNote?: boolean
+  onFinish?: (result: GameResult) => void
+}
 
 // Owns the whole run: the animation loop, keyboard input, scoring and phases.
 // Options:
@@ -22,8 +71,8 @@ const POINTS = { perfect: 100, good: 60, ok: 30 }
 //   waitForNote - hold the song on each note until the correct one is played
 //   onFinish    - called with the result when the song ends
 export function useGameEngine(
-  song,
-  { speed = 1, micEnabled = false, waitForNote = false, onFinish } = {},
+  song: Song,
+  { speed = 1, micEnabled = false, waitForNote = false, onFinish }: GameOptions = {},
 ) {
   // `elapsed` is milliseconds relative to song start. It is negative during the
   // countdown and drives every re-render (once per animation frame).
@@ -36,17 +85,17 @@ export function useGameEngine(
   const countdownRef = useRef(Math.ceil(COUNTDOWN_MS / 1000))
   const pausedRef = useRef(false)
   const pausedAtRef = useRef(0)
-  const notesRef = useRef([])
+  const notesRef = useRef<GameNote[]>([])
   const scoreRef = useRef(0)
   const comboRef = useRef(0)
   const maxComboRef = useRef(0)
-  const countsRef = useRef({ perfect: 0, good: 0, ok: 0, miss: 0 })
-  const feedbackRef = useRef(null)
+  const countsRef = useRef<Counts>({ perfect: 0, good: 0, ok: 0, miss: 0 })
+  const feedbackRef = useRef<Feedback | null>(null)
   const feedbackIdRef = useRef(0)
-  const activeKeysRef = useRef({}) // lane index -> 'push' | 'pull' while held
-  const micNoteRef = useRef(null)
-  const micLastKeyRef = useRef(null)
-  const micCandRef = useRef({ key: null, frames: 0 })
+  const activeKeysRef = useRef<Record<number, Direction>>({}) // lane index -> direction while held
+  const micNoteRef = useRef<MicNote | null>(null)
+  const micLastKeyRef = useRef<string | null>(null)
+  const micCandRef = useRef<{ key: string | null; frames: number }>({ key: null, frames: 0 })
   const micSilentRef = useRef(0)
   const micDebugAtRef = useRef(0)
   const finishedRef = useRef(false)
@@ -55,7 +104,7 @@ export function useGameEngine(
 
   useEffect(() => {
     // Fresh state for this run.
-    notesRef.current = song.notes.map((n) => ({
+    notesRef.current = song.notes.map((n): GameNote => ({
       ...n,
       state: 'active', // 'active' | 'hit' | 'miss'
       rating: null, // 'perfect' | 'good' | 'ok' | 'miss'
@@ -81,7 +130,7 @@ export function useGameEngine(
     setElapsed(-COUNTDOWN_MS)
     setPaused(false)
 
-    const setFeedback = (text, rating) => {
+    const setFeedback = (text: string, rating: Judgement) => {
       feedbackIdRef.current += 1
       feedbackRef.current = { text, rating, id: feedbackIdRef.current }
     }
@@ -90,18 +139,18 @@ export function useGameEngine(
     // speed slows note motion and spacing together.
     const gameTime = () => (performance.now() - startRef.current) * speed
 
-    const judge = (note, now, rating) => {
+    const judge = (note: GameNote, now: number, rating: Judgement) => {
       note.state = rating === 'miss' ? 'miss' : 'hit'
       note.rating = rating
       note.judgeElapsed = now
       note.judgeX = noteX(note.time - now)
     }
 
-    const registerPress = (lane, wantPull) => {
+    const registerPress = (lane: number, wantPull: boolean) => {
       const now = gameTime()
 
       // Find the closest still-active note in this lane.
-      let best = null
+      let best: GameNote | null = null
       let bestDelta = Infinity
       for (const n of notesRef.current) {
         if (n.lane !== lane || n.state !== 'active') continue
@@ -115,7 +164,7 @@ export function useGameEngine(
       // Nothing in range: treat as a harmless "just playing around" press.
       if (!best || bestDelta > HIT_WINDOW) return
 
-      const wantType = wantPull ? 'pull' : 'push'
+      const wantType: Direction = wantPull ? 'pull' : 'push'
       if (best.type !== wantType) {
         // Wrong bellows direction. In wait-for-note mode the note stays put so
         // you can try again; otherwise it counts as a miss.
@@ -129,7 +178,7 @@ export function useGameEngine(
         return
       }
 
-      let rating = 'ok'
+      let rating: Rating = 'ok'
       if (bestDelta <= PERFECT_WINDOW) rating = 'perfect'
       else if (bestDelta <= GOOD_WINDOW) rating = 'good'
 
@@ -157,7 +206,7 @@ export function useGameEngine(
       }
     }
 
-    const onKeyDown = (e) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
         e.preventDefault()
         if (!e.repeat) togglePause()
@@ -174,7 +223,7 @@ export function useGameEngine(
       registerPress(lane, pull)
     }
 
-    const onKeyUp = (e) => {
+    const onKeyUp = (e: KeyboardEvent) => {
       const lane = KEY_CODES[e.code]
       if (lane === undefined) return
       delete activeKeysRef.current[lane]
@@ -238,23 +287,21 @@ export function useGameEngine(
         const rt = performance.now()
         if (det && rt - micDebugAtRef.current > 200) {
           micDebugAtRef.current = rt
-          const cents = `${det.cents >= 0 ? '+' : ''}${det.cents.toFixed(0)}\u00a2`
+          const cents = `${det.cents >= 0 ? '+' : ''}${det.cents.toFixed(0)}¢`
           if (det.matched) {
             console.log(
-              `[mic] ${det.freq.toFixed(1)} Hz \u2192 ${det.name} ${det.type} (button ${
+              `[mic] ${det.freq.toFixed(1)} Hz → ${det.name} ${det.type} (button ${
                 det.lane + 1
               }) ${cents}`,
             )
           } else {
             console.log(
-              `[mic] ${det.freq.toFixed(1)} Hz \u2192 no match (closest ${
-                det.name ?? '?'
-              } ${cents})`,
+              `[mic] ${det.freq.toFixed(1)} Hz → no match (closest ${det.name ?? '?'} ${cents})`,
             )
           }
         }
 
-        if (det && det.lane >= 0) {
+        if (det && det.matched) {
           micSilentRef.current = 0
           const { lane, type } = det
           micNoteRef.current = { lane, type, name: det.name }
@@ -272,7 +319,7 @@ export function useGameEngine(
               cand.key = null
               cand.frames = 0
               registerPress(lane, type === 'pull')
-              console.log(`[mic] \u2713 hit ${det.name} ${type} (button ${lane + 1})`)
+              console.log(`[mic] ✓ hit ${det.name} ${type} (button ${lane + 1})`)
             }
           }
         } else {

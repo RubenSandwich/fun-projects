@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import type { ReactNode, SyntheticEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
 import './Modal.css'
 
@@ -13,9 +14,16 @@ import './Modal.css'
 //   onClose   — called on the ✕ button, a backdrop click, or Escape
 //   className — extra class(es) for the <dialog> (optional)
 //   children  — the modal body (hint, scrollable body, footer, …)
-export default function Modal({ title, onClose, className = '', children }) {
-  const dialogRef = useRef(null)
-  const titleRef = useRef(null)
+interface ModalProps {
+  title: ReactNode
+  onClose: () => void
+  className?: string
+  children?: ReactNode
+}
+
+export default function Modal({ title, onClose, className = '', children }: ModalProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
   const titleId = useId()
 
   useEffect(() => {
@@ -36,13 +44,13 @@ export default function Modal({ title, onClose, className = '', children }) {
   }, [])
 
   // Escape fires `cancel`; keep React the single source of truth for visibility.
-  const handleCancel = (e) => {
+  const handleCancel = (e: SyntheticEvent<HTMLDialogElement>) => {
     e.preventDefault()
     onClose()
   }
 
   // A click that lands on the dialog itself (its ::backdrop) closes it.
-  const handleClick = (e) => {
+  const handleClick = (e: ReactMouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current) onClose()
   }
 

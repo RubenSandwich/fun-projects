@@ -8,11 +8,21 @@ import {
   savePreset,
   deletePreset,
   importPresetJSON,
+  type Preset,
 } from '#data/constants'
 import { jsonErrorText } from '../../../utils'
 import Modal from '#components/Modal/Modal'
-import NoteFreq from '#modals/NoteFreq/NoteFreq'
+import NoteFreq, { type PresetDraft } from '#modals/NoteFreq/NoteFreq'
 import './PresetPicker.css'
+
+interface PresetPickerProps {
+  onClose: () => void
+  onActiveChange?: (preset: Preset) => void
+  micEnabled?: boolean
+  onMicStarted?: () => void
+}
+
+type Editing = 'new' | { preset: Preset } | null
 
 // A full-page modal listing the saved note-frequency presets. You can pick the
 // active tuning, edit or delete a user preset, create a new one, or upload one
@@ -22,12 +32,12 @@ export default function PresetPicker({
   onActiveChange,
   micEnabled = false,
   onMicStarted,
-}) {
-  const [presets, setPresets] = useState(() => getPresets())
-  const [activeId, setActiveId] = useState(() => getActivePresetId())
-  const [editing, setEditing] = useState(null) // 'new' | { preset } | null
+}: PresetPickerProps) {
+  const [presets, setPresets] = useState<Preset[]>(() => getPresets())
+  const [activeId, setActiveId] = useState<string>(() => getActivePresetId())
+  const [editing, setEditing] = useState<Editing>(null)
   const [uploadError, setUploadError] = useState('')
-  const fileRef = useRef(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   // Re-read the store after any change and tell the parent what's active now.
   const refresh = () => {
@@ -36,24 +46,24 @@ export default function PresetPicker({
     onActiveChange?.(getActivePreset())
   }
 
-  const select = (id) => {
+  const select = (id: string) => {
     setActivePreset(id)
     refresh()
   }
 
-  const remove = (id) => {
+  const remove = (id: string) => {
     deletePreset(id)
     refresh()
   }
 
-  const handleSave = ({ id, name, notes }) => {
+  const handleSave = ({ id, name, notes }: PresetDraft) => {
     const saved = savePreset({ id, name, notes })
     setActivePreset(saved.id) // start using what you just made
     setEditing(null)
     refresh()
   }
 
-  const upload = async (file) => {
+  const upload = async (file: File | undefined) => {
     setUploadError('')
     if (!file) return
     try {
@@ -139,7 +149,7 @@ export default function PresetPicker({
             accept="application/json,.json"
             hidden
             onChange={(e) => {
-              upload(e.target.files[0])
+              upload(e.target.files?.[0])
               e.target.value = ''
             }}
           />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { LANE_LABELS, LANE_COLORS, LANE_NOTES, getActivePreset } from '#data/constants'
-import { DIFF_CLASS } from '#data/songs'
+import { LANE_LABELS, LANE_COLORS, LANE_NOTES, getActivePreset, type Preset } from '#data/constants'
+import { DIFF_CLASS, type Song } from '#data/songs'
 import Accordion from '#components/Accordion/Accordion'
 import SegmentedControl from '#components/SegmentedControl/SegmentedControl'
 import Switch from '#components/Switch/Switch'
@@ -16,8 +16,22 @@ const SPEEDS = [
   { label: '1×', value: 1, note: 'Full speed' },
 ]
 
-export default function Start({ songs, onStart, onSongsChange, micEnabled, onMicChange }) {
-  const [selectedId, setSelectedId] = useState(() => songs[0]?.id)
+interface StartProps {
+  songs: Song[]
+  onStart: (index: number, speed: number, waitForNote: boolean, hideFeedback: boolean) => void
+  onSongsChange: () => void
+  micEnabled: boolean
+  onMicChange: (enabled: boolean) => void
+}
+
+export default function Start({
+  songs,
+  onStart,
+  onSongsChange,
+  micEnabled,
+  onMicChange,
+}: StartProps) {
+  const [selectedId, setSelectedId] = useState<string | undefined>(() => songs[0]?.id)
   const [speed, setSpeed] = useState(1)
   const [waitForNote, setWaitForNote] = useState(false)
   const [hideFeedback, setHideFeedback] = useState(false)
@@ -25,7 +39,7 @@ export default function Start({ songs, onStart, onSongsChange, micEnabled, onMic
   const [micError, setMicError] = useState('')
   const [showSongLibrary, setShowSongLibrary] = useState(false)
   const [showPresetPicker, setShowPresetPicker] = useState(false)
-  const [activePreset, setActivePreset] = useState(() => getActivePreset())
+  const [activePreset, setActivePreset] = useState<Preset>(() => getActivePreset())
 
   // Track the selected song by id so it survives songs being added or removed.
   const selectedIndex = Math.max(

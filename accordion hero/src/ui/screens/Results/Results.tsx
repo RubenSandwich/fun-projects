@@ -1,6 +1,14 @@
 import './Results.css'
+import type { Song } from '#data/songs'
+import type { GameResult } from '#hooks/useGameEngine'
 
-function rankFor(accuracy) {
+interface Rank {
+  grade: string
+  label: string
+  cls: string
+}
+
+function rankFor(accuracy: number): Rank {
   switch (true) {
     case accuracy >= 95:
       return { grade: 'S', label: 'Maestro!', cls: 'rank--s' }
@@ -15,7 +23,15 @@ function rankFor(accuracy) {
   }
 }
 
-export default function Results({ song, result, speed = 1, onReplay, onMenu }) {
+interface ResultsProps {
+  song: Song
+  result: GameResult
+  speed?: number
+  onReplay: () => void
+  onMenu: () => void
+}
+
+export default function Results({ song, result, speed = 1, onReplay, onMenu }: ResultsProps) {
   const rank = rankFor(result.accuracy)
   const { counts } = result
 

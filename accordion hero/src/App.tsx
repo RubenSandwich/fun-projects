@@ -1,14 +1,18 @@
 import { useMemo, useState } from 'react'
 import { flushSync } from 'react-dom'
-import { getSongs, withLeadIn } from '#data/songs'
+import { getSongs, withLeadIn, type Song } from '#data/songs'
+import type { GameResult } from '#hooks/useGameEngine'
 import Start from '#screens/Start/Start'
 import Game from '#screens/Game/Game'
 import Results from '#screens/Results/Results'
 
+type Screen = 'start' | 'game' | 'results'
+type TransitionDirection = 'forward' | 'backward'
+
 // Run a screen change inside a directional View Transition. `direction` is
 // 'forward' (new screen slides in from the right) or 'backward' (from the left).
 // Falls back to an instant swap where the API isn't supported.
-function transition(direction, update) {
+function transition(direction: TransitionDirection, update: () => void) {
   if (!document.startViewTransition) {
     update()
     return
@@ -18,14 +22,14 @@ function transition(direction, update) {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState('start') // 'start' | 'game' | 'results'
-  const [songs, setSongs] = useState(() => getSongs()) // built-in + saved songs
+  const [screen, setScreen] = useState<Screen>('start') // 'start' | 'game' | 'results'
+  const [songs, setSongs] = useState<Song[]>(() => getSongs()) // built-in + saved songs
   const [songIndex, setSongIndex] = useState(0)
   const [speed, setSpeed] = useState(1) // practice playback multiplier
   const [waitForNote, setWaitForNote] = useState(false) // hold on each note
   const [hideFeedback, setHideFeedback] = useState(false) // play without the live score
   const [micEnabled, setMicEnabled] = useState(false) // play via microphone
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState<GameResult | null>(null)
   const [runId, setRunId] = useState(0) // bump to force a fresh Game mount
 
   // The run-ready song: notes/sections shifted so nothing appears until the
@@ -36,11 +40,11 @@ export default function App() {
   const refreshSongs = () => setSongs(getSongs())
 
   const startGame = (
-    index,
+    index: number,
     spd = speed,
     wait = waitForNote,
     hide = hideFeedback,
-    direction = 'forward',
+    direction: TransitionDirection = 'forward',
   ) => {
     transition(direction, () => {
       setSongIndex(index)
@@ -53,7 +57,7 @@ export default function App() {
     })
   }
 
-  const handleFinish = (r) => {
+  const handleFinish = (r: GameResult) => {
     transition('forward', () => {
       setResult(r)
       setScreen('results')

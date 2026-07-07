@@ -1,7 +1,8 @@
 # 🪗 Accordion Hero
 
-A "Guitar Hero" style rhythm game for **toy accordions**, built with React + Vite
-and dressed up in a bright, cut-from-paper **Paper Mario / paper-mache** style.
+A "Guitar Hero" style rhythm game for **toy accordions**, built with React, Vite
+and TypeScript, and dressed up in a bright, cut-from-paper **Paper Mario /
+paper-mache** style.
 
 Notes fly in from the **right** across **7 lanes** — the seven accordion buttons,
 played with the number keys **1 · 2 · 3 · 4 · 5 · 6 · 7** — and you play them as
@@ -55,25 +56,25 @@ Then open the URL Vite prints (it opens automatically). Build for production wit
 
 ```
 src/
-  App.jsx                 screen router (start → game → results)
-  index.css               global styles + start/results screens (paper theme)
-  game.css                playfield, lanes, notes, feedback
-  audio/sound.js          tiny Web Audio "toy accordion" synth
-  audio/pitch.js          mic pitch detection (autocorrelation)
-  data/constants.js       lanes, button/note map, timing, note-frequency presets
-  data/songs.js           chart parser + built-in songs + the song library
-  hooks/useGameEngine.js  animation loop, keyboard + mic input, scoring
-  utils.js                shared helpers (JSON errors, slugs, downloads)
-  ui/
-    components/Modal.jsx  shared <dialog> modal (focus trap, Escape, backdrop)
-    screens/              Start.jsx, Game.jsx, Results.jsx
-    modals/               PresetPicker.jsx / NoteFreq.jsx  (note-frequency presets)
-                          SongLibrary.jsx / SongEditor.jsx (the song library + editor)
+  main.tsx                entry (createRoot + StrictMode)
+  App.tsx                 screen router (start → game → results)
+  index.css               global theme + shared primitives (paper theme)
+  audio/sound.ts          tiny Web Audio "toy accordion" synth
+  audio/pitch.ts          mic pitch detection (autocorrelation)
+  data/constants.ts       lanes, button/note map, timing, note-frequency presets
+  data/songs.ts           chart parser + built-in songs + the song library
+  hooks/useGameEngine.ts  animation loop, keyboard + mic input, scoring
+  utils.ts                shared helpers (JSON errors, slugs, downloads)
+  ui/                     each component in its own folder with a co-located .css
+    components/           Modal, Accordion, SegmentedControl, Switch
+    screens/              Start, Game, Results
+    modals/               PresetPicker / NoteFreq  (note-frequency presets)
+                          SongLibrary / SongEditor (the song library + editor)
 ```
 
 ## Add your own song
 
-Songs live in [`src/data/songs.js`](src/data/songs.js). Each has a `chart`
+Songs live in [`src/data/songs.ts`](src/data/songs.ts). Each has a `chart`
 string written in a simple tab-style notation:
 
 - a token is `+N` (push button _N_) or `-N` (pull button _N_), where _N_ is 1–7;
@@ -95,6 +96,6 @@ For example, "Row, Row, Row Your Boat":
 The easiest way is right in the app: open **Add / edit songs** on the start
 screen to write, upload, edit, or delete songs — they're saved to your browser's
 `localStorage`. To add a built-in song, drop a new entry into `BUILTIN_DEFS` in
-[`src/data/songs.js`](src/data/songs.js) with a `bpm` and `chart`, and it shows
+[`src/data/songs.ts`](src/data/songs.ts) with a `bpm` and `chart`, and it shows
 up automatically. (Consecutive same-direction notes are grouped into the
 look-ahead ribbon for you.)

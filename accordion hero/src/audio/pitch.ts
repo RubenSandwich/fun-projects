@@ -2,20 +2,36 @@
 // frequency with a (range-limited) autocorrelation, and maps it to one of the
 // accordion's button notes so a played note can count as a button press.
 
-import { LANE_NOTES } from '../data/constants.js'
-import { getAudioContext, resumeAudio } from './sound.js'
+import { LANE_NOTES, type Direction } from '../data/constants.ts'
+import { getAudioContext, resumeAudio } from './sound.ts'
 
-let stream = null
-let source = null
-let analyser = null
-let buf = null
+let stream: MediaStream | null = null
+let source: MediaStreamAudioSourceNode | null = null
+let analyser: AnalyserNode | null = null
+let buf: Float32Array<ArrayBuffer> | null = null
+
+const DIRECTIONS = ['push', 'pull'] as const
+
+// The closest button note to a frequency, with the signed cents offset.
+interface ClosestNote {
+  lane: number
+  type: Direction
+  name: string
+  cents: number
+}
+
+// A confident pitch reading. `matched` says whether it landed close enough to a
+// button note; when it didn't, lane is -1 and type is null.
+export type Detection =
+  | { matched: true; freq: number; lane: number; type: Direction; name: string; cents: number }
+  | { matched: false; freq: number; lane: -1; type: null; name: string | null; cents: number }
 
 // How far off a played note may be (in cents) and still count as a button note.
 export const TOLERANCE_CENTS = 60
 
 // Ask for the mic and wire it into an analyser on the shared audio graph. Must
 // be called from a user gesture (e.g. a button click).
-export async function startMic() {
+export async function startMic(): Promise<boolean> {
   if (analyser) return true
   const ctx = getAudioContext()
   if (!ctx || !navigator.mediaDevices?.getUserMedia) {
@@ -37,14 +53,14 @@ export async function startMic() {
   return true
 }
 
-export function stopMic() {
+export function stopMic(): void {
   if (source) source.disconnect()
   if (stream) stream.getTracks().forEach((t) => t.stop())
   stream = source = analyser = buf = null
 }
 
 // Range-limited autocorrelation. Returns the detected frequency (Hz) or -1.
-export function autoCorrelate(b, sampleRate) {
+export function autoCorrelate(b: Float32Array, sampleRate: number): number {
   const SIZE = b.length
   let sumSq = 0
   for (let i = 0; i < SIZE; i++) sumSq += b[i] * b[i]
@@ -91,11 +107,11 @@ export function autoCorrelate(b, sampleRate) {
 // Find the closest button note to a frequency. Returns the note plus the signed
 // cents offset (positive = the played note is sharp), or null if there are no
 // notes. Does not apply the tolerance — callers decide with `cents`.
-export function closestNote(freq) {
-  let best = null
+export function closestNote(freq: number): ClosestNote | null {
+  let best: { lane: number; type: Direction } | null = null
   let bestCents = Infinity
   for (let lane = 0; lane < LANE_NOTES.length; lane++) {
-    for (const type of ['push', 'pull']) {
+    for (const type of DIRECTIONS) {
       const cents = 1200 * Math.log2(freq / LANE_NOTES[lane][type].freq)
       if (Math.abs(cents) < Math.abs(bestCents)) {
         bestCents = cents
@@ -113,30 +129,26 @@ export function closestNote(freq) {
 }
 
 // Analyse a raw time-domain buffer. Returns null when there's no confident
-// pitch, otherwise { freq, lane, type, name, cents, matched } where lane is -1
-// (and matched false) when the pitch isn't close enough to a button note.
-// This is the whole detection pipeline, factored out so it can be unit-tested.
-export function analyzeBuffer(b, sampleRate) {
+// pitch, otherwise a Detection where lane is -1 (and matched false) when the
+// pitch isn't close enough to a button note. This is the whole detection
+// pipeline, factored out so it can be unit-tested.
+export function analyzeBuffer(b: Float32Array, sampleRate: number): Detection | null {
   const freq = autoCorrelate(b, sampleRate)
   if (freq <= 0) return null
   const c = closestNote(freq)
-  if (!c) return { freq, lane: -1, type: null, name: null, cents: 0, matched: false }
-  const matched = Math.abs(c.cents) <= TOLERANCE_CENTS
-  return {
-    freq,
-    lane: matched ? c.lane : -1,
-    type: matched ? c.type : null,
-    name: c.name,
-    cents: c.cents,
-    matched,
+  if (!c) return { matched: false, freq, lane: -1, type: null, name: null, cents: 0 }
+  if (Math.abs(c.cents) <= TOLERANCE_CENTS) {
+    return { matched: true, freq, lane: c.lane, type: c.type, name: c.name, cents: c.cents }
   }
+  return { matched: false, freq, lane: -1, type: null, name: c.name, cents: c.cents }
 }
 
 // Sample the mic once and analyse it. Returns null if the mic isn't running or
 // there's no confident pitch.
-export function detectNote() {
-  if (!analyser) return null
+export function detectNote(): Detection | null {
+  if (!analyser || !buf) return null
   const ctx = getAudioContext()
+  if (!ctx) return null
   analyser.getFloatTimeDomainData(buf)
   return analyzeBuffer(buf, ctx.sampleRate)
 }

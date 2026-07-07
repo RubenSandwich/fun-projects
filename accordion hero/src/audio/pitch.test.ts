@@ -6,15 +6,24 @@
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { autoCorrelate, closestNote, analyzeBuffer, TOLERANCE_CENTS } from './pitch.js'
-import { LANE_NOTES } from '../data/constants.js'
+import { autoCorrelate, closestNote, analyzeBuffer, TOLERANCE_CENTS } from './pitch.ts'
+import { LANE_NOTES } from '../data/constants.ts'
 
 const SR = 44100
 const SIZE = 2048
 
+const DIRECTIONS = ['push', 'pull'] as const
+
 // Synthesise a time-domain buffer for a tone. A naive sawtooth is harmonic-rich,
 // closer to a real accordion reed and a good stress test for octave errors.
-function makeBuffer(freq, { type = 'saw', sampleRate = SR, size = SIZE } = {}) {
+function makeBuffer(
+  freq: number,
+  {
+    type = 'saw',
+    sampleRate = SR,
+    size = SIZE,
+  }: { type?: 'saw' | 'sine'; sampleRate?: number; size?: number } = {},
+): Float32Array {
   const b = new Float32Array(size)
   for (let i = 0; i < size; i++) {
     const t = i / sampleRate
@@ -28,13 +37,13 @@ function makeBuffer(freq, { type = 'saw', sampleRate = SR, size = SIZE } = {}) {
   return b
 }
 
-const centsBetween = (a, b) => 1200 * Math.log2(a / b)
+const centsBetween = (a: number, b: number) => 1200 * Math.log2(a / b)
 
 test('closestNote maps every exact button frequency to itself', () => {
   for (let lane = 0; lane < LANE_NOTES.length; lane++) {
-    for (const type of ['push', 'pull']) {
+    for (const type of DIRECTIONS) {
       const { freq, name } = LANE_NOTES[lane][type]
-      const c = closestNote(freq)
+      const c = closestNote(freq)!
       assert.equal(c.lane, lane)
       assert.equal(c.type, type)
       assert.equal(c.name, name)
@@ -44,19 +53,19 @@ test('closestNote maps every exact button frequency to itself', () => {
 })
 
 test('closestNote distinguishes octave pairs (low C vs high C)', () => {
-  assert.equal(closestNote(261.63).lane, 0) // button 1, middle C
-  assert.equal(closestNote(523.25).lane, 3) // button 4, high C
-  assert.equal(closestNote(261.63).name, 'C')
-  assert.equal(closestNote(523.25).name, 'C')
+  assert.equal(closestNote(261.63)!.lane, 0) // button 1, middle C
+  assert.equal(closestNote(523.25)!.lane, 3) // button 4, high C
+  assert.equal(closestNote(261.63)!.name, 'C')
+  assert.equal(closestNote(523.25)!.name, 'C')
 })
 
 test('closestNote reports a signed cents offset', () => {
-  assert.ok(closestNote(398).cents > 0) // sharp of G (392)
-  assert.ok(closestNote(388).cents < 0) // flat of G (392)
+  assert.ok(closestNote(398)!.cents > 0) // sharp of G (392)
+  assert.ok(closestNote(388)!.cents < 0) // flat of G (392)
 })
 
 test('a mistuned note within tolerance still matches', () => {
-  const c = closestNote(398) // ~+26 cents from G
+  const c = closestNote(398)! // ~+26 cents from G
   assert.equal(c.type, 'push')
   assert.equal(c.name, 'G')
   assert.ok(Math.abs(c.cents) <= TOLERANCE_CENTS)
@@ -64,7 +73,7 @@ test('a mistuned note within tolerance still matches', () => {
 
 test('autoCorrelate recovers the fundamental of sine and sawtooth tones', () => {
   for (const f of [261.63, 349.23, 392, 523.25, 659.25, 880, 987.77]) {
-    for (const type of ['sine', 'saw']) {
+    for (const type of ['sine', 'saw'] as const) {
       const detected = autoCorrelate(makeBuffer(f, { type }), SR)
       assert.ok(detected > 0, `no pitch detected for ${f} Hz ${type}`)
       assert.ok(
@@ -81,7 +90,7 @@ test('autoCorrelate returns -1 for silence', () => {
 
 test('analyzeBuffer maps each button note to the right button and direction', () => {
   for (let lane = 0; lane < LANE_NOTES.length; lane++) {
-    for (const type of ['push', 'pull']) {
+    for (const type of DIRECTIONS) {
       const { freq, name } = LANE_NOTES[lane][type]
       const r = analyzeBuffer(makeBuffer(freq, { type: 'saw' }), SR)
       assert.ok(r && r.matched, `no match for button ${lane + 1} ${type} (${name})`)

@@ -1,11 +1,39 @@
 import { useState } from 'react'
-import { DIFFICULTIES, DIFF_CLASS, chartNoteCount, randomAccentColor } from '#data/songs'
+import {
+  DIFFICULTIES,
+  DIFF_CLASS,
+  chartNoteCount,
+  randomAccentColor,
+  type Song,
+  type Difficulty,
+} from '#data/songs'
 import { slug, downloadJSON } from '../../../utils'
 import Modal from '#components/Modal/Modal'
 import './SongEditor.css'
 
+// Editor draft: bpm may be a string mid-edit (coerced to a number on save).
+interface DraftState {
+  name: string
+  blurb: string
+  bpm: number | string
+  color: string
+  difficulty: Difficulty
+  chart: string
+}
+
+// The validated payload handed back to the parent on save.
+export interface SongDraft {
+  id?: string
+  name: string
+  blurb: string
+  bpm: number
+  color: string
+  difficulty: Difficulty
+  chart: string
+}
+
 // Blank starting point for a brand-new song.
-const emptyDraft = () => ({
+const emptyDraft = (): DraftState => ({
   name: '',
   blurb: '',
   bpm: 100,
@@ -14,11 +42,17 @@ const emptyDraft = () => ({
   chart: '',
 })
 
+interface SongEditorProps {
+  song?: Song | null
+  onSave: (draft: SongDraft) => void
+  onClose: () => void
+}
+
 // A full-page modal for creating or editing a song: name, colour, BPM, blurb,
 // difficulty and the note chart. Nothing is applied until "Save & Close", which
 // hands the draft back to the parent via onSave; it can also be downloaded.
-export default function SongEditor({ song = null, onSave, onClose }) {
-  const [draft, setDraft] = useState(() =>
+export default function SongEditor({ song = null, onSave, onClose }: SongEditorProps) {
+  const [draft, setDraft] = useState<DraftState>(() =>
     song
       ? {
           name: song.name,
@@ -32,7 +66,7 @@ export default function SongEditor({ song = null, onSave, onClose }) {
   )
   const [error, setError] = useState('')
 
-  const set = (patch) => {
+  const set = (patch: Partial<DraftState>) => {
     setDraft((d) => ({ ...d, ...patch }))
     if (error) setError('')
   }
@@ -64,7 +98,7 @@ export default function SongEditor({ song = null, onSave, onClose }) {
         bpm,
       })
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : String(err))
     }
   }
 

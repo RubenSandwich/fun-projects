@@ -1,4 +1,43 @@
-import { LEAD_IN } from './constants'
+import { LEAD_IN, type Direction } from './constants'
+
+// A single playable note parsed from a chart.
+export interface Note {
+  id: number
+  lane: number
+  time: number
+  type: Direction
+}
+
+// A run of consecutive same-direction notes (drives the look-ahead ribbon).
+export interface Section {
+  id: number
+  dir: Direction
+  start: number
+  end: number
+}
+
+export type Difficulty = 'Easy' | 'Medium' | 'Hard'
+
+// A raw, validated song definition — the form persisted in localStorage and fed
+// to buildSong.
+export interface SongDef {
+  id: string
+  name: string
+  blurb: string
+  bpm: number
+  subdivision: number
+  color: string
+  difficulty: Difficulty
+  chart: string
+}
+
+// A built, playable song: its definition plus the derived notes/sections/timing.
+export interface Song extends SongDef {
+  builtin: boolean
+  notes: Note[]
+  sections: Section[]
+  duration: number
+}
 
 // Chart format: a whitespace / line separated list of tokens like "+3" or "-4".
 //   - the number (1-7) is the accordion button to press.
@@ -15,17 +54,26 @@ const NOTE_RE = /^([+-]?)([1-7])$/
 // A token is either a "(...)" chord group or a run of non-space characters.
 const TOKEN_RE = /\([^)]*\)|\S+/g
 
-function parseChart(chart, { bpm, subdivision = 1, breath = true }) {
+interface ParseOptions {
+  bpm: number
+  subdivision?: number
+  breath?: boolean
+}
+
+function parseChart(
+  chart: string,
+  { bpm, subdivision = 1, breath = true }: ParseOptions,
+): { notes: Note[]; duration: number } {
   const step = 60000 / bpm / subdivision // ms between beats
-  const notes = []
+  const notes: Note[] = []
   let noteId = 0
   let cursor = 0
   const lines = chart.trim().split('\n')
 
-  const addNote = (tok, time) => {
+  const addNote = (tok: string, time: number) => {
     const m = NOTE_RE.exec(tok)
     if (!m) return
-    const type = m[1] === '-' ? 'pull' : 'push'
+    const type: Direction = m[1] === '-' ? 'pull' : 'push'
     const lane = Number(m[2]) - 1
     notes.push({ id: noteId++, lane, time, type })
   }
@@ -57,8 +105,8 @@ function parseChart(chart, { bpm, subdivision = 1, breath = true }) {
 
 // Group consecutive same-direction notes into push/pull runs. These drive the
 // look-ahead ribbon and the current-direction banner.
-function deriveSections(notes, duration) {
-  const runs = []
+function deriveSections(notes: Note[], duration: number): Section[] {
+  const runs: { dir: Direction; start: number }[] = []
   notes.forEach((n) => {
     const last = runs[runs.length - 1]
     if (!last || last.dir !== n.type) runs.push({ dir: n.type, start: n.time })
@@ -71,6 +119,9 @@ function deriveSections(notes, duration) {
   }))
 }
 
+// buildSong accepts a definition whose `subdivision`/`builtin` may be omitted.
+type BuildInput = Omit<SongDef, 'subdivision'> & { subdivision?: number; builtin?: boolean }
+
 function buildSong({
   id,
   name,
@@ -81,7 +132,7 @@ function buildSong({
   difficulty,
   chart,
   builtin = false,
-}) {
+}: BuildInput): Song {
   const { notes, duration } = parseChart(chart, { bpm, subdivision })
   const sections = deriveSections(notes, duration)
   // Keep the raw fields (chart/subdivision/builtin) on the built song so the
@@ -103,8 +154,8 @@ function buildSong({
 }
 
 // WCAG relative luminance of an [r, g, b] colour.
-function luminance(r, g, b) {
-  const f = (c) => {
+function luminance(r: number, g: number, b: number): number {
+  const f = (c: number) => {
     c /= 255
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
   }
@@ -113,24 +164,25 @@ function luminance(r, g, b) {
 
 const PAPER_LUM = luminance(255, 251, 239) // the --paper card background
 
-function hslToRgb(h, s, l) {
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   const a = s * Math.min(l, 1 - l)
-  const f = (n) => {
+  const f = (n: number) => {
     const k = (n + h / 30) % 12
     return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1))))
   }
   return [f(0), f(8), f(4)]
 }
 
-const toHex = (rgb) => '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
+const toHex = (rgb: [number, number, number]) =>
+  '#' + rgb.map((v) => v.toString(16).padStart(2, '0')).join('')
 
 // A vivid but accessible random accent: keeps at least 3:1 contrast against the
 // paper card so the coloured edge/ring stays clearly visible.
-export function randomAccentColor() {
+export function randomAccentColor(): string {
   const hue = Math.floor(Math.random() * 360)
   const sat = 0.6 + Math.random() * 0.25
   // Start bright and darken until the colour clears the 3:1 contrast bar.
-  let rgb
+  let rgb: [number, number, number] = [0, 0, 0]
   for (let l = 0.55; l >= 0.2; l -= 0.04) {
     rgb = hslToRgb(hue, sat, l)
     if ((PAPER_LUM + 0.05) / (luminance(...rgb) + 0.05) >= 3) break
@@ -145,10 +197,10 @@ export function randomAccentColor() {
 // come from BUILTIN_DEFS and can't be edited or deleted; user songs live in
 // localStorage.
 
-export const DIFFICULTIES = ['Easy', 'Medium', 'Hard']
+export const DIFFICULTIES: Difficulty[] = ['Easy', 'Medium', 'Hard']
 
 // Maps a difficulty to its badge CSS class (shared by every song UI).
-export const DIFF_CLASS = {
+export const DIFF_CLASS: Record<Difficulty, string> = {
   Easy: 'diff--easy',
   Medium: 'diff--med',
   Hard: 'diff--hard',
@@ -158,42 +210,43 @@ const HEX_RE = /^#[0-9a-f]{3,8}$/i
 const SONGS_KEY = 'accordion-user-songs'
 
 // Count the playable notes in a chart string (editor feedback + validation).
-export function chartNoteCount(chart) {
+export function chartNoteCount(chart: string): number {
   return parseChart(String(chart || ''), { bpm: 120 }).notes.length
 }
 
-function makeSongId() {
+function makeSongId(): string {
   return 'song-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
 }
 
-function isBuiltinId(id) {
+function isBuiltinId(id: string): boolean {
   return BUILTIN_DEFS.some((d) => d.id === id)
 }
 
 // Validate + normalize a raw song definition (from the editor or an upload) into
 // the fields buildSong needs. Throws a friendly Error when something's missing.
-export function normalizeSongDef(data, { id } = {}) {
+export function normalizeSongDef(data: unknown, { id }: { id?: string } = {}): SongDef {
   if (!data || typeof data !== 'object') throw new Error('The file must contain a song object.')
-  const name = typeof data.name === 'string' ? data.name.trim() : ''
+  const d = data as Record<string, unknown>
+  const name = typeof d.name === 'string' ? d.name.trim() : ''
   if (!name) throw new Error('Song needs a name.')
-  const bpm = Number(data.bpm)
+  const bpm = Number(d.bpm)
   if (!Number.isFinite(bpm) || bpm <= 0) throw new Error('Song needs a positive BPM.')
-  const chart = typeof data.chart === 'string' ? data.chart : ''
+  const chart = typeof d.chart === 'string' ? d.chart : ''
   if (!chart.trim()) throw new Error('Song needs a chart (tokens like +3 or -4).')
   if (!chartNoteCount(chart)) {
     throw new Error('The chart has no playable notes (use tokens like +3 or -4).')
   }
-  const sub = Number(data.subdivision)
+  const sub = Number(d.subdivision)
   const subdivision = Number.isFinite(sub) && sub > 0 ? sub : 1
   const color =
-    typeof data.color === 'string' && HEX_RE.test(data.color.trim())
-      ? data.color.trim()
+    typeof d.color === 'string' && HEX_RE.test(d.color.trim())
+      ? d.color.trim()
       : randomAccentColor()
-  const difficulty = DIFFICULTIES.includes(data.difficulty) ? data.difficulty : 'Medium'
+  const difficulty: Difficulty = DIFFICULTIES.includes(d.difficulty as Difficulty)
+    ? (d.difficulty as Difficulty)
+    : 'Medium'
   const blurb =
-    typeof data.blurb === 'string' && data.blurb.trim()
-      ? data.blurb.trim().slice(0, 120)
-      : 'A custom song.'
+    typeof d.blurb === 'string' && d.blurb.trim() ? d.blurb.trim().slice(0, 120) : 'A custom song.'
   return {
     id: id || makeSongId(),
     name: name.slice(0, 60),
@@ -207,7 +260,7 @@ export function normalizeSongDef(data, { id } = {}) {
 }
 
 // User song definitions from localStorage.
-function readUserDefs() {
+function readUserDefs(): unknown[] {
   try {
     const arr = JSON.parse(localStorage.getItem(SONGS_KEY) || '[]')
     return Array.isArray(arr) ? arr : []
@@ -216,7 +269,7 @@ function readUserDefs() {
   }
 }
 
-function writeUserDefs(defs) {
+function writeUserDefs(defs: SongDef[]): void {
   try {
     localStorage.setItem(SONGS_KEY, JSON.stringify(defs))
   } catch {
@@ -227,12 +280,13 @@ function writeUserDefs(defs) {
 // Every playable song: the built-in ones first, then user songs from storage.
 // Built songs carry their raw fields (chart, color, difficulty, builtin flag) so
 // the library and editor can round-trip them.
-export function getSongs() {
+export function getSongs(): Song[] {
   const builtin = BUILTIN_DEFS.map((d) => buildSong({ ...d, builtin: true }))
-  const user = []
+  const user: Song[] = []
   for (const raw of readUserDefs()) {
     try {
-      const def = normalizeSongDef(raw, { id: typeof raw?.id === 'string' ? raw.id : undefined })
+      const rawId = (raw as { id?: unknown })?.id
+      const def = normalizeSongDef(raw, { id: typeof rawId === 'string' ? rawId : undefined })
       user.push(buildSong({ ...def, builtin: false }))
     } catch {
       /* skip an unusable stored song */
@@ -242,13 +296,13 @@ export function getSongs() {
 }
 
 // Create or update a user song from a raw definition. Returns the built song.
-export function saveSong(data) {
-  const keepId =
-    typeof data.id === 'string' && data.id && !isBuiltinId(data.id) ? data.id : undefined
+export function saveSong(data: unknown): Song {
+  const dataId = (data as { id?: unknown })?.id
+  const keepId = typeof dataId === 'string' && dataId && !isBuiltinId(dataId) ? dataId : undefined
   const def = normalizeSongDef(data, { id: keepId })
   const song = buildSong({ ...def, builtin: false })
-  const defs = readUserDefs()
-  const i = defs.findIndex((d) => d && d.id === def.id)
+  const defs = readUserDefs().filter((d): d is SongDef => !!d && typeof d === 'object')
+  const i = defs.findIndex((d) => d.id === def.id)
   if (i >= 0) defs[i] = def
   else defs.push(def)
   writeUserDefs(defs)
@@ -256,20 +310,23 @@ export function saveSong(data) {
 }
 
 // Delete a user song (built-ins can't be removed).
-export function deleteSong(id) {
+export function deleteSong(id: string): void {
   if (isBuiltinId(id)) return
-  writeUserDefs(readUserDefs().filter((d) => d && d.id !== id))
+  const defs = readUserDefs().filter(
+    (d): d is SongDef => !!d && typeof d === 'object' && (d as SongDef).id !== id,
+  )
+  writeUserDefs(defs)
 }
 
 // Validate + store an uploaded song JSON as a new user song. Returns the song.
-export function importSongJSON(data) {
-  return saveSong({ ...data, id: undefined })
+export function importSongJSON(data: unknown): Song {
+  return saveSong({ ...(data as Record<string, unknown>), id: undefined })
 }
 
 // Shift a song so the first note only appears *after* the countdown ends: every
 // note and section starts LEAD_IN ms in, so the playfield stays empty during the
 // 3-2-1.
-export function withLeadIn(song) {
+export function withLeadIn(song: Song): Song {
   return {
     ...song,
     notes: song.notes.map((n) => ({ ...n, time: n.time + LEAD_IN })),
@@ -283,7 +340,9 @@ export function withLeadIn(song) {
 }
 
 // Raw definitions for the built-in songs (source of truth; built on demand).
-const BUILTIN_DEFS = [
+type BuiltinDef = Omit<SongDef, 'subdivision'>
+
+const BUILTIN_DEFS: BuiltinDef[] = [
   {
     id: 'twinkle',
     name: 'Twinkle, Twinkle',

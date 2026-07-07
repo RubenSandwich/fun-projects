@@ -1,11 +1,42 @@
 import { useEffect, useRef, useState } from 'react'
-import { LANE_COLORS, getDefaultNotes } from '#data/constants'
+import { LANE_COLORS, getDefaultNotes, type Preset, type Direction } from '#data/constants'
 import { startMic, stopMic, detectNote } from '#audio/pitch'
 import { slug, downloadJSON } from '../../../utils'
 import Modal from '#components/Modal/Modal'
 import './NoteFreq.css'
 
-const cloneRows = (rows) => rows.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
+// Editor rows allow a string freq while typing (coerced to a number on save).
+interface EditNote {
+  name: string
+  freq: number | string
+}
+interface EditRow {
+  push: EditNote
+  pull: EditNote
+}
+
+// The draft handed back to the parent on save.
+export interface PresetDraft {
+  id?: string
+  name: string
+  notes: EditRow[]
+}
+
+const cloneRows = (rows: EditRow[]): EditRow[] =>
+  rows.map((r) => ({ push: { ...r.push }, pull: { ...r.pull } }))
+
+interface Listening {
+  lane: number
+  type: Direction
+}
+
+interface NoteFreqProps {
+  preset?: Preset | null
+  onSave?: (draft: PresetDraft) => void
+  onClose: () => void
+  micEnabled?: boolean
+  onMicStarted?: () => void
+}
 
 // A full-page modal for building or tuning a note-frequency *preset*: give it a
 // name, then set each button's push/pull frequency by typing a value or by
@@ -17,10 +48,10 @@ export default function NoteFreq({
   onClose,
   micEnabled = false,
   onMicStarted,
-}) {
+}: NoteFreqProps) {
   const [name, setName] = useState(() => preset?.name || '')
-  const [rows, setRows] = useState(() => cloneRows(preset?.notes || getDefaultNotes()))
-  const [listening, setListening] = useState(null) // { lane, type } | null
+  const [rows, setRows] = useState<EditRow[]>(() => cloneRows(preset?.notes || getDefaultNotes()))
+  const [listening, setListening] = useState<Listening | null>(null)
   const [micErr, setMicErr] = useState('')
   const [nameErr, setNameErr] = useState('')
   const rafRef = useRef(0)
@@ -42,7 +73,7 @@ export default function NoteFreq({
     setListening(null)
   }
 
-  const listen = async (lane, type) => {
+  const listen = async (lane: number, type: Direction) => {
     // Clicking the active mic toggles it off.
     if (listening && listening.lane === lane && listening.type === type) {
       stopListening()
@@ -79,7 +110,7 @@ export default function NoteFreq({
     rafRef.current = requestAnimationFrame(tick)
   }
 
-  const setFreq = (lane, type, value) => {
+  const setFreq = (lane: number, type: Direction, value: string) => {
     setRows((prev) => {
       const next = cloneRows(prev)
       next[lane][type].freq = value
@@ -137,8 +168,8 @@ export default function NoteFreq({
               <span className="freq-row__btn" style={{ '--lane': LANE_COLORS[lane] }}>
                 {lane + 1}
               </span>
-              {['push', 'pull'].map((type) => {
-                const on = listening && listening.lane === lane && listening.type === type
+              {(['push', 'pull'] as const).map((type) => {
+                const on = listening?.lane === lane && listening?.type === type
                 return (
                   <div className={'freq-cell' + (on ? ' is-listening' : '')} key={type}>
                     <span className="freq-cell__name">

@@ -1,18 +1,26 @@
 import { useRef, useState } from 'react'
-import { getSongs, deleteSong, saveSong, importSongJSON, DIFF_CLASS } from '#data/songs'
+import { getSongs, deleteSong, saveSong, importSongJSON, DIFF_CLASS, type Song } from '#data/songs'
 import { jsonErrorText } from '../../../utils'
 import Modal from '#components/Modal/Modal'
-import SongEditor from '#modals/SongEditor/SongEditor'
+import SongEditor, { type SongDraft } from '#modals/SongEditor/SongEditor'
 import './SongLibrary.css'
+
+interface SongLibraryProps {
+  onClose: () => void
+  onChange?: () => void
+  onSelect?: (id: string) => void
+}
+
+type Editing = 'new' | { song: Song } | null
 
 // A full-page modal listing every song. Built-in songs are locked; user songs
 // can be edited or deleted, and you can write a new one or upload a chart.
 // Editing/creating opens the SongEditorModal on top of this one.
-export default function SongLibrary({ onClose, onChange, onSelect }) {
-  const [songs, setSongs] = useState(() => getSongs())
-  const [editing, setEditing] = useState(null) // 'new' | { song } | null
+export default function SongLibrary({ onClose, onChange, onSelect }: SongLibraryProps) {
+  const [songs, setSongs] = useState<Song[]>(() => getSongs())
+  const [editing, setEditing] = useState<Editing>(null)
   const [uploadError, setUploadError] = useState('')
-  const fileRef = useRef(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   // Re-read the store after any change and tell the parent to refresh too.
   const refresh = () => {
@@ -20,19 +28,19 @@ export default function SongLibrary({ onClose, onChange, onSelect }) {
     onChange?.()
   }
 
-  const remove = (id) => {
+  const remove = (id: string) => {
     deleteSong(id)
     refresh()
   }
 
-  const handleSave = (def) => {
+  const handleSave = (def: SongDraft) => {
     const saved = saveSong(def) // throws on invalid -> caught in the editor
     refresh()
     onSelect?.(saved.id)
     setEditing(null)
   }
 
-  const upload = async (file) => {
+  const upload = async (file: File | undefined) => {
     setUploadError('')
     if (!file) return
     try {
@@ -111,7 +119,7 @@ export default function SongLibrary({ onClose, onChange, onSelect }) {
             accept="application/json,.json"
             hidden
             onChange={(e) => {
-              upload(e.target.files[0])
+              upload(e.target.files?.[0])
               e.target.value = ''
             }}
           />

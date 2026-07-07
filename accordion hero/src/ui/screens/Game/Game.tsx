@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { useGameEngine } from '#hooks/useGameEngine'
+import type { GameNote, GameResult } from '#hooks/useGameEngine'
+import type { Song, Section } from '#data/songs'
 import {
   LANE_LABELS,
   LANE_COLORS,
@@ -7,12 +9,13 @@ import {
   HIT_LINE_PCT,
   LEAD_TIME,
   noteX,
+  type Direction,
 } from '#data/constants'
 import './Game.css'
 
 // The note's on-screen x-position (percent), or null when it shouldn't render.
 // Bounds are generous so wide notes stay visible until fully off-screen.
-function noteScreenX(note, elapsed) {
+function noteScreenX(note: GameNote, elapsed: number): number | null {
   if (note.state === 'active') {
     const x = noteX(note.time - elapsed)
     return x < -18 || x > 118 ? null : x
@@ -22,18 +25,24 @@ function noteScreenX(note, elapsed) {
 }
 
 // Which direction the song wants right now (drives the mode UI).
-function currentDir(sections, elapsed) {
+function currentDir(sections: Section[], elapsed: number): Direction {
   for (const s of sections) if (elapsed < s.end) return s.dir
   return sections.length ? sections[sections.length - 1].dir : 'push'
 }
 
-function Note({ note, left, width }) {
+interface NoteProps {
+  note: GameNote
+  left: number
+  width: string
+}
+
+function Note({ note, left, width }: NoteProps) {
   const noteName = LANE_NOTES[note.lane][note.type].name
   const isPull = note.type === 'pull'
   const cls =
     'note note--' +
     note.type +
-    (note.state === 'hit' ? ' note--hit note--' + note.rating : '') +
+    (note.state === 'hit' ? ' note--hit note--' + (note.rating ?? '') : '') +
     (note.state === 'miss' ? ' note--miss' : '')
   return (
     <div className={cls} style={{ left: left + '%', width }}>
@@ -45,6 +54,16 @@ function Note({ note, left, width }) {
   )
 }
 
+interface GameProps {
+  song: Song
+  speed?: number
+  micEnabled?: boolean
+  waitForNote?: boolean
+  hideFeedback?: boolean
+  onFinish: (result: GameResult) => void
+  onQuit: () => void
+}
+
 export default function Game({
   song,
   speed = 1,
@@ -53,7 +72,7 @@ export default function Game({
   hideFeedback = false,
   onFinish,
   onQuit,
-}) {
+}: GameProps) {
   const g = useGameEngine(song, { speed, micEnabled, waitForNote, onFinish })
 
   // A note is as wide as the time until the next note, so a lone note fills its
@@ -66,10 +85,10 @@ export default function Game({
   const stepPct = (stepMs / LEAD_TIME) * (100 - HIT_LINE_PCT)
   const halfNotePct = stepPct / 2
   const laneSpan = 100 - HIT_LINE_PCT
-  const noteWidthCss = (gapMs) =>
+  const noteWidthCss = (gapMs: number) =>
     `max(56px, calc(${((gapMs / LEAD_TIME) * laneSpan).toFixed(2)}% - 10px))`
   const gapById = useMemo(() => {
-    const m = {}
+    const m: Record<number, number> = {}
     const ns = song.notes
     for (let i = 0; i < ns.length; i++) {
       // Skip chord siblings (same beat) so every note spans to the *next* beat.
@@ -165,7 +184,7 @@ export default function Game({
           {LANE_LABELS.map((label, i) => {
             const activeType = g.activeKeys[i]
             const micHere = g.micNote && g.micNote.lane === i
-            const laneNotes = []
+            const laneNotes: { n: GameNote; left: number; width: string }[] = []
             for (const n of g.notes) {
               if (n.lane !== i) continue
               const x = noteScreenX(n, g.elapsed)
