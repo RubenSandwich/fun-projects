@@ -1,4 +1,4 @@
-// The toy accordion itself: its seven buttons and the live note map the synth
+// The toy concertina itself: its seven buttons and the live note map the synth
 // and mic detector read. This is the pure instrument model — no persistence, no
 // side effects. Saved tunings are applied on top of it from `presets.ts`.
 
@@ -14,13 +14,13 @@ export interface NoteInfo {
   freq: number
 }
 
-// One accordion button: the notes it sounds on push vs pull.
+// One concertina button: the notes it sounds on push vs pull.
 export interface LaneNote {
   push: NoteInfo
   pull: NoteInfo
 }
 
-// Seven lanes = the seven toy-accordion buttons, played with the number keys 1-7.
+// Seven lanes = the seven toy-concertina buttons, played with the number keys 1-7.
 export const LANE_LABELS = ['1', '2', '3', '4', '5', '6', '7']
 
 // Bright, saturated "cut paper" color per button (1-7).
@@ -56,7 +56,7 @@ export const KEY_CODES: Record<string, number | undefined> = {
 }
 
 // Each button is bisonoric: it sounds a different note when you push (squeeze in)
-// vs pull (draw out), exactly like a real diatonic accordion.
+// vs pull (draw out), exactly like a real diatonic concertina.
 //   button 1: C (middle C) / D      button 5: E (high) / D (high)
 //   button 2: E / F                  button 6: G (high) / F (high)
 //   button 3: G / A                  button 7: B (high) / A (high)

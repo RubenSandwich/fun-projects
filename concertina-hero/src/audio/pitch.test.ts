@@ -15,7 +15,7 @@ const SIZE = 2048
 const DIRECTIONS = ['push', 'pull'] as const
 
 // Synthesise a time-domain buffer for a tone. A naive sawtooth is harmonic-rich,
-// closer to a real accordion reed and a good stress test for octave errors.
+// closer to a real concertina reed and a good stress test for octave errors.
 function makeBuffer(
   freq: number,
   {

@@ -1,4 +1,4 @@
-// Lightweight Web Audio "toy accordion" synth. No external assets needed.
+// Lightweight Web Audio "toy concertina" synth. No external assets needed.
 
 import { LANE_NOTES, type Direction } from '../data/instrument.ts'
 
@@ -26,7 +26,7 @@ export function getAudioContext(): AudioContext | null {
   return getCtx()
 }
 
-// Play a short reedy accordion note. Each button sounds a different pitch on
+// Play a short reedy concertina note. Each button sounds a different pitch on
 // push vs pull, taken straight from the button/note map in constants.
 export function playNote(lane: number, type: Direction): void {
   const c = getCtx()
@@ -41,7 +41,7 @@ export function playNote(lane: number, type: Direction): void {
   master.gain.exponentialRampToValueAtTime(0.0001, now + 0.38)
   master.connect(c.destination)
 
-  // Two slightly detuned reeds give that wheezy accordion timbre.
+  // Two slightly detuned reeds give that wheezy concertina timbre.
   for (const detune of [-6, 6]) {
     const osc = c.createOscillator()
     osc.type = 'triangle'

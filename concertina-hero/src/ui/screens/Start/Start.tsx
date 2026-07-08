@@ -80,8 +80,8 @@ export default function Start({
   return (
     <div className="start-screen">
       <h1 className="title">
-        <span className="title__accordion">🪗</span>
-        Accordion&nbsp;Hero
+        <img className="title__logo" src="/concertina.svg" alt="" />
+        Concertina&nbsp;Hero
       </h1>
       <p className="subtitle">A squeezebox rhythm game — notes fly in from the right!</p>
 

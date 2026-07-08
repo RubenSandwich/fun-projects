@@ -20,7 +20,7 @@ src/
   data/colors.ts          colour math (randomAccentColor + WCAG contrast)
   data/scoring.ts         accuracy → rank badge (rankFor)
 
-  audio/sound.ts          Web Audio "toy accordion" synth (reads LANE_NOTES)
+  audio/sound.ts          Web Audio "toy concertina" synth (reads LANE_NOTES)
   audio/pitch.ts          mic pitch detection (autocorrelation) → button note
 
   hooks/useGameEngine.ts  the game loop: rAF, keyboard + mic input, scoring, pause, phases

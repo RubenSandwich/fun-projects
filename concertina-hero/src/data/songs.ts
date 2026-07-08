@@ -54,7 +54,7 @@ export const DIFF_CLASS: Record<Difficulty, string> = {
 }
 
 // Chart format: a whitespace / line separated list of tokens like "+3" or "-4".
-//   - the number (1-7) is the accordion button to press.
+//   - the number (1-7) is the concertina button to press.
 //   - "+" means PUSH (squeeze the bellows in); "-" means PULL (draw them out).
 //     A bare number (e.g. "3") defaults to push.
 //   - "X" (or "x") is a REST: a silent beat where nothing is played.

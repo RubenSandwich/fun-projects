@@ -68,7 +68,7 @@ export default function SongEditor({ song = null, onSave, onClose }: SongEditorP
   const noteCount = chartNoteCount(draft.chart)
 
   const download = () => {
-    downloadJSON(`accordion-song-${slug(draft.name, 'song')}.json`, {
+    downloadJSON(`concertina-song-${slug(draft.name, 'song')}.json`, {
       name: draft.name.trim() || 'Untitled song',
       blurb: draft.blurb.trim(),
       bpm: Number(draft.bpm) || 0,

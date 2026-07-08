@@ -1,6 +1,6 @@
 // Microphone pitch detection. Listens to the mic, estimates the fundamental
 // frequency with a (range-limited) autocorrelation, and maps it to one of the
-// accordion's button notes so a played note can count as a button press.
+// concertina's button notes so a played note can count as a button press.
 
 import { LANE_NOTES, type Direction } from '../data/instrument.ts'
 import { getAudioContext, resumeAudio } from './sound.ts'

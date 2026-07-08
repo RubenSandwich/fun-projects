@@ -269,12 +269,14 @@ html[data-transition='backward']::view-transition-old(screen) {
   transform: rotate(-2deg);
   text-align: center;
 }
-.title__accordion {
+.title__logo {
   display: inline-block;
+  height: 1.15em;
+  width: auto;
   margin-right: var(--sp-8);
+  vertical-align: middle;
   transform: rotate(4deg);
-  -webkit-text-fill-color: initial;
-  text-shadow: none;
+  filter: drop-shadow(3px 4px 0 color-mix(in srgb, var(--ink) 20%, transparent));
 }
 .title--small {
   font-size: clamp(2rem, 5vw, 3rem);

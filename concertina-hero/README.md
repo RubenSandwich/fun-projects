@@ -1,16 +1,16 @@
-# 🪗 Accordion Hero
+# 🪗 Concertina Hero
 
-A "Guitar Hero" style rhythm game for **toy accordions**, built with React, Vite
+A "Guitar Hero" style rhythm game for **toy concertinas**, built with React, Vite
 and TypeScript, and dressed up in a bright, cut-from-paper **Paper Mario /
 paper-mache** style.
 
-Notes fly in from the **right** across **7 lanes** — the seven accordion buttons,
+Notes fly in from the **right** across **7 lanes** — the seven concertina buttons,
 played with the number keys **1 · 2 · 3 · 4 · 5 · 6 · 7** — and you play them as
 they cross the dashed hit line on the left.
 
 ## Push vs. Pull
 
-A real toy accordion is _bisonoric_: each button sounds a different note
+A real toy concertina is _bisonoric_: each button sounds a different note
 depending on whether you squeeze the bellows in (**push**) or draw them out
 (**pull**). Each note tells you which way to go:
 
@@ -59,7 +59,7 @@ src/
   main.tsx                entry (createRoot + StrictMode)
   App.tsx                 screen router (start → game → results)
   index.css               global theme + shared primitives (paper theme)
-  audio/sound.ts          tiny Web Audio "toy accordion" synth
+  audio/sound.ts          tiny Web Audio "toy concertina" synth
   audio/pitch.ts          mic pitch detection (autocorrelation)
   data/instrument.ts      the 7 buttons: labels, colours, keys, the note map
   data/presets.ts         note-frequency preset store (localStorage)

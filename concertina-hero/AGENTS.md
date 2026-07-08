@@ -1,6 +1,6 @@
 # AGENTS.md
 
-**Accordion Hero** — a Guitar-Hero-style rhythm game for toy accordions, built
+**Concertina Hero** — a Guitar-Hero-style rhythm game for toy concertinas, built
 with React 19 + Vite 8 + TypeScript in a Paper Mario / paper-mache visual style.
 
 ## Commands

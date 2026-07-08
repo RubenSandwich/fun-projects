@@ -125,7 +125,7 @@ export default function NoteFreq({
   }
 
   const download = () => {
-    downloadJSON(`accordion-preset-${slug(name, 'preset')}.json`, {
+    downloadJSON(`concertina-preset-${slug(name, 'preset')}.json`, {
       name: name.trim() || 'Untitled preset',
       notes: rows,
     })
@@ -148,7 +148,7 @@ export default function NoteFreq({
           className="modal__field-input"
           type="text"
           value={name}
-          placeholder="e.g. My toy accordion"
+          placeholder="e.g. My toy concertina"
           maxLength={40}
           onChange={(e) => {
             setName(e.target.value)
