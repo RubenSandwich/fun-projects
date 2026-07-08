@@ -3,7 +3,7 @@ name: Deploy Solar System Clock
 on:
   push:
     branches: ["main"]
-    paths: ["solar-system-clock/**"]
+    paths: ["solar-system-clock/**", "concertina-hero/**"]
   workflow_dispatch:
 
 jobs:
